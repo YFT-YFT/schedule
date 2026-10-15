@@ -471,6 +471,13 @@ body[data-nf="wide"]{--font-name:"BIZ UDPGothic","Hiragino Sans","Hiragino Kaku 
 .uc .ad{flex:0 0 auto;max-width:48%}
 .uc .badge{flex:none}
 
+/* ---- v0.48 : 処理中の表示 ---- */
+@keyframes spin{to{transform:rotate(360deg)}}
+#busy{position:fixed;top:calc(var(--top) + 12px);left:calc(var(--rail) + (100vw - var(--rail)) / 2);transform:translateX(-50%);z-index:130;background:#fff;color:#1E3350;border:2px solid var(--brand);border-radius:999px;padding:9px 20px;font-weight:800;display:flex;gap:10px;align-items:center;box-shadow:0 10px 28px rgba(30,100,160,.28);white-space:nowrap}
+#busy .bsp{width:15px;height:15px;border:3px solid var(--brand-t);border-top-color:var(--brand);border-radius:50%;animation:spin .8s linear infinite}
+#busy .bdt{display:inline-block;width:1.7em;text-align:left;letter-spacing:.08em}
+#busy .bsec{font-weight:600;color:var(--ink2);font-size:12px}
+body.busy #toasts{top:calc(var(--top) + 70px)}
 /* ---- v0.43 : 学級の一覧表（白黒印刷向き） ---- */
 .ttab td.h{background:#fff}.ttab .nm{white-space:nowrap}.ttab .nm .t{white-space:nowrap}
 .ttab td.sbc{border-left:1.3mm solid #C00000}
@@ -489,11 +496,16 @@ body.cm .dlg [data-set],body.cm .aosel,body.cm .dlg [data-ao="all"],body.cm .dlg
 .sheet .cutline.h{position:absolute;left:0;right:0;top:50%;border-top:1px dashed #9aa;height:0}
 .sheet .cutline.v{position:absolute;top:0;bottom:0;left:50%;border-left:1px dashed #9aa;width:0}
 .sheet .cutline.v span{left:-10px;top:4mm;writing-mode:vertical-rl;padding:4px 0}
+body.cm [data-act="g-lockall"]{display:none!important}
+.logo .lt{display:flex;flex-direction:column;line-height:1.15;text-align:left}
+.logo .lt .nm0{font-size:19px;font-weight:800;color:var(--brand2);letter-spacing:.03em}
+.logo .lt small{font-size:10.5px;font-weight:700;color:var(--ink2);opacity:.75;letter-spacing:.02em;white-space:nowrap}
+@media(max-width:1100px){.logo .lt small{display:none}}
 </style>
 </head>
 <body>
 <header id="top">
-  <button class="logo" data-act="go" data-v="home" aria-label="かこピタ 全体へ" title="かこピタ"><svg class="lgt" width="140" height="34" viewBox="0 0 230 56" role="img" aria-label="かこピタ"><defs><linearGradient id="lgg" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2FB0F0"/><stop offset="1" stop-color="#1278BD"/></linearGradient></defs><g fill="none" stroke="url(#lgg)" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 22C16 21 25 20 34 18C34 29 30 40 20 47"/><path d="M20 8C20 22 21 34 17 46"/><path d="M42 15L46 22"/><path d="M58 14C66 12 76 13 84 15"/><path d="M58 41C66 49 80 48 88 39C94 31 99 20 105 11L105 43C113 47 123 46 130 41"/><path d="M100 27C110 27 120 25 129 21"/><path d="M160 14C156 26 150 36 142 44"/><path d="M152 18C164 17 174 16 182 15C182 28 176 40 164 47"/><path d="M158 30C166 32 172 35 177 40"/></g><rect x="124" y="4" width="12" height="12" rx="3.2" fill="#FFDF5E" stroke="#E2B600" stroke-width="1.2"/><g fill="none" stroke="#1E3350" stroke-width="2.6" stroke-linecap="round"><path d="M196 20v-6a3 3 0 0 1 3-3h6M214 11h6a3 3 0 0 1 3 3v6M223 36v6a3 3 0 0 1-3 3h-6M205 45h-6a3 3 0 0 1-3-3v-6"/></g><rect x="203.5" y="23" width="12" height="12" rx="3" fill="#FFDF5E"/></svg></button>
+  <button class="logo" data-act="go" data-v="home" aria-label="かこピタ 全体へ"><svg width="34" height="34" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3CB8F2"/><stop offset="1" stop-color="#1676CB"/></linearGradient></defs><rect width="40" height="40" rx="12" fill="url(#lg)"/><path d="M11 17v-4a2 2 0 0 1 2-2h4M23 11h4a2 2 0 0 1 2 2v4M29 23v4a2 2 0 0 1-2 2h-4M17 29h-4a2 2 0 0 1-2-2v-4" fill="none" stroke="#fff" stroke-width="2.7" stroke-linecap="round"/><rect x="15.5" y="15.5" width="9" height="9" rx="2.4" fill="#FFDF5E"/><path d="M31.5 5.5v4M29.5 7.5h4" stroke="#FFDF5E" stroke-width="1.7" stroke-linecap="round"/></svg><span class="lt"><span class="nm0">かこピタ</span><small>（家庭訪問・懇談日程自動調整アプリ）</small></span></button>
   <span class="clsbadge" id="clsbadge" hidden></span>
   <div class="ttl"><input id="ttl" type="text" placeholder="行事の名前（例：2学期 三者懇談会）" aria-label="プロジェクト名"></div>
   <span class="sp"></span>
@@ -524,7 +536,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.43';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.49';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -533,8 +545,50 @@ const pad=n=>String(n).padStart(2,'0');
 const KP_SRC='<!DOCTYPE html>\n'+document.documentElement.outerHTML;   // 学級別HTMLを作るための、このアプリ自身のソース
 const BOOT=window.KP_BOOT||null,CM=(BOOT&&BOOT.cls)?BOOT:null;        // CM＝学級専用モード
 const KEY_P=CM?`cp:${CM.pid}:${CM.cls}`:'project',KEY_H=CM?`ch:${CM.pid}:${CM.cls}`:'handle',KEY_D=CM?`dir:${CM.pid}`:'dir';
+const RELAY_PS="# kakopita-server.ps1 : Kakopita relay (localhost only). Run via the .bat file.\r\n$ErrorActionPreference = 'Stop'\r\n$root = $PSScriptRoot\r\nif ([string]::IsNullOrEmpty($root)) { $root = Split-Path -Parent $MyInvocation.MyCommand.Path }\r\n\r\n$html = Get-ChildItem -LiteralPath $root -Filter '*.html' |\r\n  Where-Object { $_.Name -like 'かこピタ*' -or $_.Name -like 'kakopita*' } |\r\n  Sort-Object LastWriteTime -Descending | Select-Object -First 1\r\nif (-not $html) {\r\n  Write-Host 'The Kakopita HTML file was not found in this folder.' -ForegroundColor Red\r\n  Read-Host 'Press Enter to close'\r\n  exit 1\r\n}\r\n\r\n$token = [guid]::NewGuid().ToString('N')\r\n$listener = $null\r\n$port = 0\r\nforeach ($p in 8765..8785) {\r\n  $l = New-Object System.Net.HttpListener\r\n  $l.Prefixes.Add(\"http://localhost:$p/\")\r\n  $l.Prefixes.Add(\"http://127.0.0.1:$p/\")\r\n  try { $l.Start(); $listener = $l; $port = $p; break } catch { $l.Close() }\r\n}\r\nif (-not $listener) {\r\n  Write-Host 'No free port (8765-8785) was found.' -ForegroundColor Red\r\n  Read-Host 'Press Enter to close'\r\n  exit 1\r\n}\r\n\r\n$blocked = @('.bat', '.cmd', '.ps1', '.exe', '.vbs', '.js', '.lnk', '.dll', '.msi', '.com', '.scr', '.wsf', '.hta', '.reg')\r\n\r\nfunction Resolve-KP([string]$rel) {\r\n  if ([string]::IsNullOrEmpty($rel)) { return $root }\r\n  $rel = $rel.Replace('/', '\\')\r\n  if ($rel -match '(^|\\\\)\\.\\.(\\\\|$)' -or $rel.StartsWith('\\') -or $rel.Contains(':')) { return $null }\r\n  $full = [System.IO.Path]::GetFullPath((Join-Path $root $rel))\r\n  $rootFull = [System.IO.Path]::GetFullPath($root).TrimEnd('\\') + '\\'\r\n  if (-not (($full + '\\').StartsWith($rootFull, [System.StringComparison]::OrdinalIgnoreCase))) { return $null }\r\n  return $full\r\n}\r\nfunction Send-KP($res, [int]$code, [byte[]]$bytes, [string]$type) {\r\n  $res.StatusCode = $code\r\n  $res.ContentType = $type\r\n  $res.Headers.Add('Cache-Control', 'no-store')\r\n  # The page is opened from a local file (file://), so allow it to call this relay (the token is still required).\r\n  $res.Headers.Add('Access-Control-Allow-Origin', '*')\r\n  $res.Headers.Add('Access-Control-Allow-Headers', 'X-KP-Token, Content-Type')\r\n  $res.Headers.Add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')\r\n  $res.Headers.Add('Access-Control-Allow-Private-Network', 'true')\r\n  $res.Headers.Add('Access-Control-Expose-Headers', 'X-Mtime')\r\n  if ($bytes -ne $null) {\r\n    $res.ContentLength64 = $bytes.Length\r\n    $res.OutputStream.Write($bytes, 0, $bytes.Length)\r\n  }\r\n}\r\nfunction Text-KP($res, [int]$code, [string]$text, [string]$type) {\r\n  Send-KP $res $code ([System.Text.Encoding]::UTF8.GetBytes($text)) $type\r\n}\r\nfunction Mtime-KP($path) {\r\n  $d = (Get-Item -LiteralPath $path).LastWriteTimeUtc\r\n  return [long](($d - [datetime]'1970-01-01').TotalMilliseconds)\r\n}\r\n\r\n# Copy the page to a local temp folder and open it as a local file. No http/https address is opened,\r\n# so tools that redirect web addresses to an isolated browser are not involved.\r\n$tmpDir = Join-Path $env:TEMP 'kakopita'\r\n[void][System.IO.Directory]::CreateDirectory($tmpDir)\r\n$localHtml = Join-Path $tmpDir 'kakopita.html'\r\nCopy-Item -LiteralPath $html.FullName -Destination $localHtml -Force\r\n$fileUrl = ([System.Uri]$localHtml).AbsoluteUri + \"?kpport=$port&t=$token\"\r\n\r\nfunction Open-KP([string]$url) {\r\n  # Start Edge or Chrome directly (instead of the default URL handler), because some\r\n  # workplace tools redirect every http/https address to a remote/isolated browser.\r\n  $keys = @(\r\n    'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\msedge.exe',\r\n    'HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe',\r\n    'HKCU:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\App Paths\\chrome.exe'\r\n  )\r\n  foreach ($k in $keys) {\r\n    try {\r\n      $exe = (Get-ItemProperty -LiteralPath $k -ErrorAction Stop).'(default)'\r\n      if ($exe -and (Test-Path -LiteralPath $exe)) {\r\n        Start-Process -FilePath $exe -ArgumentList @('--new-window', $url)\r\n        return $true\r\n      }\r\n    } catch { }\r\n  }\r\n  return $false\r\n}\r\n\r\n$url = \"http://localhost:$port/?t=$token\"\r\nWrite-Host ''\r\nWrite-Host '=== Kakopita relay is running ===' -ForegroundColor Green\r\nWrite-Host (\"Folder : \" + $root)\r\nWrite-Host 'Keep this window open while you work. Close it to stop.'\r\nWrite-Host ''\r\nWrite-Host 'Opening Kakopita in the local Edge/Chrome as a local file...'\r\nWrite-Host 'If it does not open, copy this address into Edge or Chrome on THIS computer:'\r\nWrite-Host $fileUrl -ForegroundColor Cyan\r\nWrite-Host ''\r\nWrite-Host '(Fallback, normal web address - may be redirected by your workplace tools:)'\r\nWrite-Host $url\r\nWrite-Host ''\r\nif (-not $env:KP_NOOPEN) {\r\n  if (-not (Open-KP $fileUrl)) { Start-Process $fileUrl }\r\n}\r\n\r\nwhile ($listener.IsListening) {\r\n  $ctx = $listener.GetContext()\r\n  $req = $ctx.Request\r\n  $res = $ctx.Response\r\n  try {\r\n    $path = $req.Url.AbsolutePath\r\n    $hn = $req.Url.Host\r\n    if ($hn -ne 'localhost' -and $hn -ne '127.0.0.1') {\r\n      Text-KP $res 403 'forbidden' 'text/plain'\r\n    }\r\n    elseif ($req.HttpMethod -eq 'OPTIONS') {\r\n      Send-KP $res 204 $null 'text/plain'\r\n    }\r\n    elseif ($path -eq '/' -or $path -eq '/index.html') {\r\n      Send-KP $res 200 ([System.IO.File]::ReadAllBytes($html.FullName)) 'text/html; charset=utf-8'\r\n    }\r\n    elseif ($path.StartsWith('/api/')) {\r\n      if ($req.Headers['X-KP-Token'] -ne $token) {\r\n        Text-KP $res 403 'forbidden' 'text/plain'\r\n      }\r\n      else {\r\n        $rel = ''\r\n        if ($req.Url.Query -match '[?&]p=([^&]*)') { $rel = [System.Uri]::UnescapeDataString($Matches[1]) }\r\n        $op = $path.Substring(5)\r\n        $full = Resolve-KP $rel\r\n        if ($op -eq 'ping') {\r\n          $nm = ConvertTo-Json -InputObject (Split-Path -Leaf $root) -Compress\r\n          Text-KP $res 200 ('{\"app\":\"kakopita\",\"name\":' + $nm + '}') 'application/json; charset=utf-8'\r\n        }\r\n        elseif ($null -eq $full) {\r\n          Text-KP $res 400 'bad path' 'text/plain'\r\n        }\r\n        elseif ($op -eq 'stat') {\r\n          if (Test-Path -LiteralPath $full -PathType Leaf) { Text-KP $res 200 ('{\"kind\":\"file\",\"mtime\":' + (Mtime-KP $full) + '}') 'application/json' }\r\n          elseif (Test-Path -LiteralPath $full -PathType Container) { Text-KP $res 200 '{\"kind\":\"dir\"}' 'application/json' }\r\n          else { Text-KP $res 404 'not found' 'text/plain' }\r\n        }\r\n        elseif ($op -eq 'list') {\r\n          if (Test-Path -LiteralPath $full -PathType Container) {\r\n            $parts = @()\r\n            foreach ($it in Get-ChildItem -LiteralPath $full) {\r\n              $nm = ConvertTo-Json -InputObject $it.Name -Compress\r\n              $isd = 'false'\r\n              if ($it.PSIsContainer) { $isd = 'true' }\r\n              $parts += ('{\"name\":' + $nm + ',\"dir\":' + $isd + '}')\r\n            }\r\n            Text-KP $res 200 ('[' + ($parts -join ',') + ']') 'application/json; charset=utf-8'\r\n          }\r\n          else { Text-KP $res 404 'not found' 'text/plain' }\r\n        }\r\n        elseif ($op -eq 'read') {\r\n          if (Test-Path -LiteralPath $full -PathType Leaf) {\r\n            $res.Headers.Add('X-Mtime', [string](Mtime-KP $full))\r\n            Send-KP $res 200 ([System.IO.File]::ReadAllBytes($full)) 'text/plain; charset=utf-8'\r\n          }\r\n          else { Text-KP $res 404 'not found' 'text/plain' }\r\n        }\r\n        elseif ($op -eq 'write') {\r\n          $ext = [System.IO.Path]::GetExtension($full).ToLower()\r\n          if ($blocked -contains $ext -or $full -eq $root) { Text-KP $res 403 'blocked file type' 'text/plain' }\r\n          elseif ($req.ContentLength64 -gt 52428800) { Text-KP $res 413 'too large' 'text/plain' }\r\n          else {\r\n            $ms = New-Object System.IO.MemoryStream\r\n            $req.InputStream.CopyTo($ms)\r\n            [void][System.IO.Directory]::CreateDirectory((Split-Path -Parent $full))\r\n            $tmp = $full + '.kptmp'\r\n            [System.IO.File]::WriteAllBytes($tmp, $ms.ToArray())\r\n            Move-Item -LiteralPath $tmp -Destination $full -Force\r\n            Text-KP $res 200 '{\"ok\":true}' 'application/json'\r\n          }\r\n        }\r\n        elseif ($op -eq 'mkdir') {\r\n          [void][System.IO.Directory]::CreateDirectory($full)\r\n          Text-KP $res 200 '{\"ok\":true}' 'application/json'\r\n        }\r\n        elseif ($op -eq 'delete') {\r\n          $ext = [System.IO.Path]::GetExtension($full).ToLower()\r\n          if ($blocked -contains $ext) { Text-KP $res 403 'blocked file type' 'text/plain' }\r\n          elseif (Test-Path -LiteralPath $full -PathType Leaf) {\r\n            Remove-Item -LiteralPath $full -Force\r\n            Text-KP $res 200 '{\"ok\":true}' 'application/json'\r\n          }\r\n          else { Text-KP $res 404 'not found' 'text/plain' }\r\n        }\r\n        else { Text-KP $res 404 'unknown' 'text/plain' }\r\n      }\r\n    }\r\n    else { Text-KP $res 404 'not found' 'text/plain' }\r\n  }\r\n  catch {\r\n    $msg = $_.Exception.Message\r\n    # The browser closed the connection (e.g. it was redirected elsewhere): not a real error, ignore quietly.\r\n    if ($msg -notmatch 'ネットワーク名|network name|I/O operation|既に|forcibly|aborted') {\r\n      Write-Host ('Error: ' + $msg) -ForegroundColor Yellow\r\n    }\r\n    try { Text-KP $res 500 'server error' 'text/plain' } catch { }\r\n  }\r\n  finally {\r\n    try { $res.Close() } catch { }\r\n  }\r\n}\r\n";
+const RELAY_BAT2="@echo off\r\nrem Kakopita launcher (manual): does NOT open a browser. Copy the address shown in this window into a browser on this PC.\r\nset KP_NOOPEN=1\r\npushd \"%~dp0\"\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%~dp0kakopita-server.ps1\"\r\npopd\r\npause\r\n";
+const RELAY_BAT="@echo off\r\nrem Kakopita launcher: double-click to start. Keep this window open while you work.\r\npushd \"%~dp0\"\r\npowershell.exe -NoProfile -ExecutionPolicy Bypass -File \"%~dp0kakopita-server.ps1\"\r\npopd\r\npause\r\n";
+let SRV=null;   // 中継プログラム（バッチで起動したPowerShell）経由のとき
+(function(){try{   // 中継プログラムのアドレス：①ローカルに置いたHTML（file://）＋ポート指定　②http://localhost
+  const q=new URLSearchParams(location.search);let t=q.get('t'),port=q.get('kpport'),base='';
+  const isFile=location.protocol==='file:',isLocalHttp=location.protocol==='http:'&&/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+  if(!isFile&&!isLocalHttp)return;
+  if(isFile){if(port){try{sessionStorage.setItem('kpPort',port)}catch(e){}}else{try{port=sessionStorage.getItem('kpPort')}catch(e){}}if(!port)return;base='http://127.0.0.1:'+port}
+  if(t){try{sessionStorage.setItem('kpTok',t)}catch(e){}}else{try{t=sessionStorage.getItem('kpTok')}catch(e){}}
+  if(t)SRV={token:t,name:'共有フォルダ',base};
+  if(q.has('t')||q.has('kpport')){try{history.replaceState(null,'',location.pathname)}catch(e){}}
+}catch(e){}})();
+function makeSrvDir(){   // File System Access のフォルダと同じ形で使える「身代わり」
+  const NF=()=>new DOMException('not found','NotFoundError');
+  const call=(op,p,body)=>fetch(`${SRV.base||''}/api/${op}?p=${encodeURIComponent(p||'')}`,{method:body===undefined?'GET':'POST',headers:{'X-KP-Token':SRV.token},body,cache:'no-store'});
+  const join=(a,b)=>a?a+'/'+b:b;
+  const mkFile=(p,n)=>({kind:'file',name:n,
+    async getFile(){const r=await call('read',p);if(!r.ok)throw NF();const txt=await r.text();return{text:async()=>txt,lastModified:+r.headers.get('X-Mtime')||Date.now()}},
+    async createWritable(){let buf='';return{async write(d){buf+=(typeof d==='string'?d:String(d))},async close(){const r=await call('write',p,buf);if(!r.ok)throw new Error('書き込みに失敗しました（'+r.status+'）')}}}});
+  const mkDir=(path,name)=>({kind:'directory',name,
+    async getFileHandle(n,o={}){const p=join(path,n);if(!o.create){const r=await call('stat',p);if(!r.ok)throw NF();const j=await r.json();if(j.kind!=='file')throw NF()}return mkFile(p,n)},
+    async getDirectoryHandle(n,o={}){const p=join(path,n);if(o.create){const r=await call('mkdir',p,'');if(!r.ok)throw NF()}else{const r=await call('stat',p);if(!r.ok)throw NF();const j=await r.json();if(j.kind!=='dir')throw NF()}return mkDir(p,n)},
+    async removeEntry(n){const r=await call('delete',join(path,n),'');if(!r.ok)throw NF()},
+    async *entries(){const r=await call('list',path);if(!r.ok)return;for(const e of await r.json())yield [e.name,e.dir?mkDir(join(path,e.name),e.name):mkFile(join(path,e.name),e.name)]},
+    async queryPermission(){return 'granted'},async requestPermission(){return 'granted'}});
+  return mkDir('',SRV.name);
+}
+const BUSY={labels:[],timer:null,t0:0};
+function busyPaint(){
+  let e=document.getElementById('busy');if(!e){e=document.createElement('div');e.id='busy';e.setAttribute('role','status');e.setAttribute('aria-live','polite');document.body.appendChild(e)}
+  const ms=Date.now()-BUSY.t0,k=Math.floor(ms/400)%3+1,sec=Math.floor(ms/1000),l=BUSY.labels[BUSY.labels.length-1][1];
+  e.innerHTML=`<span class="bsp"></span><span>${String(l).replace(/[<>&]/g,'')}</span><span class="bdt">${'.'.repeat(k)}</span>${sec>=3?`<span class="bsec">${sec}秒</span>`:''}`;
+  document.body.classList.add('busy');
+}
+function busyStart(label){   // 押してから終わるまで「…」を動かして、受け付けたことを見せる
+  const id={};BUSY.labels.push([id,label]);if(!BUSY.t0)BUSY.t0=Date.now();busyPaint();
+  if(!BUSY.timer)BUSY.timer=setInterval(busyPaint,200);
+  return()=>{BUSY.labels=BUSY.labels.filter(x=>x[0]!==id);
+    if(BUSY.labels.length)busyPaint();else{clearInterval(BUSY.timer);BUSY.timer=null;BUSY.t0=0;const e=document.getElementById('busy');if(e)e.remove();document.body.classList.remove('busy')}};
+}
+function busyWrap(fn,label){return async function(...a){const done=busyStart(label);try{return await fn.apply(this,a)}finally{done()}}}
 const plist=()=>CM?classList().filter(c=>c.key===CM.cls):classList();
-const LOGO_HTML=`<svg class="lgt" width="164" height="40" viewBox="0 0 230 56" role="img" aria-label="かこピタ"><defs><linearGradient id="lgg2" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#2FB0F0"/><stop offset="1" stop-color="#1278BD"/></linearGradient></defs><g fill="none" stroke="url(#lgg2)" stroke-width="5.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 22C16 21 25 20 34 18C34 29 30 40 20 47"/><path d="M20 8C20 22 21 34 17 46"/><path d="M42 15L46 22"/><path d="M58 14C66 12 76 13 84 15"/><path d="M58 41C66 49 80 48 88 39C94 31 99 20 105 11L105 43C113 47 123 46 130 41"/><path d="M100 27C110 27 120 25 129 21"/><path d="M160 14C156 26 150 36 142 44"/><path d="M152 18C164 17 174 16 182 15C182 28 176 40 164 47"/><path d="M158 30C166 32 172 35 177 40"/></g><rect x="124" y="4" width="12" height="12" rx="3.2" fill="#FFDF5E" stroke="#E2B600" stroke-width="1.2"/><g fill="none" stroke="#1E3350" stroke-width="2.6" stroke-linecap="round"><path d="M196 20v-6a3 3 0 0 1 3-3h6M214 11h6a3 3 0 0 1 3 3v6M223 36v6a3 3 0 0 1-3 3h-6M205 45h-6a3 3 0 0 1-3-3v-6"/></g><rect x="203.5" y="23" width="12" height="12" rx="3" fill="#FFDF5E"/></svg>`;
+const LOGO_HTML=`<span style="display:inline-flex;align-items:center;gap:10px;vertical-align:middle"><svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3CB8F2"/><stop offset="1" stop-color="#1676CB"/></linearGradient></defs><rect width="40" height="40" rx="12" fill="url(#lg2)"/><path d="M11 17v-4a2 2 0 0 1 2-2h4M23 11h4a2 2 0 0 1 2 2v4M29 23v4a2 2 0 0 1-2 2h-4M17 29h-4a2 2 0 0 1-2-2v-4" fill="none" stroke="#fff" stroke-width="2.7" stroke-linecap="round"/><rect x="15.5" y="15.5" width="9" height="9" rx="2.4" fill="#FFDF5E"/><path d="M31.5 5.5v4M29.5 7.5h4" stroke="#FFDF5E" stroke-width="1.7" stroke-linecap="round"/></svg><span style="font-size:22px;font-weight:800;color:var(--brand2)">かこピタ</span></span>`;
 const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);
 function parseT(s){const m=/^(\d{1,2}):(\d{2})$/.exec(String(s||'').trim());return m?(+m[1])*60+(+m[2]):null}
 const fmtT=m=>Math.floor(m/60)+':'+pad(m%60);
@@ -687,6 +741,7 @@ function sibFind(sb){
   const arr=P.students;
   if(sb.g&&sb.c&&sb.n){const m=arr.find(s=>s.g==sb.g&&String(s.c)==String(sb.c)&&s.n==sb.n);if(m)return m}
   if(sb.name){const nn=norm(sb.name);const m=arr.filter(s=>norm(s.name)===nn&&(!sb.g||s.g==sb.g)&&(!sb.c||String(s.c)==String(sb.c)));if(m.length===1)return m[0]}
+  if(sb.kana){const kk=norm(sb.kana);if(kk){let m=arr.filter(s=>s.kana&&norm(s.kana)===kk&&(!sb.g||s.g==sb.g));if(m.length!==1)m=arr.filter(s=>s.kana&&norm(s.kana)===kk);if(m.length===1)return m[0]}}   // 学年・組・番号を間違えても、ふりがなで見つける
   return null;
 }
 const areaKey=(s,n)=>String(s.addr||'').normalize('NFKC').replace(/[\s\u3000]/g,'').slice(0,Math.max(1,+n||5));
@@ -834,7 +889,7 @@ function render(){if(rq)return;rq=requestAnimationFrame(()=>{rq=0;renderNow()})}
 function renderNow(){
   const m=$('#main');if(!m)return;
   document.body.dataset.nf=(P.opt&&P.opt.nameFont)||'wide';
-  const vt=$('#verTxt');if(vt&&!vt.textContent)vt.textContent=`かこピタ v${APP_VER}　Created by ${APP_AUTHOR}`;
+  const vt=$('#verTxt');if(vt&&!vt.textContent)vt.textContent=`かこピタ v.${APP_VER}　Created by ${APP_AUTHOR}`;
   const keep={};$$('[data-keep]',m).forEach(e=>keep[e.dataset.keep]=[e.scrollTop,e.scrollLeft]);
   const st=m.scrollTop,ae=document.activeElement;let af=null;
   if(ae&&ae.id&&m.contains(ae))af={id:ae.id,s:ae.selectionStart,e:ae.selectionEnd};
@@ -1038,13 +1093,27 @@ async function applyRoster(){
   toast(`名簿を取り込みました：追加 ${added}名${updated?`・更新 ${updated}名`:''}${removed?`・除外 ${removed}名`:''}`,{undo:true});render();
 }
 function resetHistoryKeep(){} // import stays undoable
+function rosterAoa(){
+  const hasSex=P.students.some(s=>s.sex),hdr=['学年','組','番号','名前','ふりがな','住所','担任'].concat(hasSex?['性別/敬称']:[]);
+  const rows=P.students.length?P.students.slice().sort((a,b)=>a.g-b.g||natCmp(a.c,b.c)||a.n-b.n).map(s=>[s.g,s.c,s.n,s.name,s.kana||'',s.addr||'',(P.classes[s.g+'|'+s.c]||{}).teacher||''].concat(hasSex?[s.sex||'']:[]))
+    :[[1,1,1,'佐藤 太郎','さとう たろう','みどり町1丁目','青木'],[1,1,2,'鈴木 花子','すずき はなこ','さくら町2丁目',''],[1,2,1,'高橋 健','たかはし けん','みどり町3丁目','池田']];
+  return [hdr,...rows];
+}
+A['r-dl']=()=>{
+  try{const ws=XLSX.utils.aoa_to_sheet(rosterAoa());ws['!cols']=[{wch:6},{wch:6},{wch:6},{wch:18},{wch:22},{wch:22},{wch:10}];
+    const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'名簿');
+    const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'}),name=P.students.length?'かこピタ_名簿.xlsx':'かこピタ_名簿テンプレート.xlsx';
+    dlText(buf,name,'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    toast(P.students.length?`いまの名簿（${P.students.length}名）をダウンロードしました。編集して、そのまま読み込めます`:'名簿のテンプレートをダウンロードしました。入力して読み込んでください')}
+  catch(e){toast('ダウンロードできませんでした：'+(e.message||e),{kind:'warn'})}
+};
 function vRoster(){
   const R=UI.roster,n=P.students.length,cl=classList();
   let h=`<div class="page"><div class="ph"><div><h1>1. 名簿</h1><p>学年・組・番号・名前（ふりがな）の表を取り込みます。並び順や列の順番は自由です。</p></div></div>`;
   if(R.stage==='map')h+=vRosterMap();
   else{
     h+=`<section class="panel"><div class="cols2">
-      <div class="drop ${R.over?'over':''}" id="dropzone"><h3>ファイルをここへドラッグ</h3><p class="muted tiny" style="margin-bottom:12px">Excel（.xlsx）、CSV、テキストに対応</p><button class="btn pri" data-act="pick-roster">${ic('up',17)}ファイルを選ぶ</button><input type="file" id="rosterFile" accept=".xlsx,.xlsm,.xls,.csv,.tsv,.txt" hidden></div>
+      <div class="drop ${R.over?'over':''}" id="dropzone"><h3>ファイルをここへドラッグ</h3><p class="muted tiny" style="margin-bottom:12px">Excel（.xlsx）、CSV、テキストに対応</p><button class="btn pri" data-act="pick-roster">${ic('up',17)}ファイルを選ぶ</button> <button class="btn" data-act="r-dl">${ic('down',16)}${n?'いまの名簿をダウンロード':'名簿テンプレートをダウンロード'}</button><input type="file" id="rosterFile" accept=".xlsx,.xlsm,.xls,.csv,.tsv,.txt" hidden></div>
       <div><label class="f">表をコピーして貼り付け（Excelなどから）<textarea class="paste" id="pasteBox" placeholder="学年	組	番	名前	ふりがな&#10;1	1	1	佐藤 太郎	さとう たろう"></textarea></label><div class="row" style="margin-top:8px"><button class="btn" data-act="paste-go">${ic('check',17)}この内容を読み込む</button>${!n?`<button class="btn ghost" data-act="sample">${ic('sparkle',17)}サンプルで試す</button>`:''}</div></div></div></section>`;
   }
   if(n&&R.stage!=='map'){
@@ -1053,7 +1122,7 @@ function vRoster(){
     const q=R.q.trim()?norm(R.q):'';const shown=(q?list.filter(s=>norm(s.name).includes(q)||norm(s.kana).includes(q)):list).slice(0,400);
     const dupNums=new Set();const cnt={};list.forEach(s=>{const kk=s.g+'|'+s.c+'|'+s.n;cnt[kk]=(cnt[kk]||0)+1;if(cnt[kk]>1)dupNums.add(kk)});
     h+=`<section class="panel"><h2>名簿の確認<small>${n}名 / ${cl.length}学級</small></h2>
-      <div class="row" style="margin-bottom:12px"><div class="cbar"><button class="cp ${fk==='all'?'on':''}" data-act="r-filter" data-k="all">すべて</button></div>${classBar(fk,'r-filter')}<button class="btn sm" data-act="teachers">担任名をまとめて設定</button><span class="grow"></span><label class="tog"><input id="rq" type="text" placeholder="名前で検索" value="${esc(R.q)}" style="width:150px"></label></div>
+      <div class="row" style="margin-bottom:12px"><div class="cbar"><button class="cp ${fk==='all'?'on':''}" data-act="r-filter" data-k="all">すべて</button></div>${classBar(fk,'r-filter')}<button class="btn sm" data-act="teachers">担任名をまとめて設定</button><button class="btn sm" data-act="r-dl">${ic('down',15)}名簿をダウンロード（Excel）</button><span class="grow"></span><label class="tog"><input id="rq" type="text" placeholder="名前で検索" value="${esc(R.q)}" style="width:150px"></label></div>
       ${fk!=='all'&&P.classes[fk]?`<div class="row" style="margin-bottom:10px"><label class="tog">担任の先生：<input type="text" data-ch="teacher" data-k="${esc(fk)}" value="${esc(P.classes[fk].teacher)}" placeholder="担任名（お知らせに入ります）" style="width:220px"></label><span class="grow"></span><button class="btn sm" data-act="r-add" data-k="${esc(fk)}">${ic('plus',15)}児童生徒を追加</button></div>`:''}
       <div class="scroll"><table class="tbl"><thead><tr>${fk==='all'?'<th>学級</th>':''}<th style="width:70px">番</th><th>名前</th><th>ふりがな</th><th>住所（任意）</th><th style="width:44px"></th></tr></thead><tbody>`+
       shown.map(s=>`<tr>${fk==='all'?`<td>${esc(clsLabel(s.g,s.c))}</td>`:''}<td><input type="number" min="1" data-ch="rf" data-id="${s.id}" data-f="n" value="${s.n}" style="width:60px;${dupNums.has(s.g+'|'+s.c+'|'+s.n)?'border-color:var(--ng)':''}"></td><td><input type="text" data-ch="rf" data-id="${s.id}" data-f="name" value="${esc(s.name)}"></td><td><input type="text" data-ch="rf" data-id="${s.id}" data-f="kana" value="${esc(s.kana)}"></td><td><input type="text" data-ch="rf" data-id="${s.id}" data-f="addr" value="${esc(s.addr||'')}" placeholder="家庭訪問の移動に使います"></td><td><button class="btn ghost sm" data-act="r-del" data-id="${s.id}" aria-label="削除">${ic('trash',15)}</button></td></tr>`).join('')+
@@ -1511,27 +1580,30 @@ A.auto=()=>{
   const paint=()=>{const o=autoOpt(),sel=UI.auto.sel;
     const seg=(key,opts)=>`<div class="seg">${opts.map(([v,l])=>`<button data-ao="${key}" data-v="${v}" class="${String(o[key])===String(v)?'on':''}">${l}</button>`).join('')}</div>`;
     box.innerHTML=`<h2>かこピタ（自動配置）</h2><p class="muted tiny" style="margin-bottom:12px">入力された都合に合わせて、児童生徒をピタッと自動で配置します。休憩（×）は残し、未回答の児童生徒は対象外です。</p>
+     <div class="f aosel" style="margin-bottom:14px"><span style="font-weight:800;font-size:12.5px;color:var(--ink2)">対象の学級（「指定した学級をかこピタ」で使います）</span><div class="cbar" style="margin-top:4px">${classList().map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-ao="tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${c.n}</small></button>`).join('')}<button class="btn ghost sm" data-ao="selall">すべて選ぶ</button></div></div>
      <div class="fgrid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px">
       <label class="f">時刻の並べ方（シャッフル）${seg('shuffle',[[0,'しない'],[1,'固定'],[2,'毎回ちがう']])}<span class="tiny muted" style="font-weight:500">固定＝同じ条件なら同じ結果。毎回＝実行のたびに変わります</span></label>
       <label class="f">日ごとの人数${seg('balance',[['false','成り行き'],['true','均等にする']])}<span class="tiny muted" style="font-weight:500">均等＝人数の少ない日から先に埋めます</span></label>
       <label class="f">詰める時刻<select data-ao-sel="target"><option value="">指定しない</option>${SL.map(x=>`<option value="${x.key}" ${o.target===x.key?'selected':''}>${x.label} 付近から</option>`).join('')}</select><span class="tiny muted" style="font-weight:500">選んだ時刻に近い枠から順に使います</span></label>
       <label class="f">仕上げの探索<select data-ao-sel="refine">${[0,3,6,10].map(v=>`<option value="${v}" ${+o.refine===v?'selected':''}>${v?v+'秒まで':'しない（最初の解で終了）'}</option>`).join('')}</select><span class="tiny muted" style="font-weight:500">17:00以降の人数や偏りが減る組み合わせを探します</span></label>
       <label class="f">いまの配置${seg('keep',[['false','消して組み直す'],['true','残して、足りない分だけ']])}</label>
-      <label class="f">17:00のルール<span class="row"><b style="color:var(--ink)">${{strict:'厳守',effort:'できれば '+P.sched.cutTime+'まで',none:'制限なし'}[P.sched.cutMode]}</b><button class="btn ghost sm" data-ao="goSched">日程で変更</button></span></label></div>
+      <label class="f">時刻のルール（17:00など）<span class="seg">${[['effort','できれば'],['strict','厳守'],['none','制限なし']].map(([v,l])=>`<button data-ao="cut" data-v="${v}" class="${P.sched.cutMode===v?'on':''}">${l}</button>`).join('')}</span>${P.sched.cutMode!=='none'?`<span class="row"><input type="time" data-ao-cut value="${esc(P.sched.cutTime)}" style="width:130px"><span class="tiny muted" style="font-weight:500">${P.sched.cutMode==='strict'?'以降の枠は作りません':'以降は、入らないときだけ使います'}</span></span>`:`<span class="tiny muted" style="font-weight:500">すべての枠を同じように使います</span>`}</label></div>
      <label class="tog" style="margin-top:14px"><input type="checkbox" data-ao-opt="sibAuto" ${P.opt.sibAuto?'checked':''}>きょうだいの来校時刻を近づける（同時刻は避けます）</label>
      <div class="row" style="margin-top:8px"><label class="tog"><input type="checkbox" data-ao-opt="areaAuto" ${areaOn()?'checked':''} ${nAddr?'':'disabled'}>住所が近い児童生徒を近くに配置する（家庭訪問のときだけ最初からON）</label><label class="tog">先頭<select data-ao-optsel="areaN" style="padding:3px 6px">${[3,4,5,6,7,8,10].map(v=>`<option ${+P.opt.areaN===v?'selected':''}>${v}</option>`).join('')}</select>文字で同じ地区とみなす</label><span class="tiny muted">${nAddr?`住所あり ${nAddr} / ${P.students.length}名`:'名簿に住所がありません'}</span></div>
      <div class="row" style="margin-top:8px"><label class="tog">きょうだいの間隔<select data-ao-optsel="sibGap" style="padding:3px 6px"><option value="0" ${+P.opt.sibGap===0?'selected':''}>続けて（間をあけない）</option><option value="1" ${+P.opt.sibGap===1?'selected':''}>1枠あける</option><option value="2" ${+P.opt.sibGap===2?'selected':''}>2枠あける</option></select></label><label class="tog"><input type="checkbox" data-ao-opt="areaGap" ${P.opt.areaGap?'checked':''}>離れていそうな住所どうしは、間に1枠あける（余裕があるとき）</label></div>
-     <div class="acts"><button class="btn" data-ao="close">やめる</button><button class="btn" data-ao="all">${ic('users',16)}全学級をかこピタ</button><button class="btn pri" data-ao="one">${ic('wand',16)}この学級をかこピタ</button></div>`;
+     <div class="acts"><button class="btn" data-ao="close">やめる</button><button class="btn" data-ao="all">${ic('users',16)}全学級をかこピタ</button><button class="btn" data-ao="sel" ${sel.size?'':'disabled'}>${ic('users',16)}指定した学級をかこピタ（${sel.size}）</button><button class="btn pri" data-ao="one">${ic('wand',16)}この学級をかこピタ</button></div>`;
   };
   paint();
   el.addEventListener('click',e=>{const b=e.target.closest('[data-ao]');if(!b)return;const a=b.dataset.ao;
     if(a==='close'){el._close();return}
     if(a==='goSched'){el._close();go('schedule');return}
+    if(a==='cut'){const v=b.dataset.v;act(()=>setProp(P.sched,'cutMode',v));paint();return}
     if(a==='tog'){const kk=b.dataset.k;UI.auto.sel.has(kk)?UI.auto.sel.delete(kk):UI.auto.sel.add(kk);paint();return}
     if(a==='selall'){UI.auto.sel=new Set(classList().map(c=>c.key));paint();return}
     if(a==='one'||a==='all'||a==='sel'){el._close();runAuto(a);return}
     let v=b.dataset.v;if(v==='true')v=true;else if(v==='false')v=false;else v=+v;setAuto(a,v);paint()});
   el.addEventListener('change',e=>{const t=e.target;
+    if(t.hasAttribute('data-ao-cut')){act(()=>setProp(P.sched,'cutTime',t.value||'17:00'));paint();return}
     if(t.dataset.aoSel){let v=t.value;if(t.dataset.aoSel==='refine')v=+v;setAuto(t.dataset.aoSel,v);paint()}
     if(t.dataset.aoOpt){act(()=>setProp(P.opt,t.dataset.aoOpt,t.checked))}
     if(t.dataset.aoOptsel){act(()=>setProp(P.opt,t.dataset.aoOptsel,+t.value))}});
@@ -1598,13 +1670,14 @@ function buildGas(){
     L.push(`  form.addTextItem().setTitle('住所（先頭${clamp(+F.addrN||5,2,12)}文字ほど）').setHelpText('家庭訪問の順番を考える参考にします。（例：みどり町1丁目）').setRequired(false);`,``);
   }else if(F.addr==='list'){
     const ac=areaChoices();
-    if(ac.length)L.push(`  form.addListItem().setTitle('住所（地区）').setHelpText('お住まいの地区を選んでください。').setChoiceValues([${ac.map(x=>`'${gasEsc(x)}'`).join(',')}]).setRequired(false);`,``);
+    if(ac.length)L.push(`  form.addListItem().setTitle('住所（地区）').setHelpText('お住まいの地区を選んでください。当てはまるものが無いときは「この中には無い」を選んでください。').setChoiceValues([${[...ac,'この中には無い'].map(x=>`'${gasEsc(x)}'`).join(',')}]).setRequired(false);`,``);
   }
   const n=clamp(+F.sib||0,0,8);
   if(n>0){
     L.push(`  form.addSectionHeaderItem().setTitle('【在学きょうだい情報】').setHelpText('本校にきょうだいが在籍している場合のみ入力してください。');`);
     for(let i=1;i<=n;i++){
       L.push(`  form.addTextItem().setTitle('きょうだい${i}：名前').setRequired(false);`);
+      L.push(`  form.addTextItem().setTitle('きょうだい${i}：ふりがな（漢字以外）').setHelpText('（例：まつばら　Mackey）　学年・組・出席番号を間違えたときの確認に使います。').setRequired(false);`);
       L.push(`  form.addListItem().setTitle('きょうだい${i}：学年・組').setChoiceValues(classMaster).setRequired(false);`);
       L.push(`  form.addListItem().setTitle('きょうだい${i}：出席番号（わかれば）').setChoiceValues(nums).setRequired(false);`);
     }
@@ -1704,7 +1777,7 @@ function detectCols(hdr,rows){
     const t=String(h??'').normalize('NFKC').replace(/\s/g,'');
     const m=/(?:きょうだい|兄弟|姉妹)(\d+)[:：]?(.*)/.exec(t);
     if(m){const o=col.sibs[+m[1]]||(col.sibs[+m[1]]={}),sub=m[2];
-      if(/氏名|名前|なまえ/.test(sub))o.name=i;else if(/学年.*組/.test(sub))o.gc=i;else if(/学年/.test(sub))o.g=i;else if(/組/.test(sub))o.c=i;else if(/番/.test(sub))o.n=i;return}
+      if(/ふりがな|ひらがな|フリガナ|よみ/.test(sub))o.kana=i;else if(/氏名|名前|なまえ/.test(sub))o.name=i;else if(/学年.*組/.test(sub))o.gc=i;else if(/学年/.test(sub))o.g=i;else if(/組/.test(sub))o.c=i;else if(/番/.test(sub))o.n=i;return}
     if(/タイムスタンプ|timestamp/i.test(t)){col.ts??=i;return}
     if(/^学年$/.test(t)){col.g??=i;return}
     if(/^組$/.test(t)){col.c??=i;return}
@@ -1754,9 +1827,9 @@ function buildPlan(rows,fileName){
       const o=col.sibs[k];const name=isBlankish(cell(r,o.name))?'':String(cell(r,o.name)).trim();
       let gc=o.gc!=null?parseGC(cell(r,o.gc)):null;if(!gc&&o.g!=null&&o.c!=null){const gg=num(cell(r,o.g));const cc=String(cell(r,o.c)??'').replace(/組$/,'').trim();if(!isNaN(gg)&&cc)gc={g:gg,c:cc}}
       const nn=o.n!=null&&!isBlankish(cell(r,o.n))?num(cell(r,o.n)):NaN;
-      if(!name&&!gc)continue;sibs.push({name,g:gc?gc.g:'',c:gc?gc.c:'',n:isNaN(nn)?'':nn});
+      const skana=o.kana!=null&&!isBlankish(cell(r,o.kana))?String(cell(r,o.kana)).trim():'';if(!name&&!gc&&!skana)continue;sibs.push({name,kana:skana,g:gc?gc.g:'',c:gc?gc.c:'',n:isNaN(nn)?'':nn});
     }
-    recs.push({row:ri+2,ts,g,c,n,addr:isBlankish(cell(r,col.addr))?'':String(cell(r,col.addr)).trim(),name:String(cell(r,col.name)??'').trim(),kana:String(cell(r,col.kana)??'').trim(),k:kTxt,free:/いつでも/.test(kTxt),toks,bad,sibs});
+    recs.push({row:ri+2,ts,g,c,n,addr:(isBlankish(cell(r,col.addr))||/^(この(中|リスト)には(無|な)い|その他)$/.test(String(cell(r,col.addr)).trim()))?'':String(cell(r,col.addr)).trim(),name:String(cell(r,col.name)??'').trim(),kana:String(cell(r,col.kana)??'').trim(),k:kTxt,free:/いつでも/.test(kTxt),toks,bad,sibs});
     if(bad.length)badDT.push({row:ri+2,g,c,n,bad});
   });
   /* dedupe: latest timestamp wins */
@@ -1802,7 +1875,7 @@ function buildPlan(rows,fileName){
   const derived=tl.length?{start:keyT(tl[0]),slotMin:step||(+P.sched.slotMin||20),slotCount:step?Math.floor((tl[tl.length-1]-tl[0])/step)+1:1}:null;
   /* siblings that cannot be found */
   const sibMissing=[];const sibSeen=new Set();
-  for(const m of matched)for(const b of m.r.sibs){const f=sibFind({name:b.name,g:b.g,c:b.c,n:b.n});if(!f){const k=`${b.name}|${b.g}|${b.c}`;if(!sibSeen.has(k)){sibSeen.add(k);sibMissing.push({of:m.st,b})}}}
+  for(const m of matched)for(const b of m.r.sibs){const f=sibFind({name:b.name,kana:b.kana,g:b.g,c:b.c,n:b.n});if(!f){const k=`${b.name}|${b.g}|${b.c}`;if(!sibSeen.has(k)){sibSeen.add(k);sibMissing.push({of:m.st,b})}}}
   return{file:fileName,total:recs.length,recs,finals,dupKeys:[...new Set(dupInfo)],matched,numOnly,none,unans,col,badDT,dates:[...dates].sort(),extraDates,extraTimes,outside,derived,sibMissing,
     free:matched.filter(m=>m.r.free&&!m.r.toks.length).length,both:matched.filter(m=>m.r.free&&m.r.toks.length)};
 }
@@ -1830,7 +1903,7 @@ function applyPlan(plan,o){
       done.add(st.id);
       /* siblings: replace imported entries, keep manual ones */
       const manual=(st.sib||[]).filter(b=>b.src!=='i'&&b.src!=='r');
-      const imp=r.sibs.map(b=>({name:b.name,g:b.g===''?'':String(b.g),c:String(b.c),n:b.n===''?'':String(b.n),note:'',src:'i'}));
+      const imp=r.sibs.map(b=>({kana:b.kana||'',name:b.name,g:b.g===''?'':String(b.g),c:String(b.c),n:b.n===''?'':String(b.n),note:'',src:'i'}));
       setProp(st,'sib',manual.concat(imp));nSib+=imp.length;
     }
     /* unanswered */
@@ -1880,7 +1953,7 @@ function vForm(){
   if(g)h+=`<p class="tiny muted" style="margin:12px 0 0">フォームに入る内容：${g.classes}学級の学年・組／日時の選択肢 ${g.choices}個（${S.dates.length}日 × ${getSlots().length}枠）${g.closeStr?`／${esc(g.closeStr)}に自動締め切り`:''}</p>`;
   h+=`<div class="row" style="margin-top:14px"><button class="btn pri big" data-act="gas-copy" ${g?'':'disabled'}>${ic('send',18)}GASをコピーする</button><button class="btn" data-act="gas-dl" ${g?'':'disabled'}>${ic('down',17)}ファイルで保存</button><button class="btn ghost" data-act="gas-show" ${g?'':'disabled'}>${UI.form.show?'コードを隠す':'コードを見る'}</button></div>
    ${UI.form.show&&g?`<textarea class="paste" readonly style="min-height:200px;margin-top:10px" onfocus="this.select()">${esc(g.code)}</textarea>`:''}
-   <ol class="steps"><li><a href="https://script.new" target="_blank" rel="noopener">script.new</a> を開く（Googleにログインした状態で）</li><li>最初からあるコードを<b>すべて消して</b>、コピーしたGASを貼り付ける</li><li>上の「実行」で <b>createKadanForm</b> を実行する（初回は権限の承認が出ます）</li><li>画面下の実行ログに、フォームの編集URLと回答用URLが出ます。回答用URLを保護者に配ります</li></ol></section>`;
+   <ol class="steps"><li><a href="https://script.new" target="_blank" rel="noopener">script.new</a> を開く（Googleにログインした状態で）<br><b>または</b> <a href="https://script.google.com" target="_blank" rel="noopener">Google Apps Script</a> を開いて「新しいプロジェクト」を作る<span class="tiny muted">（セキュリティ設定でリンクから開けないときは、Googleにログインしたブラウザで「Google Apps Script」を検索して開いてください）</span></li><li>最初からあるコードを<b>すべて消して</b>、コピーしたGASを貼り付ける</li><li>上の「実行」で <b>createKadanForm</b> を実行する（初回は権限の承認が出ます。<b>表示される権限は、すべて許可</b>してください。一部だけだとフォームを作れず、失敗します。「Googleで確認されていません」と出たら「詳細」→「（安全ではないページ）に移動」→「許可」を押します。自分で貼り付けたコードなので問題ありません）</li><li>画面下の実行ログに、フォームの編集URLと回答用URLが出ます。回答用URLを保護者に配ります</li></ol></section>`;
   h+=`<section class="panel"><h2><span class="stepno">B</span>回答を取り込む<small>フォームの回答ファイルを読み込みます</small></h2>`;
   if(IMP.stage==='review'&&IMP.plan)h+=vImportReview();
   else{
@@ -1910,7 +1983,7 @@ function vImportReview(){
   if(p.unans.length)h+=det(`まだ回答のない児童生徒：${p.unans.length}名${o.markUnans?'（「未」にして配置の対象外にします）':''}`,'',li(p.unans,s=>`${esc(clsLabel(s.g,s.c))} ${s.n}番 ${esc(s.name)}`));
   if(p.both.length)h+=det(`「いつでも可」と日時の両方がある回答：${p.both.length}件（日時の指定を使います）`,'',li(p.both,m=>esc(lab(m.r))));
   if(p.badDT.length)h+=det(`読めなかった日時：${p.badDT.length}行`,'warn',li(p.badDT,b=>`${esc(lab(b))}：${esc(b.bad.join(' / '))}`));
-  if(p.sibMissing.length)h+=det(`名簿に見つからないきょうだい：${p.sibMissing.length}件`,'',li(p.sibMissing,x=>`${esc(clsLabel(x.of.g,x.of.c))} ${esc(x.of.name)} さんの申告：${esc(x.b.name||'名前なし')}（${x.b.g?x.b.g+'年'+x.b.c+'組':'学年組なし'}）`));
+  if(p.sibMissing.length)h+=det(`名簿に見つからないきょうだい：${p.sibMissing.length}件`,'',li(p.sibMissing,x=>`${esc(clsLabel(x.of.g,x.of.c))} ${esc(x.of.name)} さんの申告：${esc(x.b.name||'名前なし')}${x.b.kana?'［'+esc(x.b.kana)+'］':''}（${x.b.g?x.b.g+'年'+x.b.c+'組':'学年組なし'}）`));
   if(!P.sched.dates.length&&p.dates.length){
     h+=`<div class="okbox" style="margin-top:8px">日程が空なので、回答から日程を作ります：${p.dates.map(d=>fmtD(d)).join('、')}／${p.derived?p.derived.start+'から'+p.derived.slotMin+'分×'+p.derived.slotCount+'枠':''}<br><span class="tiny">回答に出てきた時刻の範囲から作ります。最後の枠が足りないときは、あとから「2. 日程」で枠数を増やしてください。</span></div>`;
   }else if(p.extraDates.length||p.extraTimes.length){
@@ -2174,7 +2247,7 @@ function tableSheet(c,W=297,H=210){
       body+='</tr>';
     });
     const list=outList&&pairs.length?`<div class="sbl" style="font-size:${clamp(fs*1.05,6,10*kk_)}pt"><div class="sh">★ きょうだい（赤字の児童生徒）</div>${pairs.map(x=>`<div class="sl1">${x}</div>`).join('')}</div>`:'';
-    return `<section class="dsheet land" style="width:${W}mm;height:${H}mm"><div class="dh"><div class="dcr">かこピタ v${APP_VER}　Created by ${esc(APP_AUTHOR)}</div><div class="dh1"><b>${esc(clsLabel(c.g,c.c))}</b>　${esc(kindName())} 日程表<span class="dh2">${c.teacher?esc(c.teacher)+' 先生':''}　${esc(range)}　${esc(P.meta.school||'')}</span></div></div>
+    return `<section class="dsheet land" style="width:${W}mm;height:${H}mm"><div class="dh"><div class="dcr">かこピタ v.${APP_VER}　Created by ${esc(APP_AUTHOR)}</div><div class="dh1"><b>${esc(clsLabel(c.g,c.c))}</b>　${esc(kindName())} 日程表<span class="dh2">${c.teacher?esc(c.teacher)+' 先生':''}　${esc(range)}　${esc(P.meta.school||'')}</span></div></div>
      <table class="ttab" style="${tabH?`height:${tabH}mm`:'height:auto'}"><thead><tr><th class="tm"></th>${dates.map(d=>`<th>${mdw(d)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${list}
      <div class="dfoot">${unpl.length?`日時が決まっていない児童生徒：${unpl.map(s=>esc(s.name)).join('、')}`:'全員の日時が決まっています'}　／　${mem.length}名${wa!==AD?'　（紙面に収めるため住所を省略しました）':''}</div></section>`;
   };
@@ -2349,19 +2422,34 @@ async function shConnectHandle(dir,mode){
   clearInterval(SH.timer);SH.timer=setInterval(()=>{shSync({quiet:false});if(SH.lockKey)shPutLock(SH.lockKey)},SH_POLL);
   await shSync({quiet:true});paintShare();render();
 }
+const SHARE_SUB='担任用';
+async function pickDir(){   // 前回のフォルダの場所から開く（ブラウザは「HTMLが置かれた場所」を知ることができないため）
+  const opt={mode:'readwrite',id:'kakopita-share'};
+  try{const last=await dbGet('lastDir');if(last)opt.startIn=last}catch(e){}
+  const dir=await showDirectoryPicker(opt);try{await dbSet('lastDir',dir)}catch(e){}return dir;
+}
+async function hasProjectFile(dir){try{await dir.getFileHandle('project.json');return true}catch(e){return false}}
+async function ensureClassHtmls(dir,onlyMissing){
+  const keys=classList().map(c=>c.key);let todo=keys;
+  if(onlyMissing){todo=[];for(const k of keys){const c=P.classes[k];try{await dir.getFileHandle(`${clsLabel(c.g,c.c)}.html`)}catch(e){todo.push(k)}}}
+  return todo.length?await genClassHtmls(todo,dir):0;
+}
 async function shConnectPicker(){
   if(!shSupported()){toast('このブラウザでは共有フォルダを使えません。Chrome または Edge で開いてください');return}
   if(!await shEnsureUser())return;
-  let dir;try{dir=await showDirectoryPicker({mode:'readwrite'})}catch(e){return}
+  let dir;if(SRV){dir=makeSrvDir()}else{try{dir=await pickDir()}catch(e){return}}
   if(CM){   // 学級専用HTML：このHTMLと同じプロジェクトのフォルダにつなぐ
-    let env=null;try{const fh=await dir.getFileHandle('project.json');env=JSON.parse(await (await fh.getFile()).text())}catch(e){}
-    if(!env){toast('このフォルダには共有プロジェクトが見つかりません。このHTMLが入っている共有フォルダを選んでください',{kind:'warn',ms:8000});return}
+    const readEnv=async d=>{try{const fh=await d.getFileHandle('project.json');return JSON.parse(await (await fh.getFile()).text())}catch(e){return null}};
+    let env=await readEnv(dir);
+    if(!env){try{const sub=await dir.getDirectoryHandle(SHARE_SUB);env=await readEnv(sub);if(env)dir=sub}catch(e){}}   // 1つ上のフォルダを選んでも「担任用」を見つける
+    if(!env){toast('このフォルダには共有データが見つかりません。このHTMLが入っているフォルダ（「担任用」）を選んでください',{kind:'warn',ms:8000});return}
     if(env.data&&env.data.id&&CM.pid&&env.data.id!==CM.pid){toast('別のプロジェクトのフォルダです。このHTMLが入っている共有フォルダを選んでください',{kind:'warn',ms:8000});return}
     await shConnectHandle(dir,'merge');toast(`共有フォルダにつながりました：${dir.name}`);return}
-  let has=false;try{await dir.getFileHandle('project.json');has=true}catch(e){}
+  let has=await hasProjectFile(dir);
+  if(!has){try{const sub=await dir.getDirectoryHandle(SHARE_SUB);if(await hasProjectFile(sub)){dir=sub;has=true}}catch(e){}}   // 既存の「担任用」があればそれを使う
   if(has){const r=await ask({title:'共有フォルダを開きます',body:`<p>「${esc(dir.name)}」には、共有プロジェクトがすでにあります。</p><p class="muted tiny" style="margin-top:6px">このフォルダの内容を読み込みます。いま開いているデータは、バックアップに残してから置き換えます。</p>`,buttons:[{id:0,label:'やめる'},{id:1,label:'フォルダの内容を読み込む',kind:'pri'}]});if(r!==1)return;await shConnectHandle(dir,'load')}
   else{if(!P.students.length){toast('先に名簿を読み込んでから、共有を始めてください');return}
-    const r=await ask({title:'このフォルダで共有を始めます',body:`<p>「${esc(dir.name)}」に、いまのデータを共有プロジェクトとして書き出します。</p><p class="muted tiny" style="margin-top:6px">学級ごとのファイルが作られます。担任の先生にも、このフォルダを開いてもらってください（共有フォルダやクラウドの同期フォルダなど）。</p>`,buttons:[{id:0,label:'やめる'},{id:1,label:'共有を始める',kind:'pri'}]});if(r!==1)return;await shConnectHandle(dir,'create')}
+    const r=await ask({title:'このフォルダで共有を始めます',body:`<p>「${esc(dir.name)}」に、いまのデータを共有プロジェクトとして書き出します。</p><p class="muted tiny" style="margin-top:6px">学級ごとのファイルが作られます。担任の先生も、同じかこピタのHTMLを開いて、このフォルダを選んでください（共有フォルダやクラウドの同期フォルダなど）。</p>`,buttons:[{id:0,label:'やめる'},{id:1,label:'共有を始める',kind:'pri'}]});if(r!==1)return;await shConnectHandle(dir,'create')}
   toast(`共有を始めました：${dir.name}`);
 }
 async function shDisconnect(){
@@ -2378,9 +2466,20 @@ async function shEnsureUser(){
   });
   if(!el)return false;SH.user=el;localStorage.setItem('kp_user',el);return true;
 }
-async function shRestore(){ // after reload: try to reconnect to the saved folder
-  try{const dir=await dbGet(KEY_D);if(!dir)return;SH.dir=dir;SH.name=dir.name;SH.user=shUser();
-    const p=await dir.queryPermission({mode:'readwrite'});
+async function shAutoServer(){   // バッチ経由：フォルダを選ばずに自動でつながる
+  try{const r=await fetch((SRV.base||'')+'/api/ping',{headers:{'X-KP-Token':SRV.token}});if(!r.ok)throw 0;const j=await r.json();SRV.name=j.name||'共有フォルダ'}
+  catch(e){SRV=null;toast('中継プログラムにつながりません。「かこピタ起動.bat」から開き直してください',{kind:'warn',ms:9000});return}
+  const dir=makeSrvDir();let env=null;
+  try{const f=await (await dir.getFileHandle('project.json')).getFile();env=JSON.parse(await f.text())}catch(e){}
+  if(!await shEnsureUser())return;
+  if(env){const same=env.data&&env.data.id===P.id&&P.students.length>0;
+    if(same)await shRestore(dir);else await shConnectHandle(dir,'load');
+    toast(`共有フォルダにつながりました（${SRV.name}）`)}
+  else toast('この共有フォルダには、まだ共有データがありません。名簿を読み込んでから、「共有する」で始めてください',{ms:8000});
+}
+async function shRestore(dirArg){ // after reload: try to reconnect to the saved folder
+  try{const dir=dirArg||await dbGet(KEY_D);if(!dir)return;SH.dir=dir;SH.name=dir.name;SH.user=shUser();
+    const p=dirArg?'granted':await dir.queryPermission({mode:'readwrite'});
     if(p==='granted'){SH.on=true;
       if(CM){clearInterval(SH.timer);SH.timer=setInterval(()=>{shSync({quiet:false});if(SH.lockKey)shPutLock(SH.lockKey)},SH_POLL);await shSync({quiet:true});paintShare();return}
       for(const part of ['project','roster',...classList().map(c=>'class:'+c.key)]){SH.last[part]=serPart(part)}
@@ -2425,7 +2524,7 @@ function bannerHtml(){
   return `<div class="page" style="padding-bottom:0"><div class="ngbox" style="margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><b>同時に編集された部分があります：</b>${keys.map(lab).map(esc).join('、')}<span class="grow"></span><button class="btn sm pri" data-act="sh-resolve">どちらを使うか決める</button></div></div>`;
 }
 function cmBanner(){
-  return `<div class="page" style="padding-bottom:0"><div class="warnbox" style="margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><b>共有フォルダにつながっていません。</b>つなぐと、学年主任や他の先生と同じデータで進められます（つながなくても、この画面だけで作業できます）。<span class="grow"></span>${SH.needGrant?'<button class="btn sm pri" data-act="cm-grant">前回のフォルダに再接続</button>':''}<button class="btn sm ${SH.needGrant?'':'pri'}" data-act="cm-connect">フォルダを選ぶ</button></div></div>`;
+  return `<div class="page" style="padding-bottom:0"><div class="warnbox" style="margin-bottom:14px;display:flex;gap:12px;align-items:center;flex-wrap:wrap"><b>共有フォルダにつながっていません。</b>つなぐと、学年主任や他の先生と同じデータで進められます。<b>このHTMLが入っているフォルダ</b>を選んでください（つながなくても、この画面だけで作業できます）。<span class="grow"></span>${SH.needGrant?'<button class="btn sm pri" data-act="cm-grant">前回のフォルダに再接続</button>':''}<button class="btn sm ${SH.needGrant?'':'pri'}" data-act="cm-connect">フォルダを選ぶ</button></div></div>`;
 }
 A['cm-connect']=()=>shConnectPicker();
 A['cm-grant']=()=>shGrant();
@@ -2456,13 +2555,20 @@ async function genClassHtmls(keys,dir){
   out.forEach(([name,html],i)=>setTimeout(()=>dlText(html,name),i*500));
   return n;
 }
+async function writeTo(dir,name,text){const fh=await dir.getFileHandle(name,{create:true}),w=await fh.createWritable();await w.write(text);await w.close()}
+function relaySection(){
+  return `<h3 style="font-size:14px;margin:18px 0 6px">バッチで起動する（Windows・フォルダ選択が不要）</h3>
+   <p class="tiny muted" style="margin-bottom:8px">共有フォルダに、<b>かこピタのHTML・起動バッチ・中継プログラム</b>の3つを置きます。担任は<b>「かこピタ起動.bat」をダブルクリックするだけ</b>で、フォルダを選ばずに同じデータにつながります（Chrome・Edge以外のブラウザでも使えます）。${SRV?'<b>　いまはこの方式で接続中です。</b>':''}</p>
+   <div class="row"><button class="btn" data-sh="relay-all">${ic('down',16)}3つを共有フォルダに書き出す</button><button class="btn ghost sm" data-sh="relay-bat">バッチだけ</button><button class="btn ghost sm" data-sh="relay-bat2" title="ブラウザを自動で開かないバッチ。表示されたアドレスを自分で貼り付けて使います">手動用バッチ</button><button class="btn ghost sm" data-sh="relay-ps">中継プログラムだけ</button><button class="btn ghost sm" data-sh="relay-html">HTMLだけ</button></div>
+   <p class="tiny muted" style="margin-top:6px">書き出せないとき（ブラウザの安全のため、バッチなどは書き込めないことがあります）は、ダウンロードされるので、共有フォルダに入れてください。「危険なファイル」と出たら「保存」を選びます。中継プログラムは担任のPCの中だけで動き、外部には出ません。</p>`;
+}
 function chiefSection(){
   const cl=classList();
-  return `<h3 style="font-size:14px;margin:18px 0 6px">学級専用のHTMLを作る<span class="tag-inline">おすすめ</span></h3>
-   <p class="tiny muted" style="margin-bottom:8px">各学級の専用HTML（例：<b>1年1組.html</b>）を作ります。担任の先生は、自分の学級のHTMLをダブルクリックで開くだけで、その学級の画面が開きます（名簿・日程などの設定は表示されません）。共有フォルダに書き出すと、先生が開くたびに最新のデータをフォルダから読み込みます。</p>
-   <div class="row"><button class="btn pri" data-sh="genall" ${cl.length?'':'disabled'}>${ic('folder',16)}全学級のHTMLを作る（${cl.length}学級）</button>
+  return `<h3 style="font-size:14px;margin:18px 0 6px">学級専用のHTMLを作る<small class="muted" style="font-weight:500">　（使わなくてOK）</small></h3>
+   <p class="tiny muted" style="margin-bottom:8px">ふつうは、同じかこピタのHTMLを全員が開いて、共有フォルダを選べば十分です。学級ごとの専用HTML（1年1組.html など）は、担任に「自分の学級だけ」を渡したいとき用です。</p>
+   <div class="row"><button class="btn" data-sh="genall" ${cl.length?'':'disabled'}>${ic('folder',16)}学級専用HTMLを作り直す（${cl.length}学級）</button>
    <select id="shGenCls">${cl.map(c=>`<option value="${esc(c.key)}" ${c.key===curCls()?'selected':''}>${esc(clsLabel(c.g,c.c))}</option>`).join('')}</select><button class="btn" data-sh="genone" ${cl.length?'':'disabled'}>この学級だけ</button></div>
-   <p class="tiny muted" style="margin-top:6px">${SH.on?`いま共有中のフォルダ「${esc(SH.name)}」に書き出します。`:'書き出し先のフォルダを選びます。先に「共有フォルダを選ぶ」で共有を始め、同じフォルダに書き出すのがおすすめです。'}先生には、①HTMLを開く ②画面上の「フォルダを選ぶ」で、共有フォルダを1回だけ選ぶ、の2つをお願いしてください。</p>`;
+   <p class="tiny muted" style="margin-top:6px">${SH.on?`書き出し先：共有中のフォルダ「${esc(SH.name)}」`:'共有を始めていないときは、書き出し先のフォルダを選びます。'}　名簿を取り込み直したときや、アプリを新しい版にしたときは、作り直してください。</p>`;
 }
 function cmSection(){
   return `<h3 style="font-size:14px;margin:18px 0 6px">このHTMLを、最新のデータで保存し直す</h3>
@@ -2500,7 +2606,7 @@ A['share']=async()=>{
      :`<div style="display:flex;flex-direction:column;gap:10px"><label class="f" style="max-width:320px">あなたの名前（編集中の表示に使います）<input type="text" id="shNameIn" value="${esc(shUser())}" placeholder="例：青木"></label>
        <div class="row"><button class="btn pri big" data-sh="start" ${sup?'':'disabled'}>${ic('folder',18)}共有フォルダを選ぶ</button>${SH.needGrant?`<button class="btn big" data-sh="grant">前回のフォルダに再接続</button>`:''}</div>
        <p class="tiny muted">新しいフォルダを選ぶと共有を始められます。すでに共有プロジェクトがあるフォルダを選ぶと、その内容を読み込みます。</p></div>`}
-     ${CM?cmSection():chiefSection()}<h3 style="font-size:14px;margin:18px 0 6px">学級ファイルの書き出し・取り込み<small class="muted" style="font-weight:500">　（フォルダを使えない場合や、持ち出し用）</small></h3>
+     ${CM?cmSection():relaySection()+chiefSection()}<h3 style="font-size:14px;margin:18px 0 6px">学級ファイルの書き出し・取り込み<small class="muted" style="font-weight:500">　（フォルダを使えない場合や、持ち出し用）</small></h3>
      <div class="row"><select id="shCls">${classList().map(c=>`<option value="${esc(c.key)}" ${c.key===curCls()?'selected':''}>${esc(clsLabel(c.g,c.c))}</option>`).join('')}</select><button class="btn" data-sh="exp">${ic('down',16)}この学級を書き出す</button><button class="btn" data-sh="imp">${ic('up',16)}学級ファイルを取り込む</button></div>
      <p class="tiny muted" style="margin-top:6px">書き出したファイルには、その学級の都合・配置・きょうだい情報が入ります。取り込むときに、どちらが新しいかを確認します。</p>
      <div class="acts"><button class="btn pri" data-close>閉じる</button></div>`;
@@ -2511,15 +2617,23 @@ A['share']=async()=>{
     const b=e.target.closest('[data-sh]');if(!b)return;const a=b.dataset.sh;
     if(a==='start'){const v=$('#shNameIn',el)?.value.trim();if(v){SH.user=v;localStorage.setItem('kp_user',v)}el._close();await shConnectPicker();return}
     if(a==='grant'){el._close();await shGrant();return}
-    if(a==='sync'){await shSync({quiet:false});paint();toast('同期しました');return}
+    if(a==='sync'){const _d=busyStart('同期しています');try{await shSync({quiet:false})}finally{_d()}paint();toast('同期しました');return}
     if(a==='disc'){if(await ask({title:'共有をやめますか？',body:'<p class="muted">この端末のデータはそのまま残ります。共有フォルダのファイルも消えません。</p>',buttons:[{id:0,label:'やめる'},{id:1,label:'共有をやめる',kind:'pri'}]})){el._close();await shDisconnect()}return}
     if(a==='rename'){const n=prompt('あなたの名前',shUser());if(n&&n.trim()){SH.user=n.trim();localStorage.setItem('kp_user',SH.user);paint()}return}
+    if(a==='relay-all'||a==='relay-bat'||a==='relay-bat2'||a==='relay-ps'||a==='relay-html'){
+      const files={'relay-bat':[['かこピタ起動.bat',RELAY_BAT]],'relay-bat2':[['かこピタ起動（手動）.bat',RELAY_BAT2]],'relay-ps':[['kakopita-server.ps1','\uFEFF'+RELAY_PS]],'relay-html':[['かこピタ.html',KP_SRC]]};
+      const list=a==='relay-all'?[...files['relay-html'],...files['relay-bat'],...files['relay-ps']]:files[a];
+      const _bd=busyStart('ファイルを書き出しています');let dir=SH.on&&!SRV?SH.dir:null,wrote=[],dl=[];
+      for(const [n,t] of list){let ok=false;if(dir){try{await writeTo(dir,n,t);ok=true}catch(err){}}
+        if(ok)wrote.push(n);else dl.push([n,t])}
+      dl.forEach(([n,t],i)=>setTimeout(()=>dlText(t,n,n.endsWith('.html')?'text/html':'text/plain'),i*500));
+      toast(`${wrote.length?wrote.length+'個を共有フォルダに書き出しました。':''}${dl.length?dl.length+'個をダウンロードしました（共有フォルダに入れてください）。':''}`,{ms:9000});_bd();return}
     if(a==='genall'||a==='genone'){
       if(!P.students.length){toast('先に名簿を読み込んでください');return}
       const keys=a==='genall'?classList().map(c=>c.key):[$('#shGenCls',el).value];
       let dir=SH.on?SH.dir:null;
       if(dir)await shSync({quiet:true});
-      else if(shSupported()){try{dir=await showDirectoryPicker({mode:'readwrite'})}catch(e){return}}
+      else if(shSupported()){try{dir=await pickDir()}catch(e){return}}
       try{const n=await genClassHtmls(keys,dir);toast(dir?`${n}学級のHTMLを「${dir.name}」に作りました`:`${n}学級のHTMLをダウンロードしました`,{ms:7000})}catch(err){toast('作成できませんでした：'+(err.message||err),{kind:'warn'})}
       return}
     if(a==='regen'){
@@ -2556,7 +2670,7 @@ const isGithubPages=()=>/\.github\.io$/i.test(location.hostname)||/[?&]dl=1\b/.t
 async function downloadApp(){
   try{const r=await fetch(location.href.split('#')[0],{cache:'no-store'});if(!r.ok)throw new Error(r.status);const t=await r.text();
     if(!/かこピタ/.test(t))throw new Error('unexpected');
-    const b=new Blob([t],{type:'text/html'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`かこピタ_v${APP_VER}.html`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
+    const b=new Blob([t],{type:'text/html'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`かこピタ_v.${APP_VER}.html`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500);
     toast('ダウンロードしました。ファイルをダブルクリックすると、インターネットなしで使えます',{ms:7000});return true;
   }catch(e){toast('ダウンロードできませんでした。ブラウザの「名前を付けて保存」（Ctrl+S）でも保存できます',{ms:7000});return false}
 }
@@ -2574,9 +2688,9 @@ function maybeDownloadDialog(){
     if(b.dataset.dl==='go')await downloadApp();el._close()});
 }
 A.about=()=>{
-  const el=openDlg(`<h2 style="display:flex;align-items:center;gap:10px">${LOGO_HTML}<span class="badge brand">v${APP_VER}</span></h2>
+  const el=openDlg(`<h2 style="display:flex;align-items:center;gap:10px">${LOGO_HTML}<span class="badge brand">v.${APP_VER}</span></h2>
    <p class="muted" style="margin:4px 0 12px">家庭訪問・懇談を、ピタッと組む日程づくりツール</p>
-   <dl class="kv"><dt>作者</dt><dd>かこピタ v${APP_VER}　Created by ${APP_AUTHOR}（with Gemini）　／　Special Thanks ウチムラヨウスケ</dd><dt>この版</dt><dd>Web（HTML）版 v${APP_VER}　ブラウザだけで動き、インターネットがなくても使えます</dd><dt>データ</dt><dd>名簿などのデータは、この端末の中と、あなたが選んだファイル・フォルダにだけ保存されます。外部へは送信されません。</dd><dt>保存場所</dt><dd>${esc(location.protocol==='file:'?'ダウンロードしたファイル（file）':location.host)}</dd></dl>
+   <dl class="kv"><dt>作者</dt><dd>かこピタ v.${APP_VER}　Created by ${APP_AUTHOR}（with Gemini）　／　Special Thanks ウチムラヨウスケ</dd><dt>この版</dt><dd>Web（HTML）版 v.${APP_VER}　ブラウザだけで動き、インターネットがなくても使えます</dd><dt>データ</dt><dd>名簿などのデータは、この端末の中と、あなたが選んだファイル・フォルダにだけ保存されます。外部へは送信されません。</dd><dt>保存場所</dt><dd>${esc(location.protocol==='file:'?'ダウンロードしたファイル（file）':location.host)}</dd></dl>
    <div class="row" style="margin-top:16px"><button class="btn" data-ab="help">${ic('send',16)}使い方を見る</button>${isHttp()?`<button class="btn" data-ab="dl">${ic('down',16)}このアプリをダウンロード（オフライン用）</button>`:''}</div>
    <div class="acts"><button class="btn pri" data-close>閉じる</button></div>`);
   el.addEventListener('click',e=>{if(e.target.closest('[data-close]'))el._close();const b=e.target.closest('[data-ab]');if(!b)return;if(b.dataset.ab==='help'){el._close();A.help()}else downloadApp()});
@@ -2585,11 +2699,11 @@ A.about=()=>{
 /* ---------- help ---------- */
 const HELP=[
  ['はじめに',()=>`<h3>最短の流れ（6ステップ）</h3><ol><li><b>1. 名簿</b>：学年・組・番号・名前・ふりがな（住所・担任名もいっしょに）を貼り付けるか、ファイルで読み込む</li><li><b>2. 日程</b>：実施日と、1日の時間割（開始時刻・1枠の長さ・枠数）を決める</li><li><b>3. フォーム</b>：Googleフォームを作るコード（GAS）をコピーして実行。集まった回答ファイルを取り込む</li><li><b>4. 条件</b>：児童生徒ごとの×（不可）・○（この時間のみ可）を確認・入力する（手入力だけでもOK）</li><li><b>5. かこピタ(配置)</b>：「かこピタ（自動配置）する」を押す。気になるところは、ドラッグで入れ替える</li><li><b>6. 印刷</b>：お知らせ・催促状・学級の一覧表・条件ブロックを印刷する（用紙はA4・A3・B5・B4の縦横から選べます）</li></ol>
-  <div class="okbox" style="margin-top:12px"><b>担任の先生へ：</b>学年主任（設定担当者）から<b>「1年1組.html」のような学級専用のHTML</b>を受け取ったら、ダブルクリックで開くだけです。自分の学級の画面が開き、<b>4. 条件</b>・<b>5. かこピタ(配置)</b>・<b>6. 印刷</b>の3つだけが表示されます。共有フォルダにつなぐ（画面上の「フォルダを選ぶ」で、HTMLが入っているフォルダを1回選ぶ）と、ほかの先生の編集と合わさります。</div>
+  <div class="okbox" style="margin-top:12px"><b>複数人で使うとき：</b>全員が<b>同じかこピタのHTML</b>を開き、右上の「共有する」→ 名前を入力 →「共有フォルダを選ぶ」で、同じ共有フォルダを選びます。<b>これは、各担任が自分のパソコンで初めて開いたときに、1人ずつ必要な操作です</b>（設定担当者が1回設定すれば全員分が済む、という仕組みではありません）。2回目以降は、「前回のフォルダに再接続」を押すだけです。各担任は、自分の学級だけを組みます。ほかの人が編集中の学級は、見るだけになります。</div>
   <h3>初心者の方へ：最短で結果を出す3ステップ</h3><ol><li><b>希望データの準備</b>：保護者の希望を、4. 条件で×○に入力します。大変なときは、Googleフォームの回答を取り込めます（名前の空白・全角半角・ひらがなカタカナの違いは自動で吸収します）。</li><li><b>「かこピタ」で自動配置</b>：やり直したいときは「配置ロック中」ボタンを押してロックを解除し、もう一度かこピタします（ロック中に実行すると、画面の上に赤いお知らせが出ます）。条件が厳しくて誰かが入れないときは、実行前に名前つきで知らせます。時間がかかるときは「中断する」で止められます。</li><li><b>最終調整と印刷</b>：決まった案を直したいときは、名前を動かすだけ。最後に「6. 印刷」で、美しい個票を出力します。</li></ol>`],
  ['画面の使い方',()=>`<h3>1. 名簿</h3><p>Excel・CSV・貼り付けのどれでも取り込めます。列の順番は自由で、見出しがあれば自動で当てはめます。<b>担任名</b>も列として取り込めるほか、「担任名をまとめて設定」でも入力できます。住所は家庭訪問で近い家を続けたいときだけ入れてください（個人情報です）。</p>
   <h3>2. 日程</h3><p>日付は上限なし、期間で追加できます。「できれば17:00まで」などの時刻のルール、きょうだい・住所への配慮もここと設定で決められます。</p>
-  <h3>3. フォーム</h3><p>名簿と日程からGAS（Googleフォームを作るコード）を作ります。<b>script.new</b> に貼り付けて実行すると、実行ログに「フォーム作成完了：編集URL」「回答用URL」「【自動締め切り予約】…」が表示されます（Apps Scriptの画面の下の「実行ログ」）。住所は「聞かない／入力／リスト」から選べます。回答は、フォームの「回答」→スプレッドシート→ダウンロード（xlsx）で取り込みます。</p>
+  <h3>3. フォーム</h3><p>名簿と日程からGAS（Googleフォームを作るコード）を作ります。<b>script.new</b>（または Google Apps Script）に貼り付けて実行すると、実行ログに「フォーム作成完了：編集URL」「回答用URL」「【自動締め切り予約】…」が表示されます（Apps Scriptの画面の下の「実行ログ」）。住所は「聞かない／入力／リスト」から選べます（リストの最後には、必ず「この中には無い」が入ります）。きょうだい欄には、名前の次に「ふりがな」の欄ができ、学年・組・番号の入力ミスがあっても、ふりがなで名簿から探します。回答は、フォームの「回答」→スプレッドシート→ダウンロード（xlsx）で取り込みます。</p>
   <h3>4. 条件</h3><p>ブラシ（×・○・未・消しゴム）を選んで、ドラッグで塗ります。日付や時刻の見出しをクリックすると、その日・その時刻をまとめて塗れます。枠数（連続枠）は1〜30。きょうだいの学年・組・番号を入れると、名簿と自動で照合します。<b>○がある児童生徒は、○の枠にだけ配置されます。</b></p>
   <h3>5. かこピタ(配置)</h3><p>児童生徒を選ぶと、入れない時間帯が濃い斜線になります（他の児童生徒が入っているマスの上も同様です）。置きたいマスをクリック、またはドラッグ。右クリックで外す／休憩（×）。「全員を外す」で、その学級の配置をまとめて外せます。名前の右に出る住所（地区）は、<b>家庭訪問のときだけ最初から表示</b>されます。ほかの行事では最初は非表示で、「住所を表示」にチェックを入れると表示できます。</p>
   <h3>6. 印刷</h3><p>日程のお知らせ・未回答の催促状・各学級の一覧表・条件ブロックを印刷できます。<b>用紙はすべて、A4・A3・B5・B4の縦横（8種類）から選べます。</b>標準は、お知らせと催促状がA4縦（上下2段。横にすると左右2段）、学級の一覧表がA4縦（白黒印刷向き。児童生徒名が折り返さない大きさに自動調整。きょうだいは赤字と★で強調）、条件ブロックはA3で「1学級2枚に収まり、文字がいちばん大きくなる向き」を自動で選びます。住所の印刷も、家庭訪問のときだけ最初からオンです。文面は「文面を編集する」で書き換えられます（{名前}などの言葉が自動で入れ替わります）。</p>`],
@@ -2597,8 +2711,9 @@ const HELP=[
   <h3>きょうだい・住所への配慮</h3><ul><li><b>きょうだい配慮</b>：きょうだいが別の学級にいても、<b>同じ時刻にならない</b>ようにし、同じ日の近い時刻に寄せます。<b>間隔は「続けて」または「1〜2枠あける」から選べます</b>（既定は続けて）。</li><li><b>住所配慮</b>：住所の先頭◯文字が同じ（同じ地区）児童生徒を、同じ日に続けて配置します。余裕があるときは、離れていそうな地区（地区名が違う）どうしが隣り合わないよう、間に1枠あけます。<b>「住所が近い児童生徒を近くに配置する」は、行事が家庭訪問のときだけ最初からオンです</b>（ほかの行事では最初はオフ。チェックで切り替えられます）。</li></ul>`],
  ['便利な技',()=>`<ul><li><b>Ctrl+Z / Ctrl+Y</b>：取り消し／やり直し（配置・条件・名簿の取り込みなど、ほとんどの操作に効きます）</li><li><b>1・2・3・0 キー</b>（4. 条件）：ブラシを ×・○・未・消しゴム に切り替え</li><li><b>↑↓ キー</b>（4. 条件）：前後の児童生徒へ</li><li><b>選んでクリック</b>（5. かこピタ(配置)）：未配置の児童生徒を選び、置きたいマスをクリック。置いてある人を選んで別のマスをクリックすると、入れ替わります。</li><li><b>右クリック</b>（5. かこピタ(配置)）：置いた人を外す／空きマスを休憩（×）に</li><li><b>名前で探す</b>：条件・配置の画面の検索欄で、児童生徒を名前ですばやく探せます</li><li><b>Ctrl+S</b>：保存先ファイルへ保存（設定済みのとき）</li><li><b>休憩の予約</b>：「休憩（×）を置く」モードで空きマスをクリック。かこピタはそこを避けます。</li><li><b>枠数</b>：特別な支援や相談が必要な児童生徒に、連続した時間を確保できます。</li></ul>`],
  ['保存・共有・オフライン',()=>`<h3>保存</h3><p>編集のたびに、このブラウザの中へ自動保存されます。右上の保存表示から「保存先ファイル」を決めておくと、そのファイルにも自動で書き込みます（Chrome／Edge）。「以前の状態に戻す」で、自動バックアップ（12件）から戻せます。</p>
-  <h3>共有のしかた①：学級専用のHTML（おすすめ）</h3><p>学年主任が名簿と回答を取り込んだら、右上の「共有する」→「全学級のHTMLを作る」を押します。共有フォルダに<b>「1年1組.html」「1年2組.html」…</b>ができます。各担任は<b>自分の学級のHTMLをダブルクリックするだけ</b>で、その学級の画面が開きます。初めてのときだけ、画面上の「フォルダを選ぶ」で、HTMLが入っている共有フォルダを選んでください（2回目からは「前回のフォルダに再接続」を押すだけです）。<b>保存は自分の学級のファイルだけに書く</b>ので、他の人と衝突しません。学年主任の「全体」画面には、全学級の進み具合が30秒ごとに更新されます。</p>
-  <h3>共有のしかた②：プロジェクトフォルダ</h3><p>学年主任が、共有フォルダ（学校のサーバー、クラウドの同期フォルダなど）を選んで共有を始めます。学級ごとにファイルが作られ、<b>30秒ごとに最新を確認</b>します。ほかの人が編集中の学級には「◯◯さんが編集中」と表示され、見るだけの状態になります。同時に編集してしまったときは、どちらを使うか選べます。Chrome／Edge で使えます。それ以外では、「学級ファイルの書き出し・取り込み」をお使いください。</p>
+<h3>共有のしかた：プロジェクトフォルダ（全員が同じHTMLを開く）</h3><p>学年主任が、共有フォルダ（学校のサーバー、クラウドの同期フォルダなど）を選んで共有を始めます。学級ごとにファイルが作られ、<b>30秒ごとに最新を確認</b>します。ほかの人が編集中の学級には「◯◯さんが編集中」と表示され、見るだけの状態になります。同時に編集してしまったときは、どちらを使うか選べます。Chrome／Edge で使えます。それ以外では、「学級ファイルの書き出し・取り込み」をお使いください。</p>
+  <h3>バッチで起動する（Windows・フォルダ選択が不要）</h3><p>「共有する」→「3つを共有フォルダに書き出す」で、共有フォルダに<b>かこピタ.html・かこピタ起動.bat・kakopita-server.ps1</b>ができます（書き出せないときはダウンロードして入れてください）。担任は<b>「かこピタ起動.bat」をダブルクリック</b>するだけです。担任のPCの中だけで動く小さな中継プログラムが起動し、ブラウザでかこピタが開いて、共有フォルダにつながります（フォルダ選択は不要）。作業中は、黒い窓を閉じないでください。閉じると、保存が共有フォルダに届かなくなります。かこピタを新しい版にするときは、共有フォルダの「かこピタ.html」を入れ替えます。</p>
+  <p><b>職場でインターネットが別のブラウザ（リモートで隔離されたブラウザなど）に切り替わる場合：</b>バッチは、かこピタのHTMLを自分のPCの一時フォルダにコピーし、<b>ローカルのファイルとして</b>EdgeまたはChromeで開きます（インターネットのアドレスは開きません）。うまく開かないときは、黒い窓に表示される「file:///…」のアドレスを、自分のPCで動くブラウザに貼り付けてください。それも難しいときは、バッチを使わず、<b>「共有フォルダを選ぶ」の方式</b>（ネットワークを使わず、パソコンの中だけで動きます）をお使いください。</p>
   <h3>持ち出して作業するとき</h3><p>学級専用のHTMLは、1つのファイルの中にその学級のデータが入っています。USBなどで持ち出して自宅で作業し、「共有する」→「このHTMLを保存し直す」で更新したHTMLを持ち帰って、共有フォルダのHTMLと入れ替えます。開いてフォルダにつなぐと、サーバー側のほうが新しかった場合は、どちらを使うか確認します。</p>
   <h3>オフラインで使う</h3><p>このアプリは<b>1つのHTMLファイル</b>で、インターネットなしで動きます。名簿を扱う作業は、インターネットのない環境で行い、フォームを作るときだけ、インターネットにつないで「script.new」を開いてください。</p>
   <h3>データを消す（新しい行事を始めるとき）</h3><p>「設定」→「データを消す…」を押すと、消す内容を選べます。標準の「次の行事の準備」は、<b>名簿・担任名・学校情報・文面・設定は残し</b>、条件・配置・日程・取り込み履歴だけを消します。「名簿・担任名も消す」「すべて消す（初期化）」も、ボタンひとつで選べます。実行前に自動でバックアップを取るので、「元に戻す」で戻せます。</p>`],
@@ -2610,7 +2725,7 @@ const HELP=[
  ['かこピタについて',()=>`<h3>【Origin】ツール名「かこピタ」に込めた想い</h3><p>「かこピタ」という名前は、学校現場の二大重労働である「家庭訪問（か）」と「懇談（こ）」から取られています。これらの業務で最も心身を削るのが「日程調整」というパズルです。数十人の保護者の希望を、パズルのピースを埋めるように調整し、かつ重複や漏れが許されない。この緻密な作業を、数学者ピタゴラスの定理のごとく、論理的かつ瞬時に解決したいという願いが込められています。</p><p>本ツールは、単なる効率化ではなく、担任が「児童生徒と向き合う時間」を取り戻すための聖域を作ることを目的として開発されました。「ピタッ！」と決まるその瞬間、パズルを解いた爽快感とともに、校務に新しい風が吹くことを確信しています。まさに、教育現場に数学的な美しさと、ゆとりをもたらすための校務DXの象徴です。</p>
   <h3>【The Solution】従来業務の苦悩 vs 「かこピタ」の革命</h3><p>従来、日程調整は「付箋」と「消しゴム」の戦いでした。保護者から提出された紙の山を前に、担任は深夜まで盤面を睨み、一人の変更があれば全員を並べ直すという、あまりにも非生産的なループを繰り返していました。これは教育者が行うべきクリエイティブな仕事ではありません。</p><p>「かこピタ」はこのプロセスを完全にデジタル化・自動化します。アンケート回答を読み込んだ瞬間、数万通りの組合せを計算し、最適な解を提示します。人がやれば数日かかる作業を数秒へ。この圧倒的な時間短縮こそが、教員の働き方改革の正体です。また、転記ミスやダブルブッキングといったヒューマンエラーをゼロにすることで、保護者との信頼関係維持にも大きく寄与します。精神的なプレッシャーからの解放は、翌日の授業の質を確実に向上させるでしょう。</p>
   <h3>【Compassion】かゆいところに手が届く、現場目線のディテール</h3><p>本ツールには、フジイヨウスケ氏の現場経験に基づく「魂のディテール」が宿っています。例えば、一覧表の児童生徒名をクリックするだけで、その子の都合へ移動できる機能。たったこれだけのことですが、45人の名簿を上下にスクロールするストレスを完全に消し去ります。また、17時以降の行表示トグルは、放課後勤務の有無に合わせて画面を最適化するための、静かな優しさです。これらは仕様書には現れにくいですが、実際に毎日使うユーザーにとって最も価値のある『配慮』という名の機能です。</p>
-  <h3>【Credit】</h3><p>かこピタ v${APP_VER}　Created by ${APP_AUTHOR} with Gemini ／ Special Thanks ウチムラヨウスケ<br>Web（HTML）版は、原作の機能と考え方を引き継いで移設したものです。</p>`]
+  <h3>【Credit】</h3><p>かこピタ v.${APP_VER}　Created by ${APP_AUTHOR} with Gemini ／ Special Thanks ウチムラヨウスケ<br>Web（HTML）版は、原作の機能と考え方を引き継いで移設したものです。</p>`]
 ];
 A.help=(el0,e,tab=0)=>{
   const el=openDlg('',{wide:true}),box=$('.dlg',el);let cur=tab;
@@ -2842,7 +2957,7 @@ function vGrid(){
     <label class="tog"><input type="checkbox" data-ch="hl" ${P.opt.hl?'checked':''}>入れない時間を斜線で示す</label>
     ${P.students.some(s=>s.addr)?`<label class="tog"><input type="checkbox" data-ch="addrshow" ${showAddr()?'checked':''}>住所を表示</label>`:''}
     ${eff?`<label class="tog"><input type="checkbox" data-ch="hide17" ${P.opt.hide17?'checked':''}>${esc(P.sched.cutTime)}以降を隠す</label>`:''}
-    <button class="btn sm ${cls.locked?'pri':''} ${lockOn?'pulse':''}" data-act="g-lock" title="ロック中は自動配置で上書きされません。もう一度押すと解除します">${ic('lock',15)}${cls.locked?'配置ロック中':'配置ロック'}</button>
+    <button class="btn sm" data-act="g-print" title="この学級の一覧表をA4などで印刷します">${ic('print',14)}一覧表を印刷</button><button class="btn sm" data-act="g-lockall" title="全学級または指定した学級のロックをまとめて解除・設定">${ic('lock',14)}ロック一括…</button><button class="btn sm ${cls.locked?'pri':''} ${lockOn?'pulse':''}" data-act="g-lock" title="ロック中は自動配置で上書きされません。もう一度押すと解除します">${ic('lock',15)}${cls.locked?'配置ロック中':'配置ロック'}</button>
     ${used||brks?`<button class="btn sm danger" data-act="g-clear" title="この学級の配置をまとめて外します">${ic('trash',15)}全員を外す</button>`:''}</div>
    <div style="min-height:44px">${sel?`<div class="hint" style="margin-bottom:12px">${esc(sel.name)} さんを選択中：${pm.has(sel.id)?'移動したいマスをクリックすると、その場所へ移ります（入っている人とは入れ替わります）':'置きたいマスをクリックしてください'}　<span style="opacity:.7">Escで解除</span></div>`:''}</div>
    <div class="gv"><aside><section class="panel" style="padding:12px" data-drop="un"><h2 style="margin-bottom:8px">未配置<small>${un.length}名 / 使用 ${used}${brks?`＋休憩${brks}`:''} / ${total}枠</small></h2>
@@ -2926,6 +3041,28 @@ function openPicker(k,x,y){
 }
 A['g-cls']=el=>{UI.cls=el.dataset.k;UI.grid.sel=null;UI.cond.sid=null;render()};
 A['g-mode']=el=>{UI.grid.mode=el.dataset.m;render()};
+A['g-print']=()=>{const k=curCls();if(!k)return;const U=UI.print;U.mode='table';U.sel=new Set([k]);A['p-print']()};
+A['g-lockall']=()=>{
+  const cl=plist(),sel=new Set(cl.filter(c=>P.classes[c.key].locked).map(c=>c.key));
+  const el=openDlg('',{}),box=$('.dlg',el);
+  const paint=()=>{box.innerHTML=`<h2>配置ロックの一括操作</h2><p class="muted tiny">ロック中の学級は、「かこピタ（自動配置）」で動かされません。</p>
+    <div class="cbar" style="margin:12px 0 8px">${cl.map(c=>{const lk=P.classes[c.key].locked;return `<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-lk="tog" data-k="${esc(c.key)}">${lk?ic('lock',12)+' ':''}${esc(clsLabel(c.g,c.c))}</button>`}).join('')}</div>
+    <div class="row"><button class="btn ghost sm" data-lk="all">すべて選ぶ</button><button class="btn ghost sm" data-lk="locked">ロック中だけ選ぶ</button><button class="btn ghost sm" data-lk="none">選択を外す</button></div>
+    <div class="acts" style="flex-wrap:wrap"><button class="btn" data-close>閉じる</button><button class="btn" data-lk="lock" ${sel.size?'':'disabled'}>選んだ学級をロック</button><button class="btn pri" data-lk="unlock" ${sel.size?'':'disabled'}>選んだ学級のロックを解除</button><button class="btn pri" data-lk="unlockall">全学級のロックを解除</button></div>`};
+  paint();
+  el.addEventListener('click',e=>{
+    if(e.target.closest('[data-close]')){el._close();return}
+    const b=e.target.closest('[data-lk]');if(!b)return;const a=b.dataset.lk;
+    if(a==='tog'){sel.has(b.dataset.k)?sel.delete(b.dataset.k):sel.add(b.dataset.k)}
+    else if(a==='all')cl.forEach(c=>sel.add(c.key));
+    else if(a==='none')sel.clear();
+    else if(a==='locked'){sel.clear();cl.forEach(c=>{if(P.classes[c.key].locked)sel.add(c.key)})}
+    else{const val=a==='lock',keys=a==='unlockall'?cl.map(c=>c.key):[...sel];
+      act(()=>{for(const k of keys)if(P.classes[k])setProp(P.classes[k],'locked',val)});UI.grid.lockMsg=0;
+      toast(val?`${keys.length}学級をロックしました`:`${keys.length}学級のロックを解除しました`);if(a==='unlockall')sel.clear()}
+    paint();
+  });
+};
 A['g-lock']=()=>{UI.grid.lockMsg=0;const c=P.classes[curCls()];act(()=>setProp(c,'locked',!c.locked))};
 A['g-pick']=el=>{UI.grid.sel=UI.grid.sel===el.dataset.sid?null:el.dataset.sid;render()};
 A['g-cond']=el=>{const s=stById(el.dataset.sid);UI.cond.sid=s.id;UI.cond.mode='one';go('cond')};
@@ -2995,7 +3132,7 @@ A['settings']=()=>{
    <h3 style="margin:18px 0 8px;font-size:14px">データ</h3>
    <div class="row"><button class="btn sm" data-set="newevent">${ic('trash',15)}データを消す…</button><button class="btn sm" data-set="sample">${ic('sparkle',15)}サンプルデータを読み込む</button><span class="tiny muted">「データを消す」では、消す内容を選べます（標準は、名簿を残して条件・配置・日程だけ消す）</span></div>
    <h3 style="margin:18px 0 8px;font-size:14px">このアプリについて</h3>
-   <p class="tiny muted">かこピタ（家訪・懇談 日程づくり）v${APP_VER}　Created by ${APP_AUTHOR}</p>
+   <p class="tiny muted">かこピタ（家訪・懇談 日程づくり）v.${APP_VER}　Created by ${APP_AUTHOR}</p>
    <p class="tiny muted">名簿などのデータは、このブラウザの中とあなたが選んだファイルにだけ保存されます。外部へ送信しません。</p>
    <div class="acts"><button class="btn pri" data-close>閉じる</button></div>`,{wide:true});
   el.addEventListener('click',async e=>{
@@ -3130,11 +3267,17 @@ window.addEventListener('beforeunload',()=>{if(SAVE.state==='busy')saveNow()});
 async function init(){
   if(CM){document.body.classList.add('cm');document.title=`かこピタ｜${CM.name}`}
   $('#btnUndo').addEventListener('click',doUndo);$('#btnRedo').addEventListener('click',doRedo);
-  const had=await initStore();render();shRestore();setTimeout(maybeDownloadDialog,700);
+  const had=await initStore();render();SRV?shAutoServer():shRestore();setTimeout(maybeDownloadDialog,700);
   if(had&&P.students.length)toast(`前回の編集（${fullTs(P.updatedAt)}）から再開しました`,{ms:6000});
   if(fileHandle&&SAVE.file&&!SAVE.file.ok)paintSave();
 }
-window.__kp={CM,buildClassHtml,genClassHtmls,paperWH,blocksBestOrient,toast,areaOn,showAddr,docPages,SH,shSync,shConnectHandle,serPart,exportClass,importClassFile,shLockOf,setUser:n=>{SH.user=n},buildPrint,printTargets,slipNotice,slipRemind,sheetsHtml,buildGas,imp:()=>IMP,bump:()=>{VER++;SC.k=''},getSlots,isLate,slotOK,headKey,putPlace,clearPlace,buildProblem,solveClass,scoreOf,runAuto,searchGen,runGen,newCtl,mulberry,P:()=>P,UI,act,go,makeSample,placeAt,info,stStatus,members,A,undo:doUndo,redo:doRedo};
+window.__kp={busyStart,shAutoServer,SH,shSync,buildGas,rosterAoa,sibFind,CM,buildClassHtml,genClassHtmls,paperWH,blocksBestOrient,toast,areaOn,showAddr,docPages,SH,shSync,shConnectHandle,serPart,exportClass,importClassFile,shLockOf,setUser:n=>{SH.user=n},buildPrint,printTargets,slipNotice,slipRemind,sheetsHtml,buildGas,imp:()=>IMP,bump:()=>{VER++;SC.k=''},getSlots,isLate,slotOK,headKey,putPlace,clearPlace,buildProblem,solveClass,scoreOf,runAuto,searchGen,runGen,newCtl,mulberry,P:()=>P,UI,act,go,makeSample,placeAt,info,stStatus,members,A,undo:doUndo,redo:doRedo};
+shConnectHandle=busyWrap(shConnectHandle,'共有フォルダにつないでいます');
+shGrant=busyWrap(shGrant,'共有フォルダに再接続しています');
+shAutoServer=busyWrap(shAutoServer,'共有フォルダにつないでいます');
+shRestore=busyWrap(shRestore,'共有フォルダに再接続しています');
+shDisconnect=busyWrap(shDisconnect,'共有をやめています');
+genClassHtmls=busyWrap(genClassHtmls,'学級専用HTMLを書き出しています');
 init();
 
 })();</script>
