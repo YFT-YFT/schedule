@@ -514,6 +514,11 @@ body.cm [data-act="g-lockall"]{display:none!important}
 @media (max-width:980px){.gv aside{position:static}}
 .selcard{background:linear-gradient(var(--brand-t),var(--brand-t)),var(--paper)}
 .tt th.dayh{cursor:pointer}
+.cm td.cl.part,.am td.c.part{background-image:repeating-linear-gradient(135deg,transparent 0 3px,rgba(0,0,0,.2) 3px 5px)}
+.cm.fine tr.fine td.cl{height:17px;padding:0;line-height:17px;font-size:12px}
+.cm.fine tr.fine th.tl{font-size:11px;font-weight:500;color:var(--ink3);padding:0 8px;line-height:17px}
+.cm.fine tr.bstart th.tl{font-weight:800;color:var(--ink)}
+.cm.fine tr.bstart td,.cm.fine tr.bstart th{border-top:2px solid var(--line2)}
 .brkmode .tt th.dayh:hover{background:var(--line2)}
 .brkmode .tt td.cell.empty-c,.brkmode .tt td.cell:has(.brk){cursor:cell;touch-action:none;user-select:none}
 .seg button:disabled{opacity:.4;cursor:not-allowed}
@@ -552,7 +557,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.63';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.66';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -661,7 +666,7 @@ const gStyle=g=>{const c=gcol(g);return `--cbg:${c[0]};--cfg:${c[1]};--cfg2:${c[
 const clsLabel=(g,c)=>`${g}年${c}組`;
 
 /* ---------- project ---------- */
-function newProject(){const _id=uid();return{v:1,kpv:'0.63',id:_id,term:_id,title:'',updatedAt:Date.now(),
+function newProject(){const _id=uid();return{v:1,kpv:'0.66',id:_id,term:_id,title:'',updatedAt:Date.now(),
  meta:{school:'',tel:'',kind:'三者懇談会',kindCustom:''},
  sched:{dates:[],start:'14:00',slotMin:20,slotCount:20,cutMode:'effort',cutTime:'17:00'},
  opt:{keepManual:true,sibAuto:true,areaAuto:null,areaN:5,sibGap:0,areaGap:true,hl:true,hide17:false},auto:{shuffle:0,balance:false,target:'',refine:3,keep:false},form:{title:'',autoClose:false,closeDate:'',closeTime:'17:00',sib:2,addr:null,addrN:5,addrList:''},imp:null,tpl:{},printedAt:0,
@@ -675,9 +680,9 @@ function migrate(o){
   if(o&&o.form&&!(parseFloat(o.kpv)>=0.52)&&p.form.addr==='none')p.form.addr=null;   // v0.52: 住所の既定を「家庭訪問のときだけリスト」に（未設定に戻す）
   if(!p.term)p.term=p.id;   // 世代ID：古いデータはプロジェクトIDと同じ扱い（どのPCで読んでも同じ値になる）
   if(o&&o.form&&!(parseFloat(o.kpv)>=0.55)&&p.form.addr){const kd=p.meta.kind==='custom'?(p.meta.kindCustom||''):(p.meta.kind||'');if(!/家庭訪問/.test(kd))p.form.addr=null}   // v0.55: 家庭訪問以外では「聞かない」を既定に戻す
-  p.kpv='0.63';
+  p.kpv='0.66';
   if(!Array.isArray(p.vari))p.vari=d.vari;
-  p.students=(Array.isArray(p.students)?p.students:[]).map(s=>Object.assign({sib:[],cond:{},slots:1,ok:false,memo:'',kana:'',sex:'',addr:''},s));
+  p.students=(Array.isArray(p.students)?p.students:[]).map(s=>Object.assign({sib:[],cond:{},cf:{},slots:1,ok:false,memo:'',kana:'',sex:'',addr:''},s));
   p.classes=p.classes&&typeof p.classes==='object'?p.classes:{};
   for(const s of p.students){const k=s.g+'|'+s.c;if(!p.classes[k])p.classes[k]={g:s.g,c:s.c,teacher:'',locked:false,grid:{},slots:1};}
   for(const k in p.classes){const c=p.classes[k];c.grid=c.grid||{};c.teacher=c.teacher||''}
@@ -729,17 +734,43 @@ function classList(){
   return out.sort((a,b)=>a.g-b.g||natCmp(a.c,b.c));
 }
 function ensureClass(g,c){const k=g+'|'+c;if(!P.classes[k])setProp(P.classes,k,{g,c,teacher:'',locked:false,grid:{},slots:1});return P.classes[k]}
+/* ---- 5分セル：保護者の回答は日程の枠（例：20分）で入るが、細かく（5分ごとに）直した分は st.cf に持つ ---- */
+const CU=5;
+function blockOf(d,t){const s=P.sched,bm=+s.slotMin||20,b0=parseT(s.start),bs=b0==null?840:b0,n=clamp(+s.slotCount||0,0,300),i=Math.floor((t-bs)/bm);return(t<bs||i>=n)?null:d+'|'+keyT(bs+i*bm)}
+function cellV(st,d,t){   // 5分セルの実際の状態（5分の直しがあればそれ、なければ、含まれる枠の状態）
+  const c=st.cf&&st.cf[d+'|'+keyT(t)];if(c)return c.v==='e'?'':c.v;
+  const bk=blockOf(d,t),b=bk&&st.cond[bk];return b?b.v:'';
+}
+const hasCf=st=>{const c=st.cf;if(!c)return false;for(const _ in c)return true;return false};
+function blockV(st,d,x){   // 日程の枠ひとつの状態。一部だけ違うときは part（斜線で表示）
+  const bk=d+'|'+x.key,bm=+P.sched.slotMin||20;
+  if(!hasCf(st)){const b=st.cond[bk];return{v:b?b.v:'',part:false}}
+  let nx=0,nu=0,no=0,n=0;for(let m=x.t;m<x.t+bm;m+=CU){const v=cellV(st,d,m);n++;if(v==='x')nx++;else if(v==='u')nu++;else if(v==='o')no++}
+  if(nx)return{v:'x',part:nx<n};if(nu)return{v:'u',part:nu<n};if(no)return{v:'o',part:no<n};return{v:'',part:false};
+}
+function ensureCf(st){if(!st.cf)setProp(st,'cf',{})}
+function wipeCf(st,pred){if(!st.cf)return;for(const k of Object.keys(st.cf)){if(!pred||pred(parseT(k.split('|')[1])))delProp(st.cf,k)}}
+function clearCfBlock(st,k){if(!hasCf(st))return;const i=k.indexOf('|'),d=k.slice(0,i),t=parseT(k.slice(i+1)),bm=+P.sched.slotMin||20;if(t==null)return;for(let m=t;m<t+bm;m+=CU){const ck=d+'|'+keyT(m);if(st.cf[ck])delProp(st.cf,ck)}}
+function slotState(st,d,x,ck){   // 学級の枠（1枠の長さが日程と違ってもよい）の状態：× / ○ / 未 / 空
+  const G=gridOf(ck);if(G.same&&!hasCf(st)){const c=st.cond[d+'|'+x.key];return c?c.v:''}
+  let bx=false,bu=false,ao=true,any=false;
+  for(let m=Math.floor(x.t/CU)*CU;m<x.t+G.len;m+=CU){const v=cellV(st,d,m);if(v==='x')bx=true;else if(v==='u')bu=true;if(v==='o')any=true;else ao=false}
+  return bx?'x':bu?'u':(ao&&any)?'o':'';
+}
+function slotAllO(st,k,ck){const G=gridOf(ck),i=k.indexOf('|'),d=k.slice(0,i),t=parseT(k.slice(i+1));if(t==null)return false;for(let m=Math.floor(t/CU)*CU;m<t+G.len;m+=CU)if(cellV(st,d,m)!=='o')return false;return true}
 function info(st){
   if(st._ci&&st._ci.ver===VER)return st._ci;
   const V=validSet();let nx=0,no=0,nu=0;
-  for(const k in st.cond){if(!V.has(k))continue;const v=st.cond[k].v;if(v==='x')nx++;else if(v==='o')no++;else if(v==='u')nu++}
+  if(hasCf(st)){for(const d of P.sched.dates)for(const x of getSlots()){const v=blockV(st,d,x).v;if(v==='x')nx++;else if(v==='o')no++;else if(v==='u')nu++}}
+  else for(const k in st.cond){if(!V.has(k))continue;const v=st.cond[k].v;if(v==='x')nx++;else if(v==='o')no++;else if(v==='u')nu++}
   return st._ci={ver:VER,nx,no,nu,total:V.size};
 }
-function slotOK(st,k){
+function slotOK0(st,k){
   const c=st.cond[k];if(c&&(c.v==='x'||c.v==='u'))return false;
   if(info(st).no>0)return !!(c&&c.v==='o');
   return true;
 }
+const slotOK=(st,k)=>slotOKg(st,k);
 /* ---- 学級ごとの時間割：1枠の長さ・開始時刻を学級ごとに変えられる（終わりの時刻は日程と同じ）---- */
 const GCACHE={};
 function gridOf(k){
@@ -755,21 +786,12 @@ function gridOf(k){
 }
 const gslots=k=>gridOf(k).slots;
 const ckOf=cls=>cls.g+'|'+cls.c;
-function condIv(st,d){   // 保護者の○×（日程の枠の長さごと）を、時間の区間にして持つ
-  const c=st._cv&&st._cv.ver===VER?st._cv:(st._cv={ver:VER,m:{}});
-  if(c.m[d])return c.m[d];
-  const bm=+P.sched.slotMin||20,bad=[],os=[];
-  for(const k in st.cond){const i=k.indexOf('|');if(k.slice(0,i)!==d)continue;const t=parseT(k.slice(i+1));if(t==null)continue;const v=st.cond[k].v;if(v==='x'||v==='u')bad.push({a:t,b:t+bm});else if(v==='o')os.push({a:t,b:t+bm})}
-  os.sort((p,q)=>p.a-q.a);const o=[];for(const x of os){const l=o[o.length-1];if(l&&x.a<=l.b)l.b=Math.max(l.b,x.b);else o.push({a:x.a,b:x.b})}
-  return c.m[d]={bad,o};
-}
-function slotOKg(st,k,ck){   // 学級の枠 k に入れるか。枠の長さが日程と同じなら従来どおり。違うときは、時間の重なりで判定
-  const G=gridOf(ck);if(G.same)return slotOK(st,k);
-  const i=k.indexOf('|'),t=parseT(k.slice(i+1));if(t==null)return true;
-  const iv=condIv(st,k.slice(0,i)),a=t,b=t+G.len;
-  for(const x of iv.bad)if(x.a<b&&a<x.b)return false;     // ×（や未）と少しでも重なる枠はNG
-  if(info(st).no>0)return iv.o.some(x=>x.a<=a&&x.b>=b);   // ○のみの人は、○の時間にすべて収まる枠だけ
-  return true;
+function slotOKg(st,k,ck){   // 学級の枠 k に入れるか。5分セルまで見て、時間の重なりで判定
+  const G=gridOf(ck);if(G.same&&!hasCf(st))return slotOK0(st,k);
+  const i=k.indexOf('|'),d=k.slice(0,i),t=parseT(k.slice(i+1));if(t==null)return true;
+  let allO=true;
+  for(let m=Math.floor(t/CU)*CU;m<t+G.len;m+=CU){const v=cellV(st,d,m);if(v==='x'||v==='u')return false;if(v!=='o')allO=false}   // ×（や未）と少しでも重なる枠はNG
+  return info(st).no>0?allO:true;   // ○のある人は、○の時間にすべて収まる枠だけ
 }
 function stStatus(st){const I=info(st);if(I.total&&I.nu===I.total)return 'unans';if(I.no>0)return I.no===I.total?'free':'o';if(I.nx>0||I.nu>0)return 'x';if(st.ok)return 'free';return 'blank'}
 const entered=st=>['o','x','free'].includes(stStatus(st));
@@ -1314,31 +1336,30 @@ A['d-range']=async()=>{const f=$('#dFrom').value,t=$('#dTo').value,we=$('#dWe').
   act(()=>setProp(P.sched,'dates',sortDates(P.sched.dates.concat(add))));UI.sched.from=UI.sched.to='';toast(`${add.length}日を追加しました`,{undo:true})};
 A['d-del']=el=>act(()=>setProp(P.sched,'dates',P.sched.dates.filter(d=>d!==el.dataset.d)));
 A['d-clear']=async()=>{const r=await ask({title:'日付をすべて消しますか？',body:'<p class="muted">日付だけを消します。入力済みの都合や配置は消えません（日付を入れ直すと元に戻ります）。</p><p class="tiny" style="margin-top:8px">新しい行事の日程を入れ直すつもりなら、<b>「データを消す…」→「次の行事の準備」</b>を使ってください。条件・配置も一緒に消えて、前の行事と混ざりません。</p><div class="ngbox" style="margin-top:10px;font-size:13.5px">'+NE_RISK+'</div><p class="tiny" style="margin-top:8px">'+NE_FIX+'</p>',buttons:[{id:0,label:'やめる'},{id:1,label:'日付だけ消す'},{id:2,label:'次の行事の準備へ',kind:'pri'}]});if(r===2){A.newevent();return}if(r===1)act(()=>setProp(P.sched,'dates',[]))};
-function hasConds(){const ds=new Set(P.sched.dates);return P.students.some(st=>Object.keys(st.cond).some(k=>ds.has(k.split('|')[0])))}
-function convertConds(old){   // 古い時間割（開始・1枠の長さ）で入った○×を、いまの時間割に合わせて作り直す（時間の重なりで判定）
-  const ns=getSlots(),dates=P.sched.dates,sm=+P.sched.slotMin||20;let n=0;
+function hasConds(){const ds=new Set(P.sched.dates);return P.students.some(st=>Object.keys(st.cond).some(k=>ds.has(k.split('|')[0]))||(st.cf&&Object.keys(st.cf).some(k=>ds.has(k.split('|')[0]))))}
+function convertConds(old){   // 日程の枠の長さ・開始時刻を変えたとき：○×の時間は変えずに、新しい枠の入れ物に入れ直す（広がらない）
+  const dates=P.sched.dates;let n=0;
   for(const st of P.students){
-    const ks=Object.keys(st.cond);if(!ks.length)continue;
-    const byD={};for(const k of ks){const [d,t]=k.split('|'),m=parseT(t);if(m==null||!dates.includes(d))continue;(byD[d]||(byD[d]=[])).push({a:m,b:m+old.min,v:st.cond[k].v,s:st.cond[k].s})}
-    if(!Object.keys(byD).length)continue;
-    const nc={};for(const k of ks)if(!dates.includes(k.split('|')[0]))nc[k]=st.cond[k];
-    for(const d of dates){const iv=byD[d];if(!iv)continue;
-      const os=iv.filter(x=>x.v==='o').sort((p,q)=>p.a-q.a),mg=[];for(const x of os){const l=mg[mg.length-1];if(l&&x.a<=l.b)l.b=Math.max(l.b,x.b);else mg.push({a:x.a,b:x.b})}
-      for(const sl of ns){const a=sl.t,b=sl.t+sm,ov=iv.filter(x=>x.a<b&&a<x.b),bad=ov.filter(x=>x.v==='x'||x.v==='u');let v=null;
-        if(bad.length)v=bad.some(x=>x.v==='x')?'x':'u';   // ×（や未）と少しでも重なる枠は×（取りこぼさない）
-        else if(mg.some(x=>x.a<=a&&x.b>=b))v='o';          // ○は、新しい枠が○の時間にすべて収まるときだけ
-        if(v)nc[d+'|'+sl.key]={v,s:ov.some(x=>x.s==='m')?'m':'i'}}}
-    setProp(st,'cond',nc);n++}
+    const ks=Object.keys(st.cond);if(!ks.length&&!hasCf(st))continue;
+    const cells=new Map(),keep={},keepF={};   // 「日付|分」→{v,s}（5分セル）
+    for(const k of ks){const [d,t]=k.split('|'),m=parseT(t);if(m==null||!dates.includes(d)){keep[k]=st.cond[k];continue}for(let q=m;q<m+old.min;q+=CU)cells.set(d+'|'+Math.floor(q/CU)*CU,{v:st.cond[k].v,s:st.cond[k].s})}
+    if(st.cf)for(const k in st.cf){const [d,t]=k.split('|'),m=parseT(t);if(m==null||!dates.includes(d)){keepF[k]=st.cf[k];continue}const c=st.cf[k];if(c.v==='e')cells.delete(d+'|'+m);else cells.set(d+'|'+m,{v:c.v,s:c.s})}
+    const nc=Object.assign({},keep),ncf=Object.assign({},keepF),bm=+P.sched.slotMin||20,by=new Map();
+    for(const [ck,c] of cells){const i=ck.indexOf('|'),d=ck.slice(0,i),m=+ck.slice(i+1),bk=blockOf(d,m);
+      if(!bk){ncf[d+'|'+keyT(m)]=c;continue}(by.get(bk)||by.set(bk,[]).get(bk)).push([m,c])}
+    for(const [bk,arr] of by){const t=parseT(bk.split('|')[1]),need=Math.ceil(bm/CU),v0=arr[0][1].v,s0=arr[0][1].s;
+      if(arr.length>=need&&arr.every(x=>x[1].v===v0)){nc[bk]={v:v0,s:arr.some(x=>x[1].s==='m')?'m':s0}}   // 枠まるごと同じ状態なら、枠の入力にする
+      else for(const [m,c] of arr)ncf[bk.split('|')[0]+'|'+keyT(m)]=c}                                       // 一部だけなら、5分の入力として持つ（時間はそのまま）
+    setProp(st,'cond',nc);setProp(st,'cf',ncf);n++}
   return n;
 }
-async function gridEdit(apply){   // 1枠の長さ・開始時刻を変えたとき、回答済みの○×を新しい時間割に合わせるか確認
+async function gridEdit(apply){   // 1枠の長さ・開始時刻を変えたとき、回答済みの○×を、時間はそのままで新しい枠に引き継ぐ
   const g=()=>({start:parseT(P.sched.start),min:+P.sched.slotMin||20}),o=g(),had=hasConds();
   apply();const n=g();
   if(!had||o.start==null||n.start==null)return;
-  if(n.min===o.min&&((n.start-o.start)%n.min+n.min)%n.min===0)return;   // 枠の位置が変わらなければ、変換は不要
-  const r=await ask({title:'回答済みの都合を、新しい時間割に合わせますか？',body:`<p>時間割を<b>${fmtT(o.start)}から${o.min}分</b>ごと → <b>${fmtT(n.start)}から${n.min}分</b>ごとに変えました。すでに回答（○×）が入っています。</p><div class="okbox" style="margin:10px 0;font-size:13.5px"><b>変換する</b>：×の時間と少しでも重なる新しい枠は、すべて×にします（×を取りこぼしません）。○（希望）は、新しい枠が○の時間にすべて収まるときだけ○にします。</div><div class="warnbox" style="font-size:13.5px"><b>変換しない</b>：回答の時刻が新しい枠と合わず、<b>×が効かなくなる</b>ことがあります。</div><p class="muted tiny" style="margin-top:8px">変換したあとも「元に戻す」（Ctrl+Z）で戻せます。間隔をもとに戻すときは、変換せず「元に戻す」を使ってください（何度も変換すると、×が少しずつ広がります）。</p>`,buttons:[{id:0,label:'変換しない'},{id:1,label:'新しい時間割に合わせて変換する',kind:'pri'}]});
-  act(()=>{if(!P.sched.respMin)setProp(P.sched,'respMin',o.min)});   // フォームの1枠の長さを覚えておく（あとから回答を取り込むときに使う）
-  if(r===1){let k=0;act(()=>{k=convertConds(o)});toast(`${k}人の都合を、新しい時間割に合わせました`,{undo:true})}
+  if(n.min===o.min&&((n.start-o.start)%n.min+n.min)%n.min===0)return;   // 枠の位置が変わらなければ、引き継ぎは不要
+  let k=0;act(()=>{if(!P.sched.respMin)setProp(P.sched,'respMin',o.min);k=convertConds(o)});   // フォームの1枠の長さも覚えておく（あとの取り込みに使う）
+  toast(`${k}人の○×を、時間はそのままで、新しい枠（${n.min}分ごと）に引き継ぎました。枠の一部だけの分は斜線で示します`,{undo:true,ms:7000});
 }
 A.slotmin=el=>gridEdit(()=>act(()=>setProp(P.sched,'slotMin',+el.dataset.m)));
 A.cutmode=el=>act(()=>setProp(P.sched,'cutMode',el.dataset.m));
@@ -2022,13 +2043,14 @@ function buildPlan(rows,fileName){
   const tl=[...times].sort((a,b)=>a-b);let step=0;for(let i=1;i<tl.length;i++){const d=tl[i]-tl[i-1];step=step?gcd(step,d):d}
   const slots=getSlots(),sm=+P.sched.slotMin||20,rm=+P.sched.respMin||step||sm;
   const hit=m=>slots.some(s=>s.t<m+rm&&m<s.t+sm);   // 回答の時刻が、いまの時間割のどれかの枠と重なるか
+  const starts=new Set(slots.map(s=>s.t));let misaligned=0;for(const r of finals)for(const t of r.toks)if(!starts.has(t.min))misaligned++;
   const extraTimes=[...times].filter(m=>!hit(m)).sort((a,b)=>a-b);
   let outside=0;for(const r of finals)for(const t of r.toks){if(!sdates.has(t.iso)||!hit(t.min))outside++}
   const derived=tl.length?{start:keyT(tl[0]),slotMin:step||(+P.sched.slotMin||20),slotCount:step?Math.floor((tl[tl.length-1]-tl[0])/step)+1:1}:null;
   /* siblings that cannot be found */
   const sibMissing=[];const sibSeen=new Set();
   for(const m of matched)for(const b of m.r.sibs){const f=sibFind({name:b.name,kana:b.kana,g:b.g,c:b.c,n:b.n});if(!f){const k=`${b.name}|${b.g}|${b.c}`;if(!sibSeen.has(k)){sibSeen.add(k);sibMissing.push({of:m.st,b})}}}
-  return{file:fileName,total:recs.length,recs,finals,dupKeys:[...new Set(dupInfo)],matched,numOnly,none,unans,col,hdr:rows[0].map(x=>String(x??'')),badDT,dates:[...dates].sort(),extraDates,extraTimes,outside,derived,sibMissing,
+  return{file:fileName,total:recs.length,recs,finals,dupKeys:[...new Set(dupInfo)],matched,numOnly,none,unans,col,hdr:rows[0].map(x=>String(x??'')),badDT,dates:[...dates].sort(),extraDates,extraTimes,outside,misaligned,derived,sibMissing,
     free:matched.filter(m=>m.r.free&&!m.r.toks.length).length,both:matched.filter(m=>m.r.free&&m.r.toks.length)};
 }
 const gcd=(a,b)=>b?gcd(b,a%b):a;
@@ -2046,12 +2068,13 @@ function applyPlan(plan,o){
     const done=new Set();
     const rmin=+P.sched.respMin||(plan.derived&&plan.derived.slotMin)||(+P.sched.slotMin||20),smin=+P.sched.slotMin||20;
     if(!P.sched.respMin&&targets.some(x=>x.r.toks.length))setProp(P.sched,'respMin',rmin);
-    const tokKeys=t=>getSlots().filter(s=>s.t<t.min+rmin&&t.min<s.t+smin).map(s=>t.iso+'|'+s.key).filter(k=>V.has(k));
     for(const{r,st}of targets){
-      const nc={};
-      if(keep)for(const k in st.cond)if(st.cond[k].s==='m')nc[k]=st.cond[k];
-      let any=false;for(const t of r.toks){for(const k of tokKeys(t)){any=true;if(!nc[k])nc[k]={v:'x',s:'i'}}}
-      setProp(st,'cond',nc);
+      const nc={},ncf={};
+      if(keep){for(const k in st.cond)if(st.cond[k].s==='m')nc[k]=st.cond[k];if(st.cf)for(const k in st.cf)if(st.cf[k].s==='m')ncf[k]=st.cf[k]}
+      let any=false;for(const t of r.toks){if(tokToCells(nc,ncf,t,rmin,V))any=true}
+      setProp(st,'cond',nc);setProp(st,'cf',ncf);
+      {const cc=P.classes[st.g+'|'+st.c];if(cc&&cc.snap)setProp(cc,'snap',null)}   // 新しい取り込みが基準になるので、学級の記録は消す
+      setProp(st,'resp',{at:Date.now(),free:!r.toks.length,rmin,toks:r.toks.map(t=>({iso:t.iso,min:t.min}))});   // 「回答どおりに戻す」用に、回答を残す
       if(r.toks.length){if(any)nCond++}else{nFree++}
       setProp(st,'ok',r.toks.length?false:true);
       if(r.addr&&!st.addr)setProp(st,'addr',r.addr);
@@ -2063,7 +2086,7 @@ function applyPlan(plan,o){
     }
     /* unanswered */
     if(o.markUnans){for(const st of plan.unans){if(done.has(st.id))continue;if(Object.keys(st.cond).some(k=>st.cond[k].s==='m')||st.ok)continue;
-      const nc={};for(const k of V)nc[k]={v:'u',s:'i'};setProp(st,'cond',nc);nUn++}}
+      const nc={};for(const k of V)nc[k]={v:'u',s:'i'};setProp(st,'cond',nc);setProp(st,'cf',{});nUn++}}
     /* reverse sibling links (rebuild) */
     for(const s of P.students){if((s.sib||[]).some(b=>b.src==='r'))setProp(s,'sib',s.sib.filter(b=>b.src!=='r'))}
     for(const s of P.students)for(const b of s.sib||[]){if(b.src!=='i')continue;const m=sibFind(b);if(!m||m===s)continue;
@@ -2073,6 +2096,41 @@ function applyPlan(plan,o){
   });
   return{applied:targets.length,nCond,nFree,nSib,nUn};
 }
+function tokToCells(nc,ncf,t,rmin,V){   // 回答ひとつ（開始時刻＋フォームの1枠の長さ）を、×にする。枠まるごとなら枠、一部だけなら5分セル
+  const bm=+P.sched.slotMin||20,by=new Map();let any=false;
+  for(let m=Math.floor(t.min/CU)*CU;m<t.min+rmin;m+=CU){const bk=blockOf(t.iso,m);if(!bk||!V.has(bk))continue;(by.get(bk)||by.set(bk,[]).get(bk)).push(m)}
+  for(const [bk,ms] of by){any=true;
+    if(ms.length*CU>=bm){if(!nc[bk])nc[bk]={v:'x',s:'i'}}
+    else for(const m of ms){const ck=t.iso+'|'+keyT(m);if(!ncf[ck])ncf[ck]={v:'x',s:'i'}}}
+  return any;
+}
+function applyResp(st){   // 最後に取り込んだ回答どおりにする
+  const r=st.resp;if(!r)return false;
+  const V=validSet(),nc={},ncf={};
+  for(const t of r.toks)tokToCells(nc,ncf,t,r.rmin||(+P.sched.respMin)||(+P.sched.slotMin||20),V);
+  setProp(st,'cond',nc);setProp(st,'cf',ncf);setProp(st,'ok',!r.toks.length);return true;
+}
+A['resp-menu']=()=>{
+  const k=curCls(),cur=stById(UI.cond.sid),el=openDlg('',{}),box=$('.dlg',el);
+  const snapOf=s=>{const c=P.classes[s.g+'|'+s.c];return !!(c&&c.snap&&c.snap.st[s.id])};
+  const has=(s,base)=>s&&(base==='snap'?snapOf(s):!!s.resp);
+  const snaps=classList().filter(c=>c.obj.snap);let base=snaps.length?'snap':'resp';
+  const fmtAt=t=>{const d=new Date(t);return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`};
+  const paint=()=>{
+    const mem=members(k),n1=has(cur,base)?1:0,n2=mem.filter(s=>has(s,base)).length,n3=P.students.filter(s=>has(s,base)).length;
+    box.innerHTML=`<h2>条件を戻す</h2>
+     <div class="f" style="margin-bottom:12px"><span style="font-weight:800;font-size:12.5px;color:var(--ink2)">戻す先</span><div class="seg"><button data-q="b:snap" class="${base==='snap'?'on':''}">時間割を変える前</button><button data-q="b:resp" class="${base==='resp'?'on':''}">取り込んだ回答どおり</button></div></div>
+     ${base==='snap'?`<p class="tiny" style="margin-bottom:12px"><b>学級の「1枠の長さ」「開始時刻」を、取り込みのあと最初に変えた瞬間</b>の条件に戻します。それまでに手で直した分は残り、そのあとの変更は消えます。記録は<b>学級ごと</b>です。${snaps.length?`<br><span class="muted">記録のある学級：${snaps.map(c=>`${esc(clsLabel(c.g,c.c))}（${fmtAt(c.obj.snap.at)}）`).join('、')}</span>`:'<br><span class="muted">まだ記録のある学級はありません（学級の時間割を変えると記録されます）。</span>'}</p>`
+     :`<p class="tiny" style="margin-bottom:12px">最後に取り込んだ<b>回答だけ</b>の状態に戻します。手で直した○×・5分ごとの入力は、取り込みの前でも後でも、消えます。回答のない人（手入力だけの人）は、そのままです。</p>`}
+     <div class="row" style="flex-direction:column;align-items:stretch;gap:8px"><button class="btn" data-q="one" ${n1?'':'disabled'}>この人だけ（${cur?esc(cur.name):''}）</button><button class="btn" data-q="cls" ${n2?'':'disabled'}>この学級（${n2}名）</button><button class="btn" data-q="all" ${n3?'':'disabled'}>全員（${n3}名）</button></div><p class="tiny muted" style="margin-top:10px">戻したあとも「元に戻す」（Ctrl+Z）で、戻す前の状態に戻せます。</p><div class="acts"><button class="btn" data-q="x">やめる</button></div>`};
+  paint();
+  el.addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;const q=b.dataset.q;
+    if(q.startsWith('b:')){base=q.slice(2);paint();return}
+    el._close();if(q==='x')return;
+    const list=q==='one'?[cur]:q==='cls'?members(k):P.students;let n=0;
+    act(()=>{for(const s of list)if(has(s,base)&&(base==='snap'?restoreSnap(s):applyResp(s)))n++});
+    toast(`${n}名を、${base==='snap'?'時間割を変える前':'回答どおり'}に戻しました`,{undo:true})});
+};
 function logCsv(plan,o){
   const rows=[['状態','学年','組','番','名前（回答）','ふりがな（回答）','メモ']];
   const g=(s,r,m)=>rows.push([s,r.g,r.c,r.n,r.name,r.kana,m||'']);
@@ -2152,6 +2210,7 @@ function vImportReview(){
     h+=det(`日程と合わない日時があります（${p.outside}件）`,'warn',`${p.extraDates.length?`<div>日程にない日付：${p.extraDates.map(d=>fmtD(d)).join('、')}</div>`:''}${p.extraTimes.length?`<div>枠にない時刻：${p.extraTimes.map(m=>fmtT(m)).join('、')}</div>`:''}
       <div style="margin-top:6px;display:flex;flex-direction:column;gap:4px">${p.extraDates.length&&P.sched.dates.length?`<label class="tog"><input type="checkbox" data-ch="imp-dates" ${o.adoptDates?'checked':''}>日程に、回答にある日付を追加する</label>`:''}${p.extraTimes.length&&p.derived&&P.sched.dates.length?`<label class="tog"><input type="checkbox" data-ch="imp-times" ${o.adoptTimes?'checked':''}>時間割を回答に合わせる（${p.derived.start}から${p.derived.slotMin}分×${p.derived.slotCount}枠）</label>`:''}${!P.sched.dates.length?'<span class="muted">日程が空なので、回答から日程を作ります。</span>':''}</div>`,true);
   }
+  if(p.misaligned)h+=det(`日時が、枠の開始時刻とずれている回答：${p.misaligned}件`,'warn',`<div>日程の枠（${+P.sched.slotMin||20}分ごと）の開始時刻に合わない日時です。時間の重なりで読み取るので、配置には使えます。Googleスプレッドシートが日時に自動変換した場合などに起こることがあります。フォームの時間と日程の「開始時刻・1枠の長さ」が合っているか、確認してください。</div>`);
   h+=`<div class="row" style="margin-top:12px;flex-direction:column;align-items:flex-start;gap:6px"><label class="tog"><input type="checkbox" data-ch="imp-keep" ${P.opt.keepManual?'checked':''}>手で直した都合は消さない（おすすめ）</label><label class="tog"><input type="checkbox" data-ch="imp-un" ${o.markUnans?'checked':''}>回答のない児童生徒を「未」にする（自動配置の対象外になります）</label></div>
   <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" data-act="imp-log">${ic('down',16)}確認結果をCSVで保存</button><button class="btn" data-act="imp-cancel">やめる</button><button class="btn pri big" data-act="imp-apply" ${(p.matched.length||p.numOnly.some(x=>o.acceptNum.has(x.r.row)))?'':'disabled'}>${ic('check',18)}この内容で取り込む</button></div>`;
   return h;
@@ -2517,7 +2576,7 @@ function blocksSheets(c){
       const h2=o.AD&&g.ah?`<div class="cba" style="font-size:${fitPt(st.addr||'',g.inW-.3,g.af,3.8).toFixed(2)}pt;height:${g.ah.toFixed(2)}mm;line-height:${g.ah.toFixed(2)}mm">${esc(st.addr||'')}</div>`:'';
       const foot=[];if(pt)foot.push(`<span>配置 ${esc(pt)}</span>`);sb.slice(0,2).forEach(l=>foot.push(`<span class="sbr">★きょうだい ${esc(l)}</span>`));
       const dth=dates.map(d=>{const t=`${dp(d).d}${WD[dp(d).wd]}`;return `<th style="font-size:${Math.max(3.4,Math.min(g.tf,g.cw*.96/(emW(t)*MMPT))).toFixed(2)}pt">${t}</th>`}).join('');
-      const rows=SL.map(x=>`<tr style="height:${g.ch.toFixed(3)}mm"><th class="tl" style="font-size:${g.lf.toFixed(2)}pt">${x.label}</th>${dates.map(d=>{const cc=st.cond[d+'|'+x.key],v=cc?cc.v:'';return `<td class="${v}" style="font-size:${g.gf.toFixed(2)}pt">${v==='x'?'×':v==='o'?'○':v==='u'?'未':''}</td>`}).join('')}</tr>`).join('');
+      const rows=SL.map(x=>`<tr style="height:${g.ch.toFixed(3)}mm"><th class="tl" style="font-size:${g.lf.toFixed(2)}pt">${x.label}</th>${dates.map(d=>{const v=slotState(st,d,x,c.key);return `<td class="${v}" style="font-size:${g.gf.toFixed(2)}pt">${v==='x'?'×':v==='o'?'○':v==='u'?'未':''}</td>`}).join('')}</tr>`).join('');
       return `<div class="cb" style="${colorExact}"><div class="cbh" style="height:${g.hh.toFixed(2)}mm"><div class="cbh1" style="height:${g.nh.toFixed(2)}mm;line-height:${g.nh.toFixed(2)}mm"><b class="nmfont" style="font-size:${nfit.toFixed(2)}pt"><span class="no">${st.n}</span> ${esc(st.name)}</b>${bd.map(b=>`<span class="cbs ${b[0]}" style="font-size:${bs.toFixed(2)}pt">${b[1]}</span>`).join('')}</div>${h2}</div>
        <table class="cbt" style="height:${(g.thH+L*g.ch).toFixed(2)}mm"><colgroup><col style="width:${g.tw.toFixed(2)}mm">${dates.map(()=>'<col>').join('')}</colgroup><thead><tr style="height:${g.thH.toFixed(2)}mm"><th></th>${dth}</tr></thead><tbody>${rows}</tbody></table>
        ${o.fl?`<div class="cbf" style="font-size:${g.ff.toFixed(2)}pt;height:${g.fh.toFixed(2)}mm">${foot.join('')}</div>`:''}</div>`}).join('');
@@ -2550,7 +2609,7 @@ function serPart(part){
   if(part==='project'){const o={};for(const k of ['v','id','term','title','meta','sched','opt','auto','form','imp','tpl','vari','printedAt'])o[k]=P[k];return JSON.stringify(o)}
   if(part==='roster')return JSON.stringify({students:P.students.map(s=>({id:s.id,g:s.g,c:s.c,n:s.n,name:s.name,kana:s.kana||'',addr:s.addr||'',sex:s.sex||''})),classes:Object.fromEntries(Object.entries(P.classes).map(([k,c])=>[k,{g:c.g,c:c.c,teacher:c.teacher||''}]))});
   const key=part.slice(6),c=P.classes[key];if(!c)return null;
-  return JSON.stringify({key,g:c.g,c:c.c,locked:!!c.locked,grid:c.grid,students:members(key).map(s=>({id:s.id,cond:s.cond,ok:!!s.ok,slots:s.slots,sib:s.sib||[],memo:s.memo||''}))});
+  return JSON.stringify({key,g:c.g,c:c.c,locked:!!c.locked,grid:c.grid,students:members(key).map(s=>({id:s.id,cf:s.cf||{},resp:s.resp||null,cond:s.cond,ok:!!s.ok,slots:s.slots,sib:s.sib||[],memo:s.memo||''}))});
 }
 function applyPart(part,d){
   if(part==='project'){const def=newProject();for(const k of Object.keys(d))P[k]=d[k];if(!d.term)P.term=P.id;P.meta=Object.assign(def.meta,P.meta);P.sched=Object.assign(def.sched,P.sched);P.opt=Object.assign(def.opt,P.opt);P.auto=Object.assign(def.auto,P.auto);P.form=Object.assign(def.form,P.form);P.tpl=P.tpl||{};return}
@@ -2563,7 +2622,7 @@ function applyPart(part,d){
     return}
   const key=part.slice(6);let c=P.classes[key];if(!c)c=P.classes[key]={g:d.g,c:d.c,teacher:'',locked:false,grid:{},slots:1};
   c.grid=d.grid||{};c.locked=!!d.locked;const byId=new Map(P.students.map(s=>[s.id,s]));
-  for(const e of d.students){const s=byId.get(e.id);if(s){s.cond=e.cond||{};s.ok=!!e.ok;s.slots=e.slots||1;s.sib=e.sib||[];s.memo=e.memo||''}}
+  for(const e of d.students){const s=byId.get(e.id);if(s){s.cond=e.cond||{};s.cf=e.cf||{};s.resp=e.resp||null;s.ok=!!e.ok;s.slots=e.slots||1;s.sib=e.sib||[];s.memo=e.memo||''}}
 }
 
 /* ---- disk helpers ---- */
@@ -3090,8 +3149,9 @@ const HELP=[
   <h3>オフラインで使う</h3><p>このアプリは<b>1つのHTMLファイル</b>で、インターネットなしで動きます。名簿を扱う作業は、インターネットのない環境で行い、フォームを作るときだけ、インターネットにつないで「script.new」を開いてください。</p>
   <h3>データを消す（新しい行事を始めるとき）</h3><p>「設定」→「データを消す…」を押すと、消す内容を選べます。標準の「次の行事の準備」は、<b>名簿・担任名・学校情報・文面・設定は残し</b>、条件・配置・日程・取り込み履歴だけを消します。「名簿・担任名も消す」「すべて消す（初期化）」も、ボタンひとつで選べます。実行前に自動でバックアップを取るので、「元に戻す」で戻せます。</p><p><b>【前の行事のファイルへの誤接続に注意】</b>「次の行事の準備」をしないまま新しい日程づくりを始めると、前の行事の共有フォルダ・学級専用HTML・起動バッチにつながったままになり、前の行事のデータを上書きしたり、新旧のデータが混ざったりするおそれがあります。準備をしたあとは、新しい共有フォルダと、新しく書き出したHTML・バッチ・ショートカットを使い、前の行事のものは使わないでください。</p>`],
  ['よくある質問',()=>`<h3>名簿との照合のしかたは？</h3><p>回答の<b>学年・組・ふりがな</b>で探します。同じふりがなの児童生徒が同じ学級にいるときだけ、<b>漢字</b>を確認し、漢字も同じ場合だけ<b>出席番号</b>まで確認します。そのため、保護者が出席番号や漢字を間違えても、電話での確認なしで取り込めます。自動で補正した件数と内訳は、取り込み前の確認画面に出ます。</p>
+  <h3>保護者の都合を、5分ごとに細かく入力できますか？</h3><p>できます。「4. 条件」の「1人ずつ」で、<b>入力の細かさ</b>を「日程の枠（20分など）」から「5分ごと」に切り替えます。5分ごとに塗ったあと「日程の枠」に戻すと、一部だけ塗った枠は<b>斜線</b>で表示されます（データは5分のままなので、何度切り替えても広がりません）。枠をまとめて塗ると、枠の中の5分ごとの入力は上書きされます。配置のときは、×と少しでも重なる枠がNGになります。<br>条件を元に戻したいときは、<b>「条件を戻す…」</b>（この人／この学級／全員）を使います。戻す先は2つです。<br>・<b>時間割を変える前</b>：学級の「1枠の長さ」「開始時刻」を、取り込みのあと最初に変えた瞬間の条件（学級ごとに自動で記録）に戻します。それまでに手で直した分は残ります。<br>・<b>取り込んだ回答どおり</b>：最後に取り込んだ回答だけの状態にします。手で直した分は、消えます。</p>
   <h3>学級ごとに、1枠の長さ（15分・20分など）や開始時刻を変えられますか？</h3><p>変えられます。「5. かこピタ(配置)」の上の欄で、学級ごとに<b>1枠の長さ・開始時刻・時刻のルール</b>を変えると、下の日程表がすぐに変わります（自動配置のボタンを押す前に確認できます）。自動配置は、その学級の枠にそろえた位置に置きます。保護者の×は、日程の枠（例：20分）のまま保存し、学級の枠（例：15分）と<b>少しでも重なる枠をNG</b>にします。ほかの学級にも同じ設定をコピーできます。枠が変わると、その学級の配置済みの分と休憩（×）は外れます（元に戻せます）。</p>
-  <h3>回答を集めたあとで、日程全体の1枠の長さ（20分→15分など）を変えられますか？</h3><p>変えられます。「2. 日程」で1枠の長さ（または開始時刻）を変えたとき、すでに回答（○×）が入っていれば、<b>新しい時間割に合わせて変換するか</b>を確認します。変換すると、×の時間と少しでも重なる新しい枠はすべて×になり、×を取りこぼしません（○は、新しい枠が○の時間にすべて収まるときだけ○）。あとから回答ファイルを取り込むときも、フォームの1枠の長さ（例：20分）と、いまの時間割（例：15分）が違っていても、時間の重なりで判定します。<br>※この「2. 日程」の1枠の長さは、保護者に答えてもらう単位です。実際に組む枠の長さは、上の質問のとおり学級ごとに変えられます。</p>
+  <h3>回答を集めたあとで、日程全体の1枠の長さ（20分→15分など）を変えられますか？</h3><p>変えられます。「2. 日程」で1枠の長さ（または開始時刻）を変えると、すでに入っている○×は、<b>時間はそのまま</b>で新しい枠に引き継がれます。例：20分で14:00と14:20が×（14:00〜14:40）→ 15分にしても×は14:00〜14:40のまま（最後の14:30の枠は、一部だけの×なので斜線）→ 20分に戻すと、もとの14:00と14:20の×に戻ります。何度変えても、×の時間は広がりません。あとから回答ファイルを取り込むときも、フォームの1枠の長さ（例：20分）と、いまの日程（例：15分）が違っていても、時間の重なりで判定します。<br>※この「2. 日程」の1枠の長さは、保護者に答えてもらう単位です。実際に組む枠の長さは、上の質問のとおり学級ごとに変えられます。</p>
   <h3>きょうだいの照合も、同じ順番ですか？</h3><p>はい、同じです（v.0.58で統一しました）。<b>学年・組・ふりがな</b>で探し、同じ人が複数いるときだけ<b>漢字</b>、それでも複数いるときだけ<b>出席番号</b>で絞ります。学年・組の入力を間違えていても、ふりがなで見つけます。</p>
   <h3>同じ児童生徒が2回回答したら？</h3><p>タイムスタンプが最新の回答だけを使い、古いものは破棄します。</p>
   <h3>まだ回答がない児童生徒は？</h3><p>取り込み時に「未」になり、自動配置の対象外になります。回答はあっても組・名前が名簿と合わず読み取れなかった人も、同じ扱いです。「6. 印刷」の催促状で、「回答が必要な人」にお知らせを出せます。</p>
@@ -3163,9 +3223,9 @@ A.newevent=()=>{
       el._close();await makeBackup('データを消す前');
       act(()=>{
         for(const s of P.students){const k=s.g+'|'+s.c;if(!sel.has(k))continue;
-          if(st.cond){for(const kk of Object.keys(s.cond))delProp(s.cond,kk);setProp(s,'ok',false)}
+          if(st.cond){for(const kk of Object.keys(s.cond))delProp(s.cond,kk);wipeCf(s);setProp(s,'resp',null);setProp(s,'ok',false)}
           if(st.sib)setProp(s,'sib',[]);if(st.slots)setProp(s,'slots',1)}
-        for(const k of sel){const c=P.classes[k];if(c&&st.grid){for(const kk of Object.keys(c.grid))delProp(c.grid,kk);setProp(c,'locked',false)}}
+        for(const k of sel){const c=P.classes[k];if(c&&st.cond&&c.snap)setProp(c,'snap',null);if(c&&st.grid){for(const kk of Object.keys(c.grid))delProp(c.grid,kk);setProp(c,'locked',false);if(c.slotMin)setProp(c,'slotMin',0);if(c.start)setProp(c,'start','')}}
         if(st.sched)setProp(P.sched,'dates',[]);
         if(st.kind){setProp(P.meta,'kind','');setProp(P.meta,'kindCustom','')}
         if(st.sched&&st.cond&&st.grid){setProp(P,'term',uid());setProp(P,'form',Object.assign({},formRaw(),{title:'',closeDate:''}))}   // 「次の行事の準備」：世代IDを新しくする（前の行事のフォルダにはつながらなくなる）
@@ -3206,7 +3266,7 @@ function vCond(){
   const st=stById(C.sid);
   const brushes=[['x','✕','都合が悪い','1'],['o','○','この時間のみ可','2'],['u','未','回答なし','3'],['e','','消しゴム','0']];
   let h=`<div class="page ${shBlocked(k)?'ro':''}">${roBanner(k)}<div class="ph"><div><h1>4. 条件</h1><p>児童生徒ごとの、都合が悪い日時（✕）や、この時間なら大丈夫な日時（○）を入力します。ドラッグでまとめて塗れます。</p></div><span class="grow"></span>
-   <button class="btn sm" data-act="go" data-v="form">${ic('send',15)}フォームの回答を取り込む</button><div class="seg"><button class="${C.mode==='one'?'on':''}" data-act="c-mode" data-m="one">1人ずつ</button><button class="${C.mode==='all'?'on':''}" data-act="c-mode" data-m="all">クラス全体</button></div></div>
+   <button class="btn sm" data-act="go" data-v="form">${ic('send',15)}フォームの回答を取り込む</button><button class="btn sm" data-act="resp-menu" title="時間割を変える前の状態／取り込んだ回答どおりの状態に戻します">${ic('undo',15)}条件を戻す…</button><div class="seg"><button class="${C.mode==='one'?'on':''}" data-act="c-mode" data-m="one">1人ずつ</button><button class="${C.mode==='all'?'on':''}" data-act="c-mode" data-m="all">クラス全体</button></div></div>
    <div class="row" style="margin-bottom:12px">${classBar(k,'c-cls')}</div>
    <div class="brushes" style="margin-bottom:12px">${brushes.map(b=>`<button class="bz ${C.brush===b[0]?'on':''}" data-act="brush" data-b="${b[0]}"><span class="gl ${b[0]}">${b[1]||'⌫'}</span>${b[2]}<kbd>${b[3]}</kbd></button>`).join('')}
    <span class="grow"></span>${clsAutoC().cutMode==='effort'?`<label class="tog"><input type="checkbox" data-ch="hide17" ${P.opt.hide17?'checked':''}>${esc(clsAutoC().cutTime)}以降を隠す</label>`:''}</div>`;
@@ -3222,21 +3282,35 @@ function vCond(){
       <section class="panel"><div class="row" style="margin-bottom:12px"><h2 style="margin:0">${esc(st.name)}<small>${esc(clsLabel(st.g,st.c))} ${st.n}番${st.kana?'・'+esc(st.kana):''}</small></h2><span class="grow"></span>
         <button class="btn sm" data-act="c-step" data-d="-1" ${ix<=0?'disabled':''}>← 前の人</button><button class="btn sm" data-act="c-step" data-d="1" ${ix>=mem.length-1?'disabled':''}>次の人 →</button></div>
         ${hasO?`<div class="okbox" style="margin-bottom:10px">○がある児童生徒は、○の枠にだけ配置されます。</div>`:''}
-        <div style="overflow:auto" data-keep="cm">${matrixOne(st)}</div>
+        <div class="row" style="margin-bottom:10px;gap:10px;flex-wrap:wrap"><span class="tiny muted" style="font-weight:700">入力の細かさ</span><div class="seg"><button class="${C.fine?'':'on'}" data-act="c-fine" data-v="0">日程の枠（${+P.sched.slotMin||20}分）</button><button class="${C.fine?'on':''}" data-act="c-fine" data-v="1">5分ごと</button></div><span class="tiny muted">${C.fine?'5分ごとに塗れます。日程の枠に戻すと、一部だけ塗った枠は斜線で表示します（データは5分のままです）。':'枠ごとに塗ります。枠をまとめて塗ると、枠の中の5分ごとの入力は上書きされます。'}</span></div>
+         <div style="overflow:auto" data-keep="cm">${matrixOne(st)}</div>
         <div class="legend" style="margin-top:12px"><span><b class="sw" style="background:var(--ng-t);color:var(--ng)">✕</b>不可</span><span><b class="sw" style="background:var(--ok-t);color:var(--ok)">○</b>この時間のみ可（○があれば、○以外は不可）</span><span><b class="sw" style="background:var(--u-t);color:var(--u)">未</b>回答なし（配置しない）</span><span><b class="sw" style="background:var(--bg);position:relative"><i style="position:absolute;top:0;right:0;border:4px solid transparent;border-top-color:var(--brand);border-right-color:var(--brand)"></i></b>フォーム取り込み分（予定）</span></div></section>
       <aside class="cside">${condSide(st,mem)}</aside></div>`;
   }
   return h+'</div>';
 }
 function matrixOne(st){
+  if(UI.cond.fine)return matrixFine(st);
   const dates=P.sched.dates,sl=visSlots(),eff=clsAutoC().cutMode==='effort';
   let h=`<table class="cm"><thead><tr><th><button class="btn ghost sm" data-act="cm-all" title="全体に塗る">全体</button></th>${dates.map(d=>{const w=dp(d).wd;return `<th class="hb ${w===0||w===6?'we':''}" data-act="cm-day" data-d="${d}">${fmtD(d)}</th>`}).join('')}</tr></thead><tbody>`;
   sl.forEach((x,i)=>{
     const late=isLate(x),first=eff&&late&&(i===0||!isLate(sl[i-1]));
     h+=`<tr class="${first?'cutrow':''}"><th class="tl" data-act="cm-time" data-t="${x.key}">${x.label}</th>`+dates.map(d=>{
-      const c=st.cond[d+'|'+x.key],v=c?c.v:'';
-      return `<td class="cl ${v} ${late&&eff?'late':''} ${c&&c.s==='i'?'si-i':''}" data-sid="${st.id}" data-pk="${d}|${x.key}">${glyph(v)}</td>`}).join('')+'</tr>';
+      const c=st.cond[d+'|'+x.key],bv=blockV(st,d,x),v=bv.v;
+      return `<td class="cl ${v} ${bv.part?'part':''} ${late&&eff?'late':''} ${c&&c.s==='i'?'si-i':''}" data-sid="${st.id}" data-pk="${d}|${x.key}" ${bv.part?'title="枠の一部だけ（5分ごとの入力）"':''}>${glyph(v)}</td>`}).join('')+'</tr>';
   });
+  return h+'</tbody></table>';
+}
+function matrixFine(st){   // 5分ごとの入力
+  const dates=P.sched.dates,s=P.sched,bm=+s.slotMin||20,b0=parseT(s.start),bs=b0==null?840:b0,end=bs+bm*clamp(+s.slotCount||0,0,300),o=clsAutoC(),eff=o.cutMode==='effort',cut=cutOf(o.cutTime);
+  let h=`<table class="cm fine"><thead><tr><th><button class="btn ghost sm" data-act="cm-all" title="全体に塗る">全体</button></th>${dates.map(d=>{const w=dp(d).wd;return `<th class="hb ${w===0||w===6?'we':''}" data-act="cm-day" data-d="${d}">${fmtD(d)}</th>`}).join('')}</tr></thead><tbody>`;
+  for(let m=bs;m<end;m+=CU){
+    if(fineHidden(m,o))continue;
+    const late=o.cutMode!=='none'&&m>=cut,bst=(m-bs)%bm===0,first=eff&&late&&m-CU<cut;
+    h+=`<tr class="fine ${bst?'bstart':''} ${first?'cutrow':''}"><th class="tl" data-act="cm-time" data-t="${keyT(m)}">${fmtT(m)}</th>`+dates.map(d=>{
+      const v=cellV(st,d,m),c=st.cf&&st.cf[d+'|'+keyT(m)],bk=blockOf(d,m),bc=bk&&st.cond[bk],src=c?c.s:(bc?bc.s:'');
+      return `<td class="cl ${v} ${late&&eff?'late':''} ${src==='i'?'si-i':''}" data-sid="${st.id}" data-pk="${d}|${keyT(m)}" data-f="1">${glyph(v)}</td>`}).join('')+'</tr>';
+  }
   return h+'</tbody></table>';
 }
 function matrixAll(mem){
@@ -3247,7 +3321,7 @@ function matrixAll(mem){
       return `<td class="c ${cl} ${i===0?'first':''}">${c}</td>`}).join('')).join('')}</tr></thead><tbody>`;
   for(const s of mem){
     h+=`<tr class="${s.id===C.sid?'selrow':''}"><td class="sticky"><div class="nm" data-act="c-open" data-id="${s.id}" title="${esc(s.name)}"><span class="dot ${stStatus(s)}"></span>${s.n} ${esc(s.name)}</div></td>`+dates.map(d=>sl.map((x,i)=>{
-      const c=s.cond[d+'|'+x.key],v=c?c.v:'';return `<td class="c ${v} ${i===0?'first':''} ${isLate(x)&&clsAutoC().cutMode==='effort'?'late':''}" data-sid="${s.id}" data-pk="${d}|${x.key}">${v==='x'?'✕':v==='o'?'○':v==='u'?'未':''}</td>`}).join('')).join('')+'</tr>';
+      const bv=blockV(s,d,x),v=bv.v;return `<td class="c ${v} ${bv.part?'part':''} ${i===0?'first':''} ${isLate(x)&&clsAutoC().cutMode==='effort'?'late':''}" data-sid="${s.id}" data-pk="${d}|${x.key}">${v==='x'?'✕':v==='o'?'○':v==='u'?'未':''}</td>`}).join('')).join('')+'</tr>';
   }
   return h+'</tbody></table>';
 }
@@ -3264,24 +3338,36 @@ function condSide(st,mem){
    `<button class="btn sm" data-act="sib-add">${ic('plus',15)}きょうだいを追加</button></section>`;
   return h;
 }
-function paintCellDom(td,v){td.classList.remove('x','o','u');if(v)td.classList.add(v);td.classList.remove('si-i');td.textContent=glyph(v)}
+function paintCellDom(td,v){td.classList.remove('x','o','u','part');if(v)td.classList.add(v);td.classList.remove('si-i');td.textContent=glyph(v)}
 let paint=null;
+function paintFine(st,pk,val){   // 5分セルを塗る（枠の状態と同じになったら、直しは消す）
+  const [d,tk]=pk.split('|'),t=parseT(tk);ensureCf(st);
+  const bk=blockOf(d,t),bv=bk&&st.cond[bk]?st.cond[bk].v:'';
+  if(val){if(bv===val){if(st.cf[pk])delProp(st.cf,pk)}else setProp(st.cf,pk,{v:val,s:'m'})}
+  else{if(bv)setProp(st.cf,pk,{v:'e',s:'m'});else if(st.cf[pk])delProp(st.cf,pk)}
+}
 function paintCell(td){
   const st=stById(td.dataset.sid);if(!st)return;const pk=td.dataset.pk,key=td.dataset.sid+'|'+pk;if(paint.seen.has(key))return;paint.seen.add(key);
+  if(td.dataset.f==='1'){paintFine(st,pk,paint.val);paintCellDom(td,paint.val||'');return}
   const cur=st.cond[pk];
   if(paint.val){if(!(cur&&cur.v===paint.val&&cur.s==='m'))setProp(st.cond,pk,{v:paint.val,s:'m'});paintCellDom(td,paint.val)}
   else{if(cur)delProp(st.cond,pk);paintCellDom(td,'')}
+  clearCfBlock(st,pk);   // 枠をまとめて塗ると、枠の中の5分の直しは、上書きされる
 }
 function endPaint(){if(!paint)return;const p=paint;paint=null;if(p.tx)commit();else render()}
 function bulkPaint(st,keys){
-  const b=UI.cond.brush,all=keys.every(k=>{const c=st.cond[k];return c&&c.v===b});
-  act(()=>{for(const k of keys){if(b==='e'||all){if(st.cond[k])delProp(st.cond,k)}else setProp(st.cond,k,{v:b,s:'m'})}});
+  const b=UI.cond.brush;
+  if(UI.cond.fine){const all=keys.every(k=>{const [d,t]=k.split('|');return cellV(st,d,parseT(t))===b});act(()=>{for(const k of keys)paintFine(st,k,(b==='e'||all)?null:b)});return}
+  const all=keys.every(k=>{const c=st.cond[k];return c&&c.v===b&&!blockV(st,k.split('|')[0],{key:k.split('|')[1],t:parseT(k.split('|')[1])}).part});
+  act(()=>{for(const k of keys){if(b==='e'||all){if(st.cond[k])delProp(st.cond,k)}else setProp(st.cond,k,{v:b,s:'m'});clearCfBlock(st,k)}});
 }
-const dayKeys=d=>visSlots().map(x=>d+'|'+x.key);
+const dayKeys=d=>{if(!UI.cond.fine)return visSlots().map(x=>d+'|'+x.key);const o=clsAutoC(),s=P.sched,bm=+s.slotMin||20,b0=parseT(s.start),bs=b0==null?840:b0,end=bs+bm*clamp(+s.slotCount||0,0,300),out=[];for(let m=bs;m<end;m+=CU){if(fineHidden(m,o))continue;out.push(d+'|'+keyT(m))}return out};
+const fineHidden=(m,o)=>o.cutMode!=='none'&&m>=cutOf(o.cutTime)&&(o.cutMode==='strict'||(P.opt.hide17&&o.cutMode==='effort'));
 A['cm-day']=el=>bulkPaint(stById(UI.cond.sid),dayKeys(el.dataset.d));
 A['cm-time']=el=>bulkPaint(stById(UI.cond.sid),P.sched.dates.map(d=>d+'|'+el.dataset.t));
 A['cm-all']=()=>bulkPaint(stById(UI.cond.sid),P.sched.dates.flatMap(dayKeys));
 A['c-mode']=el=>{UI.cond.mode=el.dataset.m;render()};
+A['c-fine']=el=>{UI.cond.fine=el.dataset.v==='1';render()};
 A['c-cls']=el=>{UI.cls=el.dataset.k;UI.cond.sid=null;UI.grid.sel=null;render()};
 A['c-sel']=el=>{UI.cond.sid=el.dataset.id;render()};
 A['c-open']=el=>{UI.cond.sid=el.dataset.id;UI.cond.mode='one';render()};
@@ -3302,12 +3388,12 @@ CH.sib=el=>{const s=stById(UI.cond.sid),i=+el.dataset.i;act(()=>{const a=s.sib.m
 A.q=el=>{
   const st=stById(UI.cond.sid),V=[...validSet()],q=el.dataset.q;
   act(()=>{
-    if(q==='allo'){for(const k of V)setProp(st.cond,k,{v:'o',s:'m'})}
-    else if(q==='u'){for(const k of V)setProp(st.cond,k,{v:'u',s:'m'})}
-    else if(q==='amx'||q==='pmx'){for(const k of V){const t=parseT(k.split('|')[1]);if(q==='amx'?t<720:t>=720)setProp(st.cond,k,{v:'x',s:'m'})}}
-    else if(q==='clear'){for(const k of Object.keys(st.cond))delProp(st.cond,k);setProp(st,'ok',false)}
+    if(q==='allo'){wipeCf(st);for(const k of V)setProp(st.cond,k,{v:'o',s:'m'})}
+    else if(q==='u'){wipeCf(st);for(const k of V)setProp(st.cond,k,{v:'u',s:'m'})}
+    else if(q==='amx'||q==='pmx'){wipeCf(st,m=>q==='amx'?m<720:m>=720);for(const k of V){const t=parseT(k.split('|')[1]);if(q==='amx'?t<720:t>=720)setProp(st.cond,k,{v:'x',s:'m'})}}
+    else if(q==='clear'){for(const k of Object.keys(st.cond))delProp(st.cond,k);wipeCf(st);setProp(st,'ok',false)}
     else if(q==='copy'){const mem=members(curCls()),i=mem.indexOf(st);if(i<1){toast('前の人がいません');return}const p=mem[i-1];
-      for(const k of Object.keys(st.cond))delProp(st.cond,k);for(const k in p.cond)setProp(st.cond,k,{v:p.cond[k].v,s:'m'})}
+      for(const k of Object.keys(st.cond))delProp(st.cond,k);wipeCf(st);for(const k in p.cond)setProp(st.cond,k,{v:p.cond[k].v,s:'m'});if(hasCf(p)){ensureCf(st);for(const k in p.cf)setProp(st.cf,k,{v:p.cf[k].v,s:'m'})}}
   });
 };
 
@@ -3325,6 +3411,12 @@ function gridSetHtml(k){
     <button class="btn sm" data-act="gs-copy">${ic('users',15)}ほかの学級にも反映…</button></div>
    <p class="tiny muted" style="margin-top:8px">変えると、下の日程表にすぐ反映されます（学級ごとの設定です）。${G.same?'':`<b>この学級の枠は日程（${bm}分）と違います。</b>保護者の×（${bm}分ごと）は、重なる枠をすべてNGにします。`}${o.cutMode==='strict'?` ${esc(o.cutTime)}以降の枠は、この学級では使いません。`:o.cutMode==='effort'?` ${esc(o.cutTime)}以降の枠は黄色で示し、できるだけ使いません。`:''}</p></section>`;
 }
+function takeSnap(k){   // 学級の1枠の長さ・開始時刻を、取り込み後に最初に変える瞬間の条件を、その学級だけ記録する
+  const c=P.classes[k];if(!c||c.snap)return;
+  const st={};for(const s of members(k))st[s.id]={cond:JSON.parse(JSON.stringify(s.cond||{})),cf:JSON.parse(JSON.stringify(s.cf||{})),ok:!!s.ok};
+  setProp(c,'snap',{at:Date.now(),st});
+}
+function restoreSnap(s){const c=P.classes[s.g+'|'+s.c],e=c&&c.snap&&c.snap.st[s.id];if(!e)return false;setProp(s,'cond',JSON.parse(JSON.stringify(e.cond)));setProp(s,'cf',JSON.parse(JSON.stringify(e.cf)));setProp(s,'ok',e.ok);return true}
 async function gsGrid(k,patch){   // 学級の1枠の長さ・開始時刻を変える（配置済みの分は、枠が変わるので外す）
   const cls=P.classes[k];if(!cls||shBlocked(k)||cls.locked)return;
   const bm=+P.sched.slotMin||20,bs0=parseT(P.sched.start),bs=bs0==null?840:bs0,old=gridOf(k);
@@ -3333,7 +3425,7 @@ async function gsGrid(k,patch){   // 学級の1枠の長さ・開始時刻を変
   if(nm===old.len&&old.slots.length&&ns===old.slots[0].t)return;
   const n=Object.values(cls.grid||{}).filter(c=>c.head).length,b=Object.values(cls.grid||{}).filter(c=>c.brk).length;
   if(n||b){const r=await ask({title:'この学級の時間割を変えます',body:`<p>枠が変わるので、<b>配置済みの ${n}名</b>と<b>休憩（×）${b}か所</b>を外します。新しい枠に置き直してください（自動配置もできます）。</p><p class="muted tiny" style="margin-top:6px">「元に戻す」（Ctrl+Z）で戻せます。</p>`,buttons:[{id:0,label:'やめる'},{id:1,label:'変更して外す',kind:'pri'}]});if(!r){render();return}}
-  act(()=>{setProp(cls,'slotMin',nm===bm?0:nm);setProp(cls,'start',ns===bs?'':fmtT(ns));for(const kk of Object.keys(cls.grid||{}))delProp(cls.grid,kk)});
+  act(()=>{takeSnap(k);setProp(cls,'slotMin',nm===bm?0:nm);setProp(cls,'start',ns===bs?'':fmtT(ns));for(const kk of Object.keys(cls.grid||{}))delProp(cls.grid,kk)});
   toast(`${clsLabel(cls.g,cls.c)}の時間割を、${nm}分ごと（${fmtT(ns)}から）にしました`,{undo:true});
 }
 function gsCut(k,patch){const cls=P.classes[k];if(!cls)return;act(()=>setProp(cls,'auto',Object.assign({},cls.auto||{},patch)))}
@@ -3351,7 +3443,7 @@ A['gs-copy']=()=>{   // この学級の時間割・時刻のルールを、ほ�
     if(q==='*'){classList().forEach(c=>{if(c.key!==k)sel.add(c.key)});paint();return}
     if(q==='go'){const o=clsAuto(k),G=gridOf(k),bm=+P.sched.slotMin||20,b0=parseT(P.sched.start),bs=b0==null?840:b0,t0=G.slots.length?G.slots[0].t:bs;
       el._close();act(()=>{for(const kk of sel){const c=P.classes[kk];if(!c)continue;const og=gridOf(kk),ch=og.len!==G.len||(og.slots[0]&&og.slots[0].t)!==t0;
-        setProp(c,'slotMin',G.len===bm?0:G.len);setProp(c,'start',t0===bs?'':fmtT(t0));if(ch)for(const x of Object.keys(c.grid||{}))delProp(c.grid,x);
+        if(ch)takeSnap(kk);setProp(c,'slotMin',G.len===bm?0:G.len);setProp(c,'start',t0===bs?'':fmtT(t0));if(ch)for(const x of Object.keys(c.grid||{}))delProp(c.grid,x);
         setProp(c,'auto',Object.assign({},c.auto||{},{cutMode:o.cutMode,cutTime:o.cutTime}))}});toast(`${sel.size}学級に反映しました`,{undo:true});return}
     if(sel.has(q))sel.delete(q);else sel.add(q);paint()});
 };
@@ -3387,7 +3479,7 @@ function vGrid(){
     const late=isLate(x)&&eff,first=late&&(i===0||!isLate(sl[i-1]));
     h+=`<tr class="${late?'late':''} ${first?'cutrow':''}"><td class="tm">${x.label}</td>`+dates.map(d=>{
       const kk=d+'|'+x.key,c0=cls.grid[kk],c=(c0&&c0.sid&&hid&&hid.has(c0.sid))?undefined:c0;let cl='cell',inner='';
-      if(!c){cl+=' empty-c';if(selOK&&!selOK(kk))cl+=' dim';else if(selO&&sel.cond[kk]&&sel.cond[kk].v==='o')cl+=' hl';const ds=decByKey.get(kk);if(ds){const s=stById(ds);if(s)inner=`<div class="tile decoy ${shk&&shk.has(ds)?'shake':''}" style="${gStyle(s.g)}"><span>${esc(s.name)}</span></div>`}}
+      if(!c){cl+=' empty-c';if(selOK&&!selOK(kk))cl+=' dim';else if(selO&&slotAllO(sel,kk,k))cl+=' hl';const ds=decByKey.get(kk);if(ds){const s=stById(ds);if(s)inner=`<div class="tile decoy ${shk&&shk.has(ds)?'shake':''}" style="${gStyle(s.g)}"><span>${esc(s.name)}</span></div>`}}
       else if(c.brk)inner='<div class="brk">×</div>';
       else if(c.head){const s=stById(c.sid);if(s){const ng=ngSet.has(c.sid);
         inner=`<div class="tile ${just&&just.has(c.sid)?'snap':''} ${shk&&shk.has(c.sid)?'shake':''} ${ng?'ng':''} ${c.exc?'exc':''} ${dupSet.has(c.sid)?'dup':''} ${G.sel===c.sid?'sel':''}" style="${gStyle(s.g)}" draggable="true" data-act="g-tile" data-sid="${c.sid}" data-hk="${kk}" data-snap="${kk}" title="${esc(s.name)}（${s.n}番）${ng?' ※都合の悪い時間です':''}">${ng?'⚠':''}<span>${esc(s.name)}</span>${addrHtml(s)}${c.n>1?`<span class="tn2">${c.n}枠</span>`:''}<button class="rm" data-act="g-rm" data-sid="${c.sid}" aria-label="外す">${ic('x',13)}</button></div>`}}
@@ -3718,8 +3810,9 @@ document.addEventListener('contextmenu',e=>{
 /* painting */
 document.addEventListener('pointerdown',e=>{
   if(UI.view!=='cond'||e.button!==0)return;const td=e.target.closest&&e.target.closest('td[data-pk]');if(!td)return;
-  const st=stById(td.dataset.sid);if(!st)return;const cur=st.cond[td.dataset.pk],b=UI.cond.brush;
-  paint={val:(b==='e'||(cur&&cur.v===b))?null:b,tx:begin(),seen:new Set()};paintCell(td);e.preventDefault();
+  const st=stById(td.dataset.sid);if(!st)return;const b=UI.cond.brush,pk=td.dataset.pk,[pd,ptk]=pk.split('|');let cur;
+  if(td.dataset.f==='1')cur={v:cellV(st,pd,parseT(ptk)),part:false};else{const px=getSlots().find(s=>s.key===ptk);cur=px?blockV(st,pd,px):{v:((st.cond[pk]||{}).v)||'',part:false}}
+  paint={val:(b==='e'||(cur.v===b&&!cur.part))?null:b,tx:begin(),seen:new Set()};paintCell(td);e.preventDefault();
 });
 document.addEventListener('pointermove',e=>{if(!paint)return;const el=document.elementFromPoint(e.clientX,e.clientY),td=el&&el.closest&&el.closest('td[data-pk]');if(td)paintCell(td)});
 document.addEventListener('pointerup',endPaint);document.addEventListener('pointercancel',endPaint);
