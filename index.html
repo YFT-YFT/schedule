@@ -565,7 +565,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.73';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.81';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -674,10 +674,10 @@ const gStyle=g=>{const c=gcol(g);return `--cbg:${c[0]};--cfg:${c[1]};--cfg2:${c[
 const clsLabel=(g,c)=>`${g}年${c}組`;
 
 /* ---------- project ---------- */
-function newProject(){const _id=uid();return{v:1,kpv:'0.73',id:_id,term:_id,title:'',updatedAt:Date.now(),
+function newProject(){const _id=uid();return{v:1,kpv:'0.81',id:_id,term:_id,title:'',updatedAt:Date.now(),
  meta:{school:'',tel:'',kind:'三者懇談会',kindCustom:''},
  sched:{dates:[],start:'14:00',slotMin:20,slotCount:20,cutMode:'effort',cutTime:'17:00'},
- opt:{keepManual:true,sibAuto:true,areaAuto:null,areaN:5,sibGap:0,areaGap:true,hl:true,hide17:false},auto:{shuffle:0,balance:false,target:'',refine:3,keep:false},form:{title:'',autoClose:false,closeDate:'',closeTime:'17:00',sib:2,addr:null,addrN:5,addrList:''},imp:null,tpl:{},printedAt:0,
+ opt:{keepManual:true,sibAuto:true,areaAuto:null,areaN:5,sibGap:0,areaGap:true,hl:true,hide17:false},auto:{shuffle:0,balance:false,target:'',refine:3,keep:false},form:{title:'',autoClose:true,closeDate:'',closeTime:'17:00',sib:2,addr:null,addrN:5,addrList:''},imp:null,tpl:{},printedAt:0,
  vari:ORIG_VARI.map(x=>[x[0],x[1]]),classes:{},students:[]}}
 let P=newProject();
 function migrate(o){
@@ -688,7 +688,7 @@ function migrate(o){
   if(o&&o.form&&!(parseFloat(o.kpv)>=0.52)&&p.form.addr==='none')p.form.addr=null;   // v0.52: 住所の既定を「家庭訪問のときだけリスト」に（未設定に戻す）
   if(!p.term)p.term=p.id;   // 世代ID：古いデータはプロジェクトIDと同じ扱い（どのPCで読んでも同じ値になる）
   if(o&&o.form&&!(parseFloat(o.kpv)>=0.55)&&p.form.addr){const kd=p.meta.kind==='custom'?(p.meta.kindCustom||''):(p.meta.kind||'');if(!/家庭訪問/.test(kd))p.form.addr=null}   // v0.55: 家庭訪問以外では「聞かない」を既定に戻す
-  p.kpv='0.73';
+  p.kpv='0.81';
   if(!Array.isArray(p.vari))p.vari=d.vari;
   p.students=(Array.isArray(p.students)?p.students:[]).map(s=>Object.assign({sib:[],cond:{},cf:{},slots:1,ok:false,memo:'',kana:'',sex:'',addr:''},s));
   p.classes=p.classes&&typeof p.classes==='object'?p.classes:{};
@@ -911,7 +911,7 @@ async function loadFromText(txt,fromHandle){
 async function openFile(){
   if(window.showOpenFilePicker){
     try{const [h]=await showOpenFilePicker({types:[{description:'かこピタ プロジェクト',accept:{'application/json':['.json']}}]});const f=await h.getFile();
-      if(await loadFromText(await f.text())){fileHandle=h;await dbSet(KEY_H,h);toast(`「${h.name}」を開きました`)}}catch(e){UI.afterOpen=false;if(e.name!=='AbortError')toast('開けませんでした: '+e.message)}
+      if(await loadFromText(await f.text())){fileHandle=h;await dbSet(KEY_H,h);toast(`「${h.name}」を開きました（開く前の状態は、「以前の状態に戻す」から戻せます）`,{ms:6000})}}catch(e){UI.afterOpen=false;if(e.name!=='AbortError')toast('開けませんでした: '+e.message)}
   }else{$('#openInput').click()}
 }
 async function initStore(){
@@ -1814,7 +1814,7 @@ A.auto=()=>{
 };
 
 /* ================= 3. form (GAS) & response import ================= */
-const FORM_DEF={title:'',autoClose:false,closeDate:'',closeTime:'17:00',sib:2,addr:null,addrN:5,addrList:''};
+const FORM_DEF={title:'',autoClose:true,closeDate:'',closeTime:'17:00',sib:2,addr:null,addrN:5,addrList:''};
 const formRaw=()=>Object.assign({},FORM_DEF,P.form||{});
 const formOpt=()=>{const o=formRaw();if(!o.addr)o.addr=isVisitKind()?'list':'none';return o};   // 住所：未設定なら、家庭訪問のときだけ「リスト」
 function setForm(k,v){P.form=Object.assign({},formRaw(),{[k]:v});VER++;scheduleSave()}
@@ -2006,6 +2006,66 @@ function detectCols(hdr,rows){
   return col;
 }
 
+/* ---------- 回答ファイルの列の確認（取り込む前に、どの列が何の情報かを見せる） ---------- */
+const IMP_ROLES=[['ts','タイムスタンプ'],['gc','学年・組（例：3年1組）'],['g','学年だけ'],['c','組だけ'],['n','出席番号'],['name','児童生徒名（漢字など）'],['kana','ふりがな'],['addr','住所（地区）'],['dt','日時（保護者が選んだ日時の列）'],['k','「希望について」（いつでも可 などの文）']];
+const IMP_SIBR=[['name','名前'],['gc','学年・組'],['kana','ふりがな'],['g','学年だけ'],['c','組だけ'],['n','番号']];
+function colToMap(col,n){const m=Array(n).fill('');
+  for(const k of ['ts','gc','g','c','n','name','kana','addr','k','dt'])if(col[k]!=null&&col[k]<n)m[col[k]]=k;
+  for(const [k,o] of Object.entries(col.sibs||{}))for(const [f,i] of Object.entries(o))if(i<n)m[i]='s'+k+':'+f;
+  return m}
+function mapToCol(m){const col={sibs:{}};m.forEach((r,i)=>{if(!r)return;const x=/^s(\d+):(\w+)$/.exec(r);if(x)(col.sibs[+x[1]]||(col.sibs[+x[1]]={}))[x[2]]=i;else col[r]=i});return col}
+function impCheck(rows,map){   // 選ばれた列を実際に読んでみて、読み取れない行を具体的に返す
+  const col=mapToCol(map),body=rows.slice(1),per=map.map(()=>null),errs=[],warns=[];
+  const at=(r,i)=>i==null?'':r[i];
+  const show=v=>{const t=String(v??'').trim();return t?'「'+(t.length>14?t.slice(0,14)+'…':t)+'」':'（空欄）'};
+  const colName=i=>'「'+(String(rows[0][i]??'').trim()||(i+1)+'列目')+'」';
+  const chk=(i,test)=>{if(i==null)return;const bad=[];body.forEach((r,ri)=>{const w=test(r);if(w)bad.push(`${ri+2}行目${w}`)});
+    const all=body.length,lv=bad.length&&bad.length>=all?'err':bad.length?'warn':'ok';
+    per[i]={bad:bad.length,all,lv,msg:bad.slice(0,4).join('、')+(bad.length>4?` ほか${bad.length-4}件`:'')};
+    if(lv==='err')errs.push(`${colName(i)}の列は、どの行も読み取れません（${bad.slice(0,2).join('、')}）。別の列を選んでください`);
+    else if(lv==='warn')warns.push(`${colName(i)}の列：${bad.length}行は読み取れません（${bad.slice(0,3).join('、')}${bad.length>3?'…':''}）。その行は取り込まれません`)};
+  chk(col.gc,r=>parseGC(at(r,col.gc))?null:show(at(r,col.gc)));
+  chk(col.g,r=>isNaN(num(at(r,col.g)))?show(at(r,col.g)):null);
+  chk(col.c,r=>String(at(r,col.c)??'').trim()?null:show(at(r,col.c)));
+  chk(col.n,r=>isNaN(num(at(r,col.n)))?show(at(r,col.n)):null);
+  if(col.dt!=null){const bad=[];body.forEach((r,ri)=>{const ts=parseTs(at(r,col.ts)),tsd=ts?new Date(ts):null;const b=[];for(const tk of splitToks(at(r,col.dt)))if(!parseDT(tk,tsd&&tsd.getFullYear(),tsd))b.push(tk);if(b.length)bad.push(`${ri+2}行目「${b.slice(0,2).join('、')}」`)});
+    per[col.dt]={bad:bad.length,all:body.length,lv:bad.length?'warn':'ok',msg:bad.slice(0,4).join('、')+(bad.length>4?` ほか${bad.length-4}件`:'')};
+    if(bad.length)warns.push(`${colName(col.dt)}の列：${bad.length}行に、日時として読めない文字があります（${bad.slice(0,2).join('、')}）。その日時は取り込まれません`)}
+  if(col.ts!=null){const bad=[];body.forEach((r,ri)=>{const v=at(r,col.ts);if(String(v??'').trim()&&!parseTs(v))bad.push(`${ri+2}行目`)});per[col.ts]={bad:bad.length,all:body.length,lv:bad.length?'warn':'ok',msg:bad.slice(0,4).join('、')};if(bad.length)warns.push(`${colName(col.ts)}の列：${bad.length}行は時刻を読めません。同じ児童生徒の回答が2つあるとき、どちらが新しいか分かりません`)}
+  if(!(col.gc!=null||(col.g!=null&&col.c!=null)))errs.push(col.g!=null||col.c!=null?'「学年」と「組」の両方の列が必要です（片方だけが選ばれています）':'「学年・組」の列（または「学年」と「組」の2列）が選ばれていません');
+  if(col.n==null)errs.push('「出席番号」の列が選ばれていません');
+  if(!body.length)errs.push('回答の行がありません（見出しの行しかありません）');
+  if(col.name==null&&col.kana==null)warns.push('「児童生徒名」も「ふりがな」も選ばれていません。出席番号だけで照合するので、番号違いに気づけません');
+  if(col.dt==null)warns.push('「日時」の列が選ばれていません。このままでは、保護者が選んだ日時（×）が1つも取り込まれません');
+  return{per,errs,warns,col};
+}
+function vImportMap(){
+  const rows=IMP.rows,hdr=rows[0],map=IMP.map,ck=impCheck(rows,map),body=rows.slice(1),F=formOpt();
+  const smax=Math.min(8,Math.max(1,F.sib||0,...map.map(r=>{const m=/^s(\d+):/.exec(r);return m?+m[1]:0})));
+  const opts=cur=>`<option value="">使わない</option>`+IMP_ROLES.map(([v,l])=>`<option value="${v}" ${cur===v?'selected':''}>${l}</option>`).join('')+Array.from({length:smax},(_,k)=>k+1).map(k=>`<optgroup label="きょうだい${k}">${IMP_SIBR.map(([f,l])=>{const v='s'+k+':'+f;return `<option value="${v}" ${cur===v?'selected':''}>きょうだい${k}の${l}</option>`}).join('')}</optgroup>`).join('');
+  const fmtV=v=>v instanceof Date?`${v.getFullYear()}/${String(v.getMonth()+1).padStart(2,'0')}/${String(v.getDate()).padStart(2,'0')} ${String(v.getHours()).padStart(2,'0')}:${String(v.getMinutes()).padStart(2,'0')}:${String(v.getSeconds()).padStart(2,'0')}`:String(v??'');
+  const smp=i=>{const a=[];for(const r of body){const v=fmtV(r[i]).trim();if(v){a.push(v.length>26?v.slice(0,26)+'…':v);if(a.length>=2)break}}return a.length?a.map(esc).join('<br>'):'<span class="muted">（空欄）</span>'};
+  const encBox=IMP.buf?`<div class="row" style="margin-bottom:8px;align-items:center"><span class="tiny">文字コード：</span><select data-ch="impenc">${Object.entries(ENC_LABEL).map(([v,l])=>`<option value="${v}" ${IMP.enc===v?'selected':''}>${l}${v===IMP.encAuto?'（自動判定）':''}</option>`).join('')}</select><span class="tiny muted">文字が化けて見えるときは、ここを切り替えてください</span></div>`:'';
+  let h=`<p class="muted" style="margin-bottom:8px"><b>${esc(IMP.file)}</b>：回答 ${body.length}行・${map.length}列。<b>各列が何の情報か</b>を確認してください。見出しから自動で当てはめています。違うときは、右の欄で選び直せます。</p>`;
+  h+=encBox;
+  if(IMP.garbled)h+=`<div class="warnbox" style="margin-bottom:8px"><b>文字化けしているようです。</b>上の「文字コード」を切り替えてみてください（Excelで「Unicodeテキスト」として保存したときは UTF-16、Windowsで保存したCSVは Shift_JIS のことがあります）。それでも直らないときは、回答のスプレッドシートの表をコピーして、取り込み画面の「貼り付け」欄に貼り付けてください。</div>`;
+  if(ck.errs.length)h+=`<div class="warnbox" style="margin-bottom:8px;border-color:#D9534F;background:#FDECEA"><b>このままでは取り込めません</b><ul style="margin:4px 0 0 18px">${ck.errs.map(e=>`<li>${esc(e)}</li>`).join('')}</ul></div>`;
+  if(ck.warns.length)h+=`<div class="warnbox" style="margin-bottom:8px"><b>確認してください</b><ul style="margin:4px 0 0 18px">${ck.warns.map(e=>`<li>${esc(e)}</li>`).join('')}</ul></div>`;
+  if(!ck.errs.length&&!ck.warns.length)h+=`<div class="okbox" style="margin-bottom:8px">すべての列を読み取れました。内容がよければ、下のボタンで進みます。</div>`;
+  h+=`<div class="scroll" data-keep="impmap" style="max-height:420px"><table class="tbl"><thead><tr><th>列（見出し）</th><th>中身の例</th><th>この列は</th><th>読み取り結果</th></tr></thead><tbody>${hdr.length||map.length?map.map((r,i)=>{const p=ck.per[i],note=p?(p.lv==='ok'?`<span style="color:var(--ok)">✓ 全${p.all}行を読み取れました</span>`:`<span style="color:${p.lv==='err'?'#C0392B':'#B45309'}">⚠ ${p.bad}/${p.all}行は読み取れません：${esc(p.msg)}</span>`):(r?'<span style="color:var(--ok)">✓ この列を使います</span>':'<span class="muted">使いません</span>');
+    return `<tr${p&&p.lv==='err'?' style="background:#FDECEA"':''}><td><b>${esc(String(hdr[i]??'').trim()||'（見出しなし）')}</b><div class="tiny muted">${i+1}列目</div></td><td class="tiny" style="max-width:220px">${smp(i)}</td><td><select data-ch="impcol" data-i="${i}">${opts(r)}</select></td><td class="tiny">${note}</td></tr>`}).join(''):''}</tbody></table></div>`;
+  h+=`<div class="row" style="margin-top:12px"><button class="btn" data-act="imp-cancel">やめる</button><span class="grow"></span><button class="btn pri big" data-act="imp-go" ${ck.errs.length?'disabled':''}>この内容で確認へ進む</button></div>`;
+  return h;
+}
+CH.impenc=el=>{try{const d=decodeResp(IMP.buf,el.value);IMP.enc=el.value;IMP.garbled=looksGarbled(d.text);IMP.rows=d.rows.filter(r=>r.some(c=>String(c??'').trim()!==''));
+    if(!IMP.rows.length)throw new Error('ファイルの中身が空です');IMP.map=colToMap(detectCols(IMP.rows[0].map(x=>String(x??'')),IMP.rows),Math.max(...IMP.rows.map(r=>r.length)));render()}
+  catch(e){toast('その文字コードでは読めませんでした：'+e.message,{kind:'warn'})}};
+CH.impcol=el=>{const i=+el.dataset.i,v=el.value;IMP.map=IMP.map.map((r,j)=>j===i?v:(v&&r===v?'':r));render()};   // 同じ項目を2つの列に当てないよう、前の列は「使わない」に戻す
+A['imp-go']=()=>{const ck=impCheck(IMP.rows,IMP.map);if(ck.errs.length){toast('赤い項目を直してから進んでください',{kind:'warn'});return}
+  try{IMP.plan=buildPlan(IMP.rows,IMP.file,mapToCol(IMP.map));IMP.stage='review';IMP.opts.acceptNum=new Set();IMP.opts.adoptTimes=!P.sched.dates.length;render()}
+  catch(e){toast('取り込めませんでした：'+e.message,{ms:7000})}};
+A['imp-remap']=()=>{IMP.stage='map';IMP.plan=null;render()};
+
 /* ---------- plan ---------- */
 const IMP={stage:'idle',file:'',plan:null,opts:{acceptNum:new Set(),markUnans:true,adoptDates:true,adoptTimes:false},drop:false};
 UI.form={show:false};
@@ -2021,13 +2081,29 @@ async function readResponseFile(f){
     for(let r=1;r<rows.length;r++)for(let c=0;c<rows[r].length;c++){const v=rows[r][c];if(v instanceof Date&&!tsCols.has(c)){const u=new Date(v.getTime()+30000);rows[r][c]=`${u.getMonth()+1}/${u.getDate()} ${z2(u.getHours())}:${z2(u.getMinutes())}`}}   // 日時の端数（14:19:59 など）を、分に丸める
     return rows;
   }
-  let t;try{t=new TextDecoder('utf-8',{fatal:true}).decode(buf)}catch(e){t=new TextDecoder('shift_jis').decode(buf)}
-  return parseDelim(t);
+  return decodeResp(buf,'auto').rows;
 }
-function buildPlan(rows,fileName){
+function decodeScore(t){const head=t.slice(0,4000);let s=0;
+  s+=(head.match(/学年|組|出席番号|番号|児童|生徒|名前|ふりがな|タイムスタンプ|きょうだい/g)||[]).length*5;   // 見出しに出てくる言葉
+  s-=(t.match(/\uFFFD/g)||[]).length*3;                                                          // 読めなかった字
+  s-=(head.match(/[縺繧郢蜿莉蛻驕髢]/g)||[]).length*2;                                           // 化けたときによく出る字
+  s+=Math.min((head.match(/[ぁ-んァ-ヶ]/g)||[]).length,200)/20;return s}
+function decodeResp(buf,enc){   // 文字コードを自動で判定する（UTF-8／Shift_JIS／UTF-16）。enc を指定すると、その文字コードで読む
+  const u=new Uint8Array(buf);
+  if(!enc||enc==='auto'){
+    if(u[0]===0xFF&&u[1]===0xFE)enc='utf-16le';else if(u[0]===0xFE&&u[1]===0xFF)enc='utf-16be';
+    else{try{const t=new TextDecoder('utf-8',{fatal:true}).decode(buf);return{rows:parseDelim(t),enc:'utf-8',text:t}}catch(e){
+      // UTF-8として厳密には読めないとき：UTF-8（一部の壊れた文字は許す）とShift_JISを、実際に読んだ中身（見出しの言葉・化けた字の数）で比べて、よいほうを選ぶ
+      const cand=['utf-8','shift_jis'].map(en=>{const t=new TextDecoder(en).decode(buf);return{en,t,sc:decodeScore(t)}});
+      cand.sort((a,b)=>b.sc-a.sc);return{rows:parseDelim(cand[0].t),enc:cand[0].en,text:cand[0].t}}}}
+  const t=new TextDecoder(enc).decode(buf);return{rows:parseDelim(t),enc,text:t};
+}
+const ENC_LABEL={'utf-8':'UTF-8','shift_jis':'Shift_JIS（Windowsで保存したCSVなど）','utf-16le':'UTF-16（Excelの「Unicodeテキスト」）','utf-16be':'UTF-16（ビッグエンディアン）'};
+function looksGarbled(text){return /\uFFFD/.test(text)||((text.match(/[縺繧郢蜿莉蛻驕髢]/g)||[]).length>=3)}   // 文字化けしたときによく出る字
+function buildPlan(rows,fileName,colOverride){
   rows=rows.filter(r=>r.some(c=>String(c??'').trim()!==''));
   if(rows.length<2)throw new Error('回答の行が見つかりません');
-  const col=detectCols(rows[0].map(x=>String(x??'')),rows);
+  const col=colOverride||detectCols(rows[0].map(x=>String(x??'')),rows);
   if((col.gc==null&&(col.g==null||col.c==null))||col.n==null)throw new Error('「学年・組」（または「学年」と「組」）「出席番号」の列が見つかりません。1行目が見出しになっているか確認してください');
   const cell=(r,i)=>i==null?'':r[i];
   const recs=[];const badDT=[];const skipRows=[];
@@ -2188,14 +2264,17 @@ function logCsv(plan,o){
 }
 function dlCsv(txt,name){const b=new Blob([txt],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
 async function loadResponse(f){
-  try{const rows=await readResponseFile(f);IMP.rows=rows;IMP.plan=buildPlan(rows,f.name);IMP.file=f.name;IMP.stage='review';IMP.opts.acceptNum=new Set();IMP.opts.adoptTimes=!P.sched.dates.length;render()}
+  try{let rows=await readResponseFile(f);rows=rows.filter(r=>r.some(c=>String(c??'').trim()!==''));if(!rows.length)throw new Error('ファイルの中身が空です');
+    IMP.buf=null;IMP.enc='';IMP.garbled=false;
+    if(!/\.(xlsx|xlsm|xls)$/i.test(f.name)){IMP.buf=await f.arrayBuffer();const d=decodeResp(IMP.buf,'auto');IMP.enc=d.enc;IMP.encAuto=d.enc;IMP.garbled=looksGarbled(d.text);rows=d.rows.filter(r=>r.some(c=>String(c??'').trim()!==''))}
+    IMP.rows=rows;IMP.file=f.name;IMP.plan=null;IMP.map=colToMap(detectCols(rows[0].map(x=>String(x??'')),rows),Math.max(...rows.map(r=>r.length)));IMP.stage='map';render()}   // まず列の確認画面を出す
   catch(e){toast('取り込めませんでした：'+e.message,{ms:7000})}
 }
 
 /* ---------- view ---------- */
 function vForm(){
   const F=formOpt(),S=P.sched,n=P.students.length,okSched=S.dates.length&&getSlots().length;
-  const g=okSched&&n?buildGas():null;
+  const g=okSched&&n?buildGas():null,gOK=g&&!(F.autoClose&&!F.closeDate);   // 自動で締め切るのに日付が空のあいだは、GASを渡さない
   const kindDefault=formTitleDefault();
   let h=`<div class="page"><div class="ph"><div><h1>3. フォーム</h1><p>保護者に答えてもらうGoogleフォームを作り、集まった回答を取り込みます。<span class="tag-inline">設定担当者の作業</span></p></div></div>`;
   h+=`<div class="cols2"><section class="panel"><h2><span class="stepno">A</span>フォームを作る<small>Googleで1回だけ実行します</small></h2>`;
@@ -2209,14 +2288,17 @@ function vForm(){
    ${F.addr==='list'?`<label class="f" style="margin-top:8px">選択肢（1行に1つ。名簿の住所の先頭${F.addrN}文字から自動で作った分に、追加できます）<textarea class="paste" data-ch="fopt" data-k="addrList" style="min-height:70px" placeholder="例：みどり町1丁目">${esc(F.addrList)}</textarea></label><p class="tiny muted" style="margin-top:4px">いまの選択肢：${areaChoices().length?esc(areaChoices().join('、')):'まだありません（名簿に住所を入れるか、上の欄に書いてください）'}</p>`:''}
    ${F.addr!=='none'?'<p class="tiny muted" style="margin-top:6px">住所は個人情報です。家庭訪問以外（懇談など）では「聞かない」をおすすめします。</p>':''}</div>`;
   if(g)h+=`<p class="tiny muted" style="margin:12px 0 0">フォームに入る内容：${g.classes}学級の学年・組／日時の選択肢 ${g.choices}個（${S.dates.length}日 × ${getSlots().length}枠）${g.closeStr?`／${esc(g.closeStr)}に自動締め切り`:''}</p>`;
-  h+=`<div class="row" style="margin-top:14px"><button class="btn pri big" data-act="gas-copy" ${g?'':'disabled'}>${ic('send',18)}GASをコピーする</button><button class="btn" data-act="gas-dl" ${g?'':'disabled'}>${ic('down',17)}ファイルで保存</button><button class="btn ghost" data-act="gas-show" ${g?'':'disabled'}>${UI.form.show?'コードを隠す':'コードを見る'}</button></div>
-   ${UI.form.show&&g?`<textarea class="paste" readonly style="min-height:200px;margin-top:10px" onfocus="this.select()">${esc(g.code)}</textarea>`:''}
+  if(g&&F.autoClose&&!F.closeDate)h+=`<div class="warnbox" style="margin-top:12px">フォームを自動で締め切る設定になっています。<b>上の「締め切りの日」を入れてください</b>（日付を入れるまで、GASはコピーできません）。自動で締め切らないときは、「締め切る」のチェックを外します。</div>`;
+  h+=`<div class="row" style="margin-top:14px"><button class="btn pri big" data-act="gas-copy" ${gOK?'':'disabled'}>${ic('send',18)}GASをコピーする</button><button class="btn" data-act="gas-dl" ${gOK?'':'disabled'}>${ic('down',17)}ファイルで保存</button><button class="btn ghost" data-act="gas-show" ${gOK?'':'disabled'}>${UI.form.show?'コードを隠す':'コードを見る'}</button></div>
+   ${UI.form.show&&gOK?`<textarea class="paste" readonly style="min-height:200px;margin-top:10px" onfocus="this.select()">${esc(g.code)}</textarea>`:''}
    <ol class="steps"><li><a href="https://script.new" target="_blank" rel="noopener">script.new</a> を開く（Googleにログインした状態で）<br><b>または</b> <a href="https://script.google.com" target="_blank" rel="noopener">Google Apps Script</a> を開いて「新しいプロジェクト」を作る<span class="tiny muted">（セキュリティ設定でリンクから開けないときは、Googleにログインしたブラウザで「Google Apps Script」を検索して開いてください）</span></li><li>最初からあるコードを<b>すべて消して</b>、コピーしたGASを貼り付ける</li><li>上の「実行」で <b>createKadanForm</b> を実行する（初回は権限の承認が出ます。<b>表示される権限は、すべて許可</b>してください。一部だけだとフォームを作れず、失敗します。「Googleで確認されていません」と出たら「詳細」→「（安全ではないページ）に移動」→「許可」を押します。自分で貼り付けたコードなので問題ありません）</li><li>画面下の実行ログに、フォームの編集URLと回答用URLが出ます。回答用URLを保護者に配ります</li></ol></section>`;
-  h+=`<section class="panel"><h2><span class="stepno">B</span>回答を取り込む<small>フォームの回答ファイルを読み込みます</small></h2>`;
+  h+=`<section class="panel"><h2><span class="stepno">B</span>回答を取り込む<small>回答ファイルの読み込み、または表の貼り付け</small></h2>`;
   if(IMP.stage==='review'&&IMP.plan)h+=vImportReview();
+  else if(IMP.stage==='map'&&IMP.rows)h+=vImportMap();
   else{
     h+=`<p class="muted" style="margin-bottom:12px">フォームの「回答」→ スプレッドシートで開く → 「ファイル」→「ダウンロード」→ Excel（.xlsx）で保存したファイルを選びます。</p>
     <div class="drop ${IMP.drop?'over':''}" id="dropzone2"><h3>回答ファイルをここへドラッグ</h3><p class="muted tiny" style="margin-bottom:12px">Excel（.xlsx）・CSV に対応</p><button class="btn pri" data-act="pick-resp">${ic('up',17)}回答ファイルを選ぶ</button><input type="file" id="respFile" accept=".xlsx,.xls,.xlsm,.csv,.tsv,.txt" hidden>${(P.sampleResp||SAMPLE_CSV)?`<div style="margin-top:12px"><button class="btn sm" data-act="sample-resp">${ic('down',15)}見本の回答ファイルをダウンロード（名前の不一致・二重回答つき）</button></div>`:''}</div>
+    <div style="margin-top:14px"><label class="f"><b>または、スプレッドシートの表をコピーして貼り付け</b>（文字化けしません）<textarea class="paste" id="respPasteBox" placeholder="回答のスプレッドシートで、見出しの行から最後の回答までを選んでコピー（Ctrl+C）→ ここに貼り付け（Ctrl+V）"></textarea></label><div class="row" style="margin-top:8px"><button class="btn" data-act="resp-paste">${ic('check',17)}貼り付けた内容を読み込む</button></div><p class="tiny muted" style="margin-top:6px">Googleフォームの「回答」→ スプレッドシートで開く → 左上の四角（全体選択）をクリック → Ctrl+C。ファイルが文字化けするときは、こちらをお使いください。</p></div>
     ${P.imp?`<p class="tiny muted" style="margin-top:10px">前回の取り込み：${fullTs(P.imp.at)}（${esc(P.imp.file)}、${P.imp.n}名）</p>`:''}
     ${!n?`<div class="warnbox" style="margin-top:12px">名簿が空です。名簿に回答の名前を照合するため、先に「1. 名簿」を読み込むのがおすすめです。</div>`:''}`;
   }
@@ -2227,7 +2309,7 @@ function vImportReview(){
   const card=(l,v,c='')=>`<div class="kpi" style="padding:10px 12px"><div class="l">${l}</div><div class="v num ${c}" style="font-size:24px;margin:0">${v}</div></div>`;
   const li=(a,f,max=6)=>a.slice(0,max).map(f).join('<br>')+(a.length>max?`<br><span class="muted">ほか ${a.length-max}件</span>`:'');
   const lab=r=>`${clsLabel(r.g,r.c)} ${r.n}番`;
-  let h=`<p class="muted" style="margin-bottom:10px"><b>${esc(IMP.file)}</b>：回答 ${p.total}行（${p.finals.length}名分）。内容を確認して、取り込みます。</p>
+  let h=`<p class="muted" style="margin-bottom:10px"><b>${esc(IMP.file)}</b>：回答 ${p.total}行（${p.finals.length}名分）。内容を確認して、取り込みます。<button class="btn sm ghost" data-act="imp-remap" style="margin-left:8px">列の指定に戻る</button></p>
   <div class="cards4" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:12px">
    ${card('反映できる',p.matched.length+(p.numOnly.filter(x=>o.acceptNum.has(x.r.row)).length),'')}${card('要確認（名前が違う）',p.numOnly.length,p.numOnly.length?'warn-c':'')}${card('名簿に該当なし',p.none.length,p.none.length?'warn-c':'')}${card('未回答',p.unans.length,'')}</div>`;
   if(!n)h+=`<div class="warnbox" style="margin-bottom:10px">名簿が空のため、どの回答も照合できません。先に名簿を読み込むか、下のボタンで回答ファイルから名簿を作れます。<div style="margin-top:8px"><button class="btn sm" data-act="imp-roster">回答ファイルから名簿を作る</button></div></div>`;
@@ -2264,6 +2346,13 @@ function vImportReview(){
 }
 A['sample-resp']=()=>{const R=P.sampleResp||SAMPLE_CSV;if(!R)return;dlText(R.csv,'かこピタ_見本の回答.csv','text/csv');toast('ダウンロードしました。「回答ファイルを選ぶ」で読み込んでみてください')};
 A['pick-resp']=()=>$('#respFile').click();
+A['resp-paste']=()=>{   // 貼り付けた文字から読み込む（ファイルの文字コードを通らないので、文字化けしない）
+  const t=($('#respPasteBox')||{}).value||'';if(!t.trim()){toast('貼り付ける内容がありません');return}
+  try{const rows=parseDelim(t).filter(r=>r.some(c=>String(c??'').trim()!==''));
+    if(rows.length<2)throw new Error('見出しの行と回答の行が必要です。スプレッドシートの全体（見出しの行から最後の回答まで）をコピーしてください');
+    IMP.buf=null;IMP.enc='';IMP.encAuto='';IMP.garbled=looksGarbled(t);IMP.rows=rows;IMP.file='貼り付けたデータ';IMP.plan=null;
+    IMP.map=colToMap(detectCols(rows[0].map(x=>String(x??'')),rows),Math.max(...rows.map(r=>r.length)));IMP.stage='map';render()}
+  catch(e){toast('取り込めませんでした：'+e.message,{ms:7000})}};
 A['imp-cancel']=()=>{IMP.stage='idle';IMP.plan=null;render()};
 A['imp-log']=()=>dlCsv(logCsv(IMP.plan,IMP.opts),`かこピタ_回答の確認結果_${todayISO()}.csv`);
 A['imp-roster']=async()=>{
@@ -2683,17 +2772,18 @@ function serPart(part){
   return JSON.stringify({key,g:c.g,c:c.c,locked:!!c.locked,grid:c.grid,students:members(key).map(s=>({id:s.id,cf:s.cf||{},resp:s.resp||null,cond:s.cond,ok:!!s.ok,slots:s.slots,sib:s.sib||[],memo:s.memo||''}))});
 }
 function applyPart(part,d){
-  if(part==='project'){const def=newProject();for(const k of Object.keys(d))P[k]=d[k];if(!d.term)P.term=P.id;P.meta=Object.assign(def.meta,P.meta);P.sched=Object.assign(def.sched,P.sched);P.opt=Object.assign(def.opt,P.opt);P.auto=Object.assign(def.auto,P.auto);P.form=Object.assign(def.form,P.form);P.tpl=P.tpl||{};return}
+  if(part==='project'){const def=newProject();for(const k of Object.keys(d))P[k]=d[k];if(!d.term)P.term=P.id;P.meta=Object.assign(def.meta,P.meta);P.sched=Object.assign(def.sched,P.sched);P.opt=Object.assign(def.opt,P.opt);P.auto=Object.assign(def.auto,P.auto);P.form=Object.assign(def.form,P.form);P.tpl=P.tpl||{};VER++;return}
   if(part==='roster'){
     const byId=new Map(P.students.map(s=>[s.id,s])),next=[];
     for(const r of d.students){let s=byId.get(r.id);if(s)Object.assign(s,{g:r.g,c:r.c,n:r.n,name:r.name,kana:r.kana,addr:r.addr,addrSrc:r.addrSrc||'',sex:r.sex});else s={id:r.id,g:r.g,c:r.c,n:r.n,name:r.name,kana:r.kana,addr:r.addr,addrSrc:r.addrSrc||'',sex:r.sex,sib:[],cond:{},slots:1,ok:false,memo:''};next.push(s)}
-    P.students=next;
+    P.students=next;VER++;
     for(const k of Object.keys(d.classes)){const o=d.classes[k];if(!P.classes[k])P.classes[k]={g:o.g,c:o.c,teacher:'',locked:false,grid:{},slots:1};P.classes[k].teacher=o.teacher}
     for(const k of Object.keys(P.classes))if(!d.classes[k])delete P.classes[k];
     return}
   const key=part.slice(6);let c=P.classes[key];if(!c)c=P.classes[key]={g:d.g,c:d.c,teacher:'',locked:false,grid:{},slots:1};
   c.grid=d.grid||{};c.locked=!!d.locked;const byId=new Map(P.students.map(s=>[s.id,s]));
   for(const e of d.students){const s=byId.get(e.id);if(s){s.cond=e.cond||{};s.cf=e.cf||{};s.resp=e.resp||null;s.ok=!!e.ok;s.slots=e.slots||1;s.sib=e.sib||[];s.memo=e.memo||''}}
+  VER++;   // 学級の人数や条件のキャッシュを作り直す（古いままだと、直後の「前回の状態」の記録がずれて、何も編集していないのに書き込んでしまう）
 }
 
 /* ---- disk helpers ---- */
@@ -2731,7 +2821,9 @@ async function shSync(opt={}){
       if(!d){if(cur!==null&&(dirty||SH.base[part]==null)){if(await shWrite(part))wrote++}continue}
       const rev=d.env.rev|0,base=SH.base[part];
       if(base==null){ // first contact with this part on disk
-        if(cur===null||!dirty){shAcceptRemote(part,d.env,d.mtime);SH.last[part]=serPart(part);remoteApplied=true;changed.push(part)}
+        // 中身が同じなら競合ではない。学級専用HTMLでは、ほかの学級は読むだけにする（競合にしない）
+        const same=()=>{try{return JSON.stringify(JSON.parse(cur))===JSON.stringify(d.env.data)}catch(e){return false}};
+        if(cur===null||!dirty||same()||(CM&&part!=='class:'+CM.cls)){shAcceptRemote(part,d.env,d.mtime);SH.last[part]=serPart(part);remoteApplied=true;changed.push(part)}
         else SH.conflicts[part]={remoteRev:rev,by:d.env.by,at:d.env.savedAt,why:'new'};
         continue}
       SH.meta[part]={rev,by:d.env.by,at:d.env.savedAt};
@@ -2783,7 +2875,7 @@ async function shConnectHandle(dir,mode){
     const parts=['project','roster',...await shListClasses()];
     P=newProject();P.students=[];P.classes={};
     for(const part of parts){const d=await shRead(part);if(d){applyPart(part,d.env.data);SH.base[part]=d.env.rev;SH.meta[part]={rev:d.env.rev,by:d.env.by,at:d.env.savedAt};SH.mtime[part]=d.mtime}}
-    P=migrate(P);for(const part of parts){SH.last[part]=serPart(part)}
+    P=migrate(P);VER++;for(const part of parts){SH.last[part]=serPart(part)}
     resetHistory();VER++;UI.cls=null;UI.cond.sid=null;UI.grid.sel=null;saveNow();
   }else{await shSync({quiet:true})}
   try{await dbSet(KEY_D,dir);await dbSet(KEY_D+':info',{name:dir.name||'',at:Date.now()});SH.info={name:dir.name||'',at:Date.now()}}catch(e){}
@@ -3192,7 +3284,7 @@ A.about=()=>{
 
 /* ---------- help ---------- */
 const HELP=[
- ['はじめに',()=>`<h3>最短の流れ（6ステップ）</h3><ol><li><b>1. 名簿</b>：学年・組・番号・名前・ふりがな（住所・担任名もいっしょに）を貼り付けるか、ファイルで読み込む</li><li><b>2. 日程</b>：実施日と、1日の時間割（開始時刻・1枠の長さ・枠数）を決める</li><li><b>3. フォーム</b>：Googleフォームを作るコード（GAS）をコピーして実行。集まった回答ファイルを取り込む</li><li><b>4. 条件</b>：児童生徒ごとの×（不可）・○（この時間のみ可）を確認・入力する（手入力だけでもOK）</li><li><b>5. かこピタ(配置)</b>：「かこピタ（自動配置）する」を押す。気になるところは、ドラッグで入れ替える</li><li><b>6. 印刷</b>：お知らせ・催促状・学級の一覧表・条件ブロックを印刷する（用紙はA4・A3・B5・B4の縦横から選べます）</li></ol>
+ ['はじめに',()=>`<h3>最短の流れ（6ステップ）</h3><ol><li><b>1. 名簿</b>：学年・組・番号・名前・ふりがな（住所・担任名もいっしょに）を貼り付けるか、ファイルで読み込む</li><li><b>2. 日程</b>：実施日と、1日の時間割（開始時刻・1枠の長さ・枠数）を決める</li><li><b>3. フォーム</b>：Googleフォームを作るコード（GAS）をコピーして実行。集まった回答ファイルを取り込む（取り込む前に、どの列が何の情報かを確認する画面が出ます）</li><li><b>4. 条件</b>：児童生徒ごとの×（不可）・○（この時間のみ可）を確認・入力する（手入力だけでもOK）</li><li><b>5. かこピタ(配置)</b>：「かこピタ（自動配置）する」を押す。気になるところは、ドラッグで入れ替える</li><li><b>6. 印刷</b>：お知らせ・催促状・学級の一覧表・条件ブロックを印刷する（用紙はA4・A3・B5・B4の縦横から選べます）</li></ol>
   <div class="okbox" style="margin-top:12px"><b>複数人で使うとき（かんたんな流れ）</b>
    <ol style="margin:6px 0 0 18px;padding:0;line-height:1.8">
    <li><b>設定担当者</b>：「共有する」で共有フォルダを選び、「バッチで起動する」の<b>3つのファイル</b>をそこへ書き出します。</li>
@@ -3225,7 +3317,8 @@ const HELP=[
   <h3>回答を集めたあとで、日程全体の1枠の長さ（20分→15分など）を変えられますか？</h3><p>変えられます。「2. 日程」で1枠の長さ（または開始時刻）を変えると、すでに入っている○×は、<b>時間はそのまま</b>で新しい枠に引き継がれます。例：20分で14:00と14:20が×（14:00〜14:40）→ 15分にしても×は14:00〜14:40のまま（最後の14:30の枠は、一部だけの×なので斜線）→ 20分に戻すと、もとの14:00と14:20の×に戻ります。何度変えても、×の時間は広がりません。<br>○は逆に、<b>枠の全部が○のときだけ</b>○の枠になります。例：20分で14:00〜14:20が○ → 15分にすると、○の枠は14:00〜14:15だけです（14:15〜14:30は一部だけなので、○の枠にはなりません）。20分に戻すと、もとの○に戻ります。あとから回答ファイルを取り込むときも、フォームの1枠の長さ（例：20分）と、いまの日程（例：15分）が違っていても、時間の重なりで判定します。<br>※この「2. 日程」の1枠の長さは、保護者に答えてもらう単位です。実際に組む枠の長さは、上の質問のとおり学級ごとに変えられます。</p>
   <h3>きょうだいの照合も、同じ順番ですか？</h3><p>はい、同じです（v.0.58で統一しました）。<b>学年・組・ふりがな</b>で探し、同じ人が複数いるときだけ<b>漢字</b>、それでも複数いるときだけ<b>出席番号</b>で絞ります。学年・組の入力を間違えていても、ふりがなで見つけます。</p>
   <h3>住所が、名簿と保護者の回答で違うときは？</h3><p>名簿に住所がなく、回答にあれば、回答の住所を使います。両方あって同じ場所なら、名簿の住所のままです（回答が「みどり町1丁目」、名簿が「みどり町1丁目3-5」のように、回答が名簿の前半だけのときも同じ扱いです。詳しいほうを使います）。<b>食い違うときは、保護者の回答を優先</b>します。取り込み前の確認画面に該当者が出て、取り込み後は「元に戻す」で戻せます。あとから名簿を取り込み直しても、保護者が答えた住所は上書きしません。<br>「みどりまち1丁目3」「みどりまち一丁目三」「みどりまち1ー3」「みどりまち1-3」のような、全角・半角、漢数字、「丁目」「番」「の」「ー」「-」の違いは、同じ住所として扱います。「みどり町」と「みどりまち」のように、漢字とかなが違うものは、同じとは見なしません。</p>
-  <h3>同じ児童生徒が2回回答したら？</h3><p>タイムスタンプが最新の回答だけを使い、古いものは破棄します。</p>
+  <h3>同じ児童生徒が2回回答したら？</h3><p>番号が名簿と合う回答を優先し、同じならタイムスタンプが最新の回答だけを使います（古いものは破棄します）。出席番号を間違えて書いた人がいても、ふりがな・名前で別の児童生徒と判断するので、正しく書いた人の回答は消えません（番号違いは、取り込み前の確認画面に出ます）。</p>
+  <h3>回答ファイルを取り込めないときは？</h3><p>文字化けするときは、回答のスプレッドシートの表（見出しの行から最後の回答まで）をコピーして、「3. フォーム」の貼り付け欄に貼り付けて読み込めます（文字コードの問題が起きません）。</p><p>取り込む前に、「どの列が何の情報か」を確認する画面が出ます。取り込めないときは、赤い文で理由（例：「出席番号」の列がない）と、読み取れない行・中身が具体的に出ます。右の欄で列を選び直せます。見出しが「列 11」のように分かりにくくても、中身を見て日時の列を探します。確認画面で「列の指定に戻る」を押すと、列の選び直しに戻れます。</p>
   <h3>まだ回答がない児童生徒は？</h3><p>取り込み時に「未」になり、自動配置の対象外になります。回答はあっても組・名前が名簿と合わず読み取れなかった人も、同じ扱いです。「6. 印刷」の催促状で、「回答が必要な人」にお知らせを出せます。</p>
   <h3>名前の異体字が表示されない</h3><p>名前の表示には、異体字の多い文字を表示できるフォントを優先して使います。それでも「□」になる文字は、パソコンにそのフォントが入っていない可能性があります。無料の「IPAmj明朝」などをインストールすると表示されることがあります。<br>「設定」→「名前のフォント」で、この端末で使えるフォントを選べます。選ぶとすぐ画面の名前に反映され（まだ決定ではありません）、「決定」で保存されます。名前の部分だけが変わり、ほかの文字は変わりません。この端末だけの設定です。<br>それでも表示できない字は、「読み替え」の表にある代わりの字（例：髙→高）で自動的に置き換えて表示します（画面では点線の下線つき。フォント選択の画面でオフにできます）。印刷では名前の字が変わるので、印刷後に手書きで直すか、別のフォントを選んでください。</p>
   <h3>印刷前の点検は？</h3><p>「6. 印刷」の画面に、日時が決まっていない児童生徒、未回答、担任名・学校名・電話番号の空欄が出ます。</p>`],
@@ -3948,7 +4041,7 @@ document.addEventListener('change',e=>{
   if(t.id==='clsFile'){if(t.files[0])importClassFile(t.files[0]);t.value='';return}
   if(t.id==='respFile'){if(t.files[0])loadResponse(t.files[0]);t.value='';return}
   if(t.id==='rosterFile'){if(t.files[0])loadFile(t.files[0]);t.value='';return}
-  if(t.id==='openInput'){const f=t.files[0];if(f)f.text().then(x=>loadFromText(x));t.value='';return}
+  if(t.id==='openInput'){const f=t.files[0];if(f)f.text().then(async x=>{if(await loadFromText(x))toast(`「${f.name}」を開きました（開く前の状態は、「以前の状態に戻す」から戻せます）`,{ms:6000})});t.value='';return}
   if('bind' in t.dataset){CH.bind(t);return}
   const c=t.dataset.ch;if(c&&CH[c])CH[c](t);
 });
