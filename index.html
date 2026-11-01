@@ -612,7 +612,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.972';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.973';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2548,10 +2548,20 @@ A['web-copy']=async()=>{
   if(await copyText(g.code))toast('Webアプリ版GASをコピーしました。script.new に貼り付け→ createWebApp を1回実行→「デプロイ」→「ウェブアプリ」（実行：自分／アクセス：全員）。詳しい手順は、ボタンの下に書いてあります',{ms:12000});else{UI.form.showWeb=true;render();toast('自動コピーできませんでした。表示したコードを選んでコピーしてください')}
 };
 const chkSteps=(id,ol)=>ol;
-A['code-make']=()=>{const u=($('#codeIn')?.value||'').trim();if(!/^https?:\/\/\S+$/.test(u)){toast('https:// で始まるURLを入れてください');return}
+/* 二次元コードを、かこピタで作る：URLを入れる（貼る）たびに、すぐ作り直す */
+function codeCalc(u){u=(u||'').trim();
+  if(!u)return{hint:'URLを入れる（貼る）と、すぐ下に二次元コードができます。'};
+  if(!/^https?:\/\/\S+$/.test(u))return{u,hint:'https:// で始まるURLを入れてください。'};
   try{const k=codeKit(),r=k.build(u),b=k.png(r.m,10,2);let s='';for(let i=0;i<b.length;i+=8192)s+=String.fromCharCode.apply(null,b.slice(i,i+8192));
     const CAP=[17,32,53,78,106,134,154,192,230,271],len=new TextEncoder().encode(u).length;
-    UI.form.code={u,len,cap:CAP[r.version-1],cut:r.version>1?len-CAP[r.version-2]:0,ver:r.version,size:r.size,svg:k.svg(r.m,2),png:'data:image/png;base64,'+btoa(s)}}catch(e){toast(e.message);return}render()};
+    return{u,len,cap:CAP[r.version-1],cut:r.version>1?len-CAP[r.version-2]:0,ver:r.version,size:r.size,svg:k.svg(r.m,2),png:'data:image/png;base64,'+btoa(s)}}
+  catch(e){return{u,hint:e.message}}}
+function codeHtml(c){c=c||codeCalc('');
+  if(c.hint)return `<div class="tiny muted" style="margin-top:8px">${esc(c.hint)}</div>`;
+  return `<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px"><div style="width:150px;background:#fff;padding:2px;border:1px solid var(--line)">${c.svg}</div><div class="tiny"><div>${c.size}×${c.size}マス（型番${c.ver}）／誤り訂正は最小（L）</div><div>URLの長さ：<b>${c.len}</b>文字（この型番は${c.cap}文字まで）${c.cut>0?`<br>あと<b>${c.cut}</b>文字短いURLなら、<b>${c.size-4}×${c.size-4}マス</b>に小さくなります`:''}</div><div class="muted" style="margin:4px 0">URLが短いほど、マスが少なく、小さく印刷しても読み取れます。Googleフォームは、短縮URL（forms.gle）が使われます</div><a class="btn sm" download="二次元コード.png" href="${c.png}">PNGで保存</a> <a class="btn sm" download="二次元コード.svg" href="data:image/svg+xml;charset=utf-8,${encodeURIComponent(c.svg)}">SVGで保存</a></div></div>`}
+let codeT=0;
+document.addEventListener('input',e=>{if(!e.target||e.target.id!=='codeIn')return;const v=e.target.value;clearTimeout(codeT);
+  codeT=setTimeout(()=>{UI.form.codeIn=v;UI.form.code=codeCalc(v);const o=document.getElementById('codeOut');if(o)o.innerHTML=codeHtml(UI.form.code)},120)});
 A['web-show']=()=>{UI.form.showWeb=!UI.form.showWeb;render()};
 A['web-prev']=()=>{UI.form.prevWeb=!UI.form.prevWeb;render()};
 A['gas-show']=()=>{UI.form.show=!UI.form.show;render()};
@@ -2950,9 +2960,9 @@ function vForm(){
    ${UI.form.showWeb&&wg?`<textarea class="paste" readonly style="min-height:200px;margin-top:10px" onfocus="this.select()">${esc(wg.code)}</textarea>`:''}
    ${chkSteps('w',`<ol class="steps"><li><a href="https://script.new" target="_blank" rel="noopener">script.new</a> を開く（Googleにログインした状態で）<br><b>または</b> <a href="https://script.google.com" target="_blank" rel="noopener">Google Apps Script</a> を開いて「新しいプロジェクト」を作る<span class="tiny muted">（セキュリティ設定でリンクから開けないときは、Googleにログインしたブラウザで「Google Apps Script」を検索して開いてください）</span>。</li><li>最初からあるコードを<b>すべて消して</b>、コピーしたGASを貼り付ける。</li><li>上の「実行」で <b>createWebApp</b> を<b>1回だけ</b>実行する（初回は権限の承認が出ます。<b>表示される権限は、すべて許可</b>してください。一部だけだと失敗します。「Googleで確認されていません」と出たら「詳細」→「（安全ではないページ）に移動」→「許可」を押します。自分で貼り付けたコードなので問題ありません）。回答がたまる<b>スプレッドシートが、あなたのマイドライブの直下に作られます</b>。そのURLは、画面下の「実行ログ」に出ます（メール通知がオンなら、あなた宛のメールにも届きます）。</li><li>右上の<b>「デプロイ」→「新しいデプロイ」</b>→「種類の選択」の歯車で<b>「ウェブアプリ」</b>を選ぶ。<b>次のユーザーとして実行：自分／アクセスできるユーザー：全員</b>にして「デプロイ」（この操作だけは手作業が必要です。最初の1回だけです）。</li><li>出てきた<b>「ウェブアプリのURL」</b>をコピーし、下の<b>「二次元コードを、かこピタで作る」欄</b>に貼り付けて、二次元コードを作り、<b>PNG（またはSVG）で保存</b>する。
 <details class="det hl" style="margin-top:8px"><summary>▼ クリックして開く：GASで作りたいとき（任意：マイドライブに画像を自動で保存したいとき）</summary><div class="detb tiny muted">かこピタで作るものと、<b>同じマス数・同じ大きさの二次元コード</b>ができます。違いは、画像がマイドライブに自動で保存され、メール通知がオンならメールにも添付されることです。GASの上のほうにある <b>PUBLIC_URL = ''</b> の引用符の間にURLを貼り付けて保存し、<b>makeCodeImage</b> を実行します。</div></details></li><li>スマホで二次元コードを読み取り、ページが開くか確かめる。<b>テスト送信を1件</b>して、回答のスプレッドシートにその1行が入ったことを確認し、テストの行は削除する。</li><li>問題なければ、保護者に二次元コードかURLを配る。</li><li><b>（回答のスプレッドシートを共有ドライブへ移すとき）</b>スプレッドシートを共有ドライブへ移動します。スプレッドシートのURLも、ウェブアプリのURLも、二次元コードも<b>そのまま使えます</b>。ただし、このGASを動かす<b>あなたのアカウントが、その共有ドライブの「投稿者」以上のメンバー</b>である必要があります（外れると、回答が保存できなくなります）。移したあとに、もう一度テスト送信をして確かめてください。</li><li><b>日程などを変えたとき</b>：新しいGASを貼り直し、「デプロイ」→「デプロイを管理」→鉛筆→バージョン「新バージョン」→「デプロイ」。<b>URLも二次元コードも、回答のスプレッドシートも、そのまま</b>です（GASで二次元コードを作る場合は、貼り直したあと、PUBLIC_URL にもう一度URLを貼ります）。「新しいデプロイ」にするとURLが変わるので、二次元コードを作り直してください（スプレッドシートは同じです）。別のプロジェクトに貼って実行したときだけ、新しいスプレッドシートが作られます。</li><li>回答は、そのスプレッドシートを「カンマ区切り形式（.CSV）」でダウンロードするか、表をコピーして、「回答を取り込む」の欄で読み込みます。</li></ol>`)}
-   <div class="panel" style="margin-top:14px;padding:12px"><b>二次元コードを、かこピタで作る</b><span class="tiny muted">（URLを貼るだけ。通信はせず、この画面の中だけで作ります）</span>
-    <div class="row" style="margin-top:8px"><input id="codeIn" type="text" placeholder="https://…" value="${esc(UI.form.code?UI.form.code.u:'')}" style="flex:1;min-width:200px"><button class="btn" data-act="code-make">二次元コードを作る</button></div>
-    ${UI.form.code?`<div style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:10px"><div style="width:150px;background:#fff;padding:2px;border:1px solid var(--line)">${UI.form.code.svg}</div><div class="tiny"><div>${UI.form.code.size}×${UI.form.code.size}マス（型番${UI.form.code.ver}）／誤り訂正は最小（L）</div><div>URLの長さ：<b>${UI.form.code.len}</b>文字（この型番は${UI.form.code.cap}文字まで）${UI.form.code.cut>0?`<br>あと<b>${UI.form.code.cut}</b>文字短いURLなら、<b>${UI.form.code.size-4}×${UI.form.code.size-4}マス</b>に小さくなります`:''}</div><div class="muted" style="margin:4px 0">URLが短いほど、マスが少なく、小さく印刷しても読み取れます。Googleフォームは、短縮URL（forms.gle）が使われます</div><a class="btn sm" download="二次元コード.png" href="${UI.form.code.png}">PNGで保存</a> <a class="btn sm" download="二次元コード.svg" href="data:image/svg+xml;charset=utf-8,${encodeURIComponent(UI.form.code.svg)}">SVGで保存</a></div></div>`:''}</div></section>`;
+   <div class="panel" style="margin-top:14px;padding:12px"><b>二次元コードを、かこピタで作る</b><span class="tiny muted">（URLを貼ると、すぐにできます。通信はせず、この画面の中だけで作ります）</span>
+    <div class="row" style="margin-top:8px"><input id="codeIn" type="text" placeholder="https://…" value="${esc(UI.form.codeIn||'')}" style="flex:1;min-width:200px" autocomplete="off" spellcheck="false"></div>
+    <div id="codeOut">${codeHtml(UI.form.code)}</div></div></section>`;
   h+=`<section class="panel"><h2><span class="stepno">B</span>回答を取り込む<small>回答ファイルの読み込み、または表の貼り付け</small></h2>`;
   if(IMP.stage==='review'&&IMP.plan)h+=vImportReview();
   else if(IMP.stage==='map'&&IMP.rows)h+=vImportMap();
@@ -4641,7 +4651,8 @@ A['settings']=()=>{
     const s=e.target.closest('[data-set]');if(s){el._close();if(s.dataset.set==='namefont')A.namefont();else if(s.dataset.set==='sample')await sampleFlow();else if(s.dataset.set==='newevent')A.newevent();else if(s.dataset.set==='fdl')downloadJSON();else if(s.dataset.set==='fopen')openFile();else if(s.dataset.set==='bk')await A['bk-open']();else await wipeFlow()}
   });
   el.addEventListener('change',e=>{const o=e.target.dataset.opt;if(o){act(()=>setProp(P.opt,o,e.target.checked));return}
-    if('vi' in e.target.dataset){const i=+e.target.dataset.vi,j=+e.target.dataset.vj;act(()=>{const a=P.vari.map(x=>x.slice());a[i][j]=e.target.value;setProp(P,'vari',a)})}});
+    if('vi' in e.target.dataset){const i=+e.target.dataset.vi,j=+e.target.dataset.vj;if(!P.vari[i]){$('#variBody').innerHTML=variRows();return}   // 「元に戻す」などで表が変わったあとの、古い行の編集は、表を描き直すだけにする
+      act(()=>{const a=P.vari.map(x=>x.slice());a[i][j]=e.target.value;setProp(P,'vari',a)})}});
 };
 const variRows=()=>P.vari.map((r,i)=>`<tr><td><input type="text" data-vi="${i}" data-vj="0" value="${esc(r[0])}"></td><td><input type="text" data-vi="${i}" data-vj="1" value="${esc(r[1])}"></td><td><button class="btn ghost sm" data-vari="del" data-i="${i}" aria-label="削除">${ic('x',14)}</button></td></tr>`).join('');
 async function wipeFlow(){
