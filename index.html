@@ -612,7 +612,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.981';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.983';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3168,7 +3168,7 @@ function vPrint(){
     <div class="row" style="margin-top:12px"><b style="font-size:13px">名前のフォント</b><span style="font-family:var(--font-name);font-size:18px">${esc(nfSampleInfo().chars.slice(0,4).join(' ')||'髙 﨑 𠮷')}</span><span class="tiny muted">いま：${esc(nfLabel(nfLoad()))}</span><button class="btn sm" data-act="namefont">選ぶ…</button></div>
     ${(()=>{const gn=glIssues().length;return `<div class="row" style="margin-top:8px${gn?'':';opacity:.55'}"><b style="font-size:13px">表示できない字は</b><div class="seg">${[['alt','代わりの字'],['kana','ひらがな'],['none','そのまま']].map(([v,l])=>`<button data-act="p-gm" data-v="${v}" class="${GLY.pm===v?'on':''}">${l}</button>`).join('')}</div><span class="tiny muted">${gn?`該当 ${gn}名。`:'該当なし（名前に、いまのフォントで表示できない字があるときに使われます）。'}代わりの字＝読み替えの表の字（髙→高）／ひらがな＝名簿のふりがなで名前全体を置き換え</span></div>`})()}
     ${(U.mode==='table'||U.mode==='blocks')?`<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><label class="tog"><input type="checkbox" data-ch="paddrdoc" ${pAddrDoc()?'checked':''}>住所も印刷する（家庭訪問のときだけ、最初から印刷します）</label>
-      ${U.mode==='table'?`<div class="row"><b style="font-size:13px;min-width:4em">きょうだい</b><div class="seg">${[['out','表の外に一覧'],['in','表の中に'],['both','両方']].map(([v,l])=>`<button data-act="p-r" data-k="sibMode" data-v="${v}" class="${(U.sibMode||'both')===v?'on':''}">${l}</button>`).join('')}</div><span class="tiny muted">赤字と★で強調（白黒でも目立ちます）</span></div>`:''}
+      ${U.mode==='table'?`<div class="row"><b style="font-size:13px;min-width:4em">きょうだい</b><div class="seg">${[['out','表の外に一覧'],['in','表の中に'],['both','両方']].map(([v,l])=>`<button data-act="p-r" data-k="sibMode" data-v="${v}" class="${(U.sibMode||'both')===v?'on':''}">${l}</button>`).join('')}</div><span class="tiny muted">赤字と★で強調（白黒でも目立ちます）</span></div><div class="row" style="margin-top:8px"><button class="btn sm" data-act="p-xlsx">${ic('down',15)}選んだ学級をExcelで保存</button><button class="btn sm" data-act="p-csv-t">${ic('down',15)}CSV（表の形）</button><button class="btn sm" data-act="p-csv-l">${ic('down',15)}CSV（1人1行）</button><span class="tiny muted">Excelは学級ごとの表＋並べ替え用の「一覧データ」シートです</span></div>`:''}
       ${U.mode==='blocks'?`<div class="row"><b style="font-size:13px;min-width:4em">枚数</b><div class="seg">${[['2','2枚（標準）'],['3','3枚'],['4','4枚'],['auto','自動（読める最小）']].map(([v,l])=>`<button data-act="p-r" data-k="pages" data-v="${v}" class="${String(U.pages)===v?'on':''}">${l}</button>`).join('')}</div><span class="tiny muted">（1学級あたり）</span></div><label class="tog"><input type="checkbox" data-ch="pplace" ${U.showPlace?'checked':''}>配置済みの日時も印字する</label>`:''}</div>`
      :U.mode==='notice'?`<label class="tog" style="margin-top:10px"><input type="checkbox" data-ch="pskip" ${U.skipUnplaced?'checked':''}>日時が決まっていない児童生徒は印刷しない</label>`
       :`<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><div class="row"><b style="font-size:13px;min-width:4em">対象</b><div class="seg"><button data-act="p-r" data-k="rTarget" data-v="unans" class="${U.rTarget==='unans'?'on':''}">回答が必要な人</button><button data-act="p-r" data-k="rTarget" data-v="all" class="${U.rTarget==='all'?'on':''}">全員</button></div><span class="tiny muted">回答が必要な人＝未回答のほか、回答が読み取れず（組・名前が合わない等）反映できていない人</span></div>
@@ -4351,6 +4351,8 @@ function vGrid(){
     ${P.students.some(s=>s.addr)?`<label class="tog"><input type="checkbox" data-ch="addrshow" ${showAddr()?'checked':''}>住所を表示</label>`:''}
     ${eff?`<label class="tog"><input type="checkbox" data-ch="hide17" ${P.opt.hide17?'checked':''}>${esc(clsAutoC().cutTime)}以降を隠す</label>`:''}
     <button class="btn sm" data-act="g-print" title="この学級の一覧表をA4などで印刷します">${ic('print',14)}一覧表を印刷</button>
+    <button class="btn sm" data-act="g-xlsx" title="この学級の一覧表を、Excel（.xlsx）ファイルで保存します">${ic('down',14)}Excelで保存</button>
+    <button class="btn sm" data-act="g-csv-t" title="この学級の一覧表を、表の形のCSVで保存します">${ic('down',14)}CSV（表の形）</button><button class="btn sm" data-act="g-csv-l" title="1人1行のCSVで保存します（並べ替え・集計向き）">${ic('down',14)}CSV（1人1行）</button>
     ${used||brks?`<button class="btn sm danger" data-act="g-clear" title="この学級の配置をまとめて外します">${ic('trash',15)}全員を外す</button>`:''}</div>
    <div style="min-height:44px">${sel?`<div class="hint" style="margin-bottom:12px">${esc(sel.name)} さんを選択中：${pm.has(sel.id)?'移動したいマスをクリックすると、その場所へ移ります（入っている人とは入れ替わります）':'置きたいマスをクリックしてください'}　<span style="opacity:.7">Escで解除</span></div>`:''}</div>
    <div class="gv"><aside><section class="panel" style="padding:12px" data-drop="un"><h2 style="margin-bottom:8px">未配置<small>${un.length}名 / 使用 ${used}${brks?`＋休憩${brks}`:''} / ${total}枠${(()=>{const hd=Object.values(P.classes[k].grid).filter(c=>c.head).length-pm.size;return hd>0?` ／ <b style="color:var(--ng)">日程の範囲外 ${hd}名</b>`:''})()}</small></h2>
@@ -4442,6 +4444,84 @@ A['g-day']=el=>{const G=UI.grid;if(G.mode!=='break')return;const k=curCls(),cls=
   const allBrk=free.every(kk=>cls.grid[kk]&&cls.grid[kk].brk);
   act(()=>{for(const kk of free){if(allBrk)delProp(cls.grid,kk);else if(!cls.grid[kk])setProp(cls.grid,kk,{brk:1})}});
   toast(allBrk?`${fmtD(d)}の休憩（×）を外しました`:`${fmtD(d)}の空きマスをすべて休憩（×）にしました`,{undo:true})};
+/* ---- 一覧表を Excel(.xlsx) で保存：学級ごとの表のシート ＋ 並べ替え用の「一覧データ」シート ---- */
+function xlBuild(keys){
+  {
+    if(!window.XLSX){toast('Excelを書き出す部品が見つかりません',{kind:'warn'});return}
+    const dates=P.sched.dates||[];
+    if(!dates.length){toast('日程（日付）が決まっていないため、書き出せません',{kind:'warn'});return}
+    const wb=XLSX.utils.book_new(),usedNames=new Set(),longRows=[];
+    const serialD=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})/.exec(iso);return m?Date.UTC(+m[1],+m[2]-1,+m[3])/86400000+25569:null};
+    const serialT=t=>{const m=/^(\d{1,2}):(\d{2})/.exec(t||'');return m?(+m[1]*60+ +m[2])/1440:null};
+    const showAddr=P.students.some(s=>s.addr);
+    for(const key of keys){
+      const cls=P.classes[key];if(!cls)continue;
+      const c=classList().find(x=>x.key===key)||{},lab=clsLabel(c.g,c.c),SL=gslots(key),mem=members(key);
+      let first=-1,last=-1;SL.forEach((x,i)=>{for(const d of dates){if(cls.grid[d+'|'+x.key]){if(first<0)first=i;last=i}}});
+      if(first<0){first=0;last=Math.min(SL.length-1,9)}
+      const rows=SL.slice(first,last+1),skip=new Set(),merges=[];
+      const cnt=dates.map(d=>{let n=0;for(const x of SL){const cc=cls.grid[d+'|'+x.key];if(cc&&cc.head&&stById(cc.sid))n++}return n});
+      const aoa=[[`${lab}　${kindName()} 日程表${c.teacher?'　'+c.teacher+' 先生':''}${P.meta.school?'　'+P.meta.school:''}`],
+                 ['時間',...dates.map(mdw)],['人数',...cnt.map(n=>n+'名')]];
+      merges.push({s:{r:0,c:0},e:{r:0,c:dates.length}});
+      rows.forEach((x,ri)=>{
+        const line=[x.label];
+        dates.forEach((d,di)=>{
+          const k=d+'|'+x.key;if(skip.has(k)){line.push(null);return}
+          const cc=cls.grid[k];if(!cc){line.push(null);return}
+          if(cc.brk){line.push('休憩');return}
+          const st=cc.head?stById(cc.sid):null;if(!st){line.push(null);return}
+          const n=Math.min(cc.n||1,rows.length-ri);
+          for(let j=1;j<n;j++){const s2=SL[first+ri+j];if(s2)skip.add(d+'|'+s2.key)}
+          if(n>1)merges.push({s:{r:3+ri,c:di+1},e:{r:3+ri+n-1,c:di+1}});
+          line.push(st.name+((cc.n||1)>1?`　${cc.n}枠`:''));
+        });
+        aoa.push(line);
+      });
+      const ws=XLSX.utils.aoa_to_sheet(aoa);
+      ws['!merges']=merges;ws['!cols']=[{wch:9},...dates.map(()=>({wch:18}))];
+      let nm=lab.replace(/[\\\/\?\*\[\]:]/g,'').slice(0,28)||'学級',base=nm,q=2;while(usedNames.has(nm))nm=base+'_'+(q++);
+      usedNames.add(nm);XLSX.utils.book_append_sheet(wb,ws,nm);
+      // 並べ替え用の一覧（1人1行）
+      for(const s of mem){
+        const hk=headKey(cls,s.id),row=[lab,s.n,s.name];
+        if(hk){const [d,t]=hk.split('|'),cc=cls.grid[hk],sl=SL.find(x=>x.key===t),dv=serialD(d),tv=serialT(sl?sl.label:t);
+          const wk=(/\((.)\)/.exec(mdw(d))||[])[1]||'';row.push(dv!=null?{t:'n',v:dv,z:'m/d'}:d, wk, tv!=null?{t:'n',v:tv,z:'h:mm'}:(sl?sl.label:t), (cc&&cc.n)||1,'配置済み')}
+        else row.push('','','','', '未配置');
+        if(showAddr)row.push(s.addr||'');
+        row.push(sibLines(s).join(' ／ '));
+        longRows.push(row);
+      }
+    }
+    if(!wb.SheetNames.length){toast('書き出せる学級がありません',{kind:'warn'});return}
+    const head=['学級','番','名前','日付','曜日','時刻','枠数','状況',...(showAddr?['住所']:[]),'きょうだい'];
+    const wl=XLSX.utils.aoa_to_sheet([head,...longRows]);
+    wl['!cols']=[{wch:9},{wch:5},{wch:16},{wch:9},{wch:6},{wch:8},{wch:6},{wch:9},...(showAddr?[{wch:24}]:[]),{wch:34}];
+    wl['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:longRows.length,c:head.length-1}})};
+    XLSX.utils.book_append_sheet(wb,wl,'一覧データ');
+    return wb;
+  }
+}
+const xlName=(keys,ext)=>{const c=keys.length===1?(classList().find(x=>x.key===keys[0])||{}):null;return `かこピタ_${c?clsLabel(c.g,c.c):'一覧表'}_${todayISO()}.${ext}`};
+function exportXlsx(keys){
+  try{const wb=xlBuild(keys);if(!wb)return;
+    dlText(XLSX.write(wb,{bookType:'xlsx',type:'array'}),xlName(keys,'xlsx'),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    toast(`Excelファイルをダウンロードしました（${keys.length}学級）。学級ごとの表のほか、並べ替え用の「一覧データ」シートも入っています`,{ms:6000})}
+  catch(e){toast('Excelに書き出せませんでした：'+(e.message||e),{kind:'warn'})}
+}
+function exportCsv(keys,form){   // form: 't'=表の形（学級ごと、空行で区切る） / 'l'=1人1行
+  try{const wb=xlBuild(keys);if(!wb)return;
+    const csv=form==='l'?XLSX.utils.sheet_to_csv(wb.Sheets['一覧データ']):wb.SheetNames.filter(n=>n!=='一覧データ').map(n=>XLSX.utils.sheet_to_csv(wb.Sheets[n]).replace(/\n+$/,'')).join('\n\n');
+    dlText('\ufeff'+csv,xlName(keys,'csv').replace('.csv',form==='l'?'_1人1行.csv':'_表.csv'),'text/csv;charset=utf-8');
+    toast(form==='l'?'CSV（1人1行）をダウンロードしました。並べ替えやフィルターに向いています':'CSV（表の形）をダウンロードしました。'+(keys.length>1?'学級ごとに空行で区切ってあります':''),{ms:6000})}
+  catch(e){toast('CSVに書き出せませんでした：'+(e.message||e),{kind:'warn'})}
+}
+A['g-xlsx']=()=>{const k=curCls();if(!k)return;exportXlsx([k])};
+A['g-csv-t']=()=>{const k=curCls();if(k)exportCsv([k],'t')};
+A['g-csv-l']=()=>{const k=curCls();if(k)exportCsv([k],'l')};
+A['p-xlsx']=()=>{const ks=docClassList().map(c=>c.key);if(!ks.length){toast('学級が選ばれていません',{kind:'warn'});return}exportXlsx(ks)};
+A['p-csv-t']=()=>{const ks=docClassList().map(c=>c.key);if(!ks.length){toast('学級が選ばれていません',{kind:'warn'});return}exportCsv(ks,'t')};
+A['p-csv-l']=()=>{const ks=docClassList().map(c=>c.key);if(!ks.length){toast('学級が選ばれていません',{kind:'warn'});return}exportCsv(ks,'l')};
 A['g-print']=()=>{const k=curCls();if(!k)return;const U=UI.print;U.mode='table';U.sel=new Set([k]);A['p-print']()};
 A['g-lockall']=()=>{
   const cl=plist(),sel=new Set(cl.filter(c=>P.classes[c.key].locked).map(c=>c.key));
