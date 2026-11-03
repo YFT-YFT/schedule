@@ -612,7 +612,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.980';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.981';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1929,7 +1929,7 @@ A.auto=()=>{
     const seg=(key,opts)=>`<div class="seg">${opts.map(([v,l])=>`<button data-ac="${key}" data-v="${v}" class="${String(o[key])===String(v)?'on':''}">${l}</button>`).join('')}</div>`;
     const mem=members(rep).find(s=>s.addr),ex=mem?areaKeyM(mem,o.areaN,o.areaMode):'';
     box.innerHTML=`<h2>かこピタ（自動配置）</h2><p class="muted tiny" style="margin-bottom:12px">入力された都合に合わせて、児童生徒をピタッと自動で配置します。休憩（×）は残し、未回答の児童生徒は対象外です。<b>この画面の設定は学級ごとに保存</b>され、ほかの学級には影響しません。</p>
-     <div class="f aosel" style="margin-bottom:14px"><span style="font-weight:800;font-size:12.5px;color:var(--ink2)">対象の学級（設定の変更と、「指定した学級をかこピタ」に使います）</span><div class="cbar" style="margin-top:4px">${classList().map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-ao="tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${c.n}</small></button>`).join('')}<button class="btn ghost sm" data-ao="seltog">${classList().length&&classList().every(c=>sel.has(c.key))?'すべて解除':'すべて選ぶ'}</button></div>
+     <div class="f aosel" style="margin-bottom:14px"><span style="font-weight:800;font-size:12.5px;color:var(--ink2)">対象の学級（設定の変更と、「指定した学級をかこピタ」に使います）</span><div class="cbar" style="margin-top:4px">${classList().map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-ao="tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${c.n}</small></button>`).join('')}<button class="btn ghost sm" data-ao="selall">すべて選ぶ</button><button class="btn ghost sm" data-ao="selnone">すべて解除</button></div>
       <span class="tiny muted" style="font-weight:500">${ks.length>1?`表示は「${esc(clsLabel(P.classes[rep].g,P.classes[rep].c))}」の設定です。<b>変更した項目だけ</b>を、選んだ${ks.length}学級に反映します（変更しなければ、何も変わりません）。`:`いまは「${esc(clsLabel(P.classes[rep].g,P.classes[rep].c))}」だけの設定です。複数の学級を選ぶと、変更した項目だけをまとめて反映できます。`}</span></div>
      <div class="fgrid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px">
       <label class="f">自動配置の方針${seg('shuffle',[[0,'出席番号順優先'],[2,'シャッフル']])}<span class="tiny muted" style="font-weight:500">シャッフル＝実行のたびに別の案になります</span>${diff('shuffle')}</label>
@@ -1950,7 +1950,8 @@ A.auto=()=>{
     const a=b.dataset.ao;
     if(a==='close'){el._close();return}
     if(a==='tog'){const kk=b.dataset.k;UI.auto.sel.has(kk)?UI.auto.sel.delete(kk):UI.auto.sel.add(kk);paint();return}
-    if(a==='seltog'){const ls=classList(),on=ls.length&&ls.every(c=>UI.auto.sel.has(c.key));UI.auto.sel=on?new Set():new Set(ls.map(c=>c.key));paint();return}
+    if(a==='selall'){UI.auto.sel=new Set(classList().map(c=>c.key));paint();return}
+    if(a==='selnone'){UI.auto.sel=new Set();paint();return}
     if(a==='one'||a==='all'||a==='sel'){el._close();runAuto(a);return}});
   el.addEventListener('change',e=>{const t=e.target;
     if(t.hasAttribute('data-ac-time')){setK('cutTime',t.value||'17:00');paint();return}
@@ -3161,7 +3162,7 @@ function vPrint(){
    <section class="panel"><div class="seg" style="margin-bottom:6px;flex-wrap:wrap">${[['notice','日程のお知らせ'],['remind','未回答の催促状'],['table','学級の一覧表'],['blocks','条件ブロック']].map(([m,l])=>`<button data-act="p-mode" data-m="${m}" class="${U.mode===m?'on':''}">${l}</button>`).join('')}</div>
     <p class="tiny muted" style="margin-bottom:12px">${{notice:'児童生徒・保護者に手渡す個票です（標準はA4縦・上下2段。横にすると左右2段）。',remind:'未回答の保護者に渡す催促状です（標準はA4縦・上下2段）。',table:'担任が日程を把握するための一覧表です（標準は縦・学級ごとに1枚・白黒印刷向き）。児童生徒名が折り返さない大きさに自動で調整します。きょうだいは赤字と★で強調します。',blocks:'手作業で配置するための、児童生徒ごとの×○の一覧です。文字が小さめなので、A3での印刷をおすすめします。1学級が2枚に収まり、文字が最大になる向きを自動で選びます。'}[U.mode]}</p>
     <div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:4px">対象の学級</div>
-    <div class="cbar">${all.map(c=>`<button class="cp ${U.sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-act="p-tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${c.n}</small></button>`).join('')}<button class="btn ghost sm" data-act="p-alltog">${all.length&&all.every(c=>U.sel.has(c.key))?'すべて解除':'すべて選ぶ'}</button></div>
+    <div class="cbar">${all.map(c=>`<button class="cp ${U.sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-act="p-tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${c.n}</small></button>`).join('')}<button class="btn ghost sm" data-act="p-all">すべて選ぶ</button><button class="btn ghost sm" data-act="p-none">すべて解除</button></div>
     <div class="row" style="margin-top:12px"><label class="tog">番号<input type="number" min="1" data-ch="pfld" data-k="from" value="${esc(U.from!==''&&U.from!=null?U.from:1)}" style="width:68px" placeholder="1">番から</label><label class="tog"><input type="number" min="1" data-ch="pfld" data-k="to" value="${esc(U.to!==''&&U.to!=null?U.to:Math.max(1,...(all.filter(c=>U.sel.has(c.key)).length?all.filter(c=>U.sel.has(c.key)):all).flatMap(c=>members(c.key).map(s=>+s.n||0))))}" style="width:68px" placeholder="45">番まで</label><span class="tiny muted">（初期値＝選んだ学級の最大の番号＝全員）</span></div>
     ${paperRowHtml()}
     <div class="row" style="margin-top:12px"><b style="font-size:13px">名前のフォント</b><span style="font-family:var(--font-name);font-size:18px">${esc(nfSampleInfo().chars.slice(0,4).join(' ')||'髙 﨑 𠮷')}</span><span class="tiny muted">いま：${esc(nfLabel(nfLoad()))}</span><button class="btn sm" data-act="namefont">選ぶ…</button></div>
@@ -3186,7 +3187,8 @@ function vPrint(){
 A['p-gm']=el=>{GLY.pm=el.dataset.v;lsSet('kp_glyphpm',GLY.pm);render()};
 A['p-mode']=el=>{UI.print.mode=el.dataset.m;render()};
 A['p-tog']=el=>{const s=UI.print.sel;s.has(el.dataset.k)?s.delete(el.dataset.k):s.add(el.dataset.k);render()};
-A['p-alltog']=()=>{const ls=classList(),on=ls.length&&ls.every(c=>UI.print.sel.has(c.key));UI.print.sel=on?new Set():new Set(ls.map(c=>c.key));render()};
+A['p-all']=()=>{UI.print.sel=new Set(classList().map(c=>c.key));render()};
+A['p-none']=()=>{UI.print.sel=new Set();render()};
 A['p-r']=el=>{UI.print[el.dataset.k]=el.dataset.v;render()};
 A['p-ps']=el=>{UI.print.pp[UI.print.mode].s=el.dataset.v;render()};
 A['p-po']=el=>{UI.print.pp[UI.print.mode].o=el.dataset.v;render()};
@@ -4075,7 +4077,7 @@ A.newevent=()=>{
     box.innerHTML=`<h2>データを消す</h2><p class="muted tiny" style="margin-bottom:10px">消す内容を選びます。実行前に自動でバックアップを取り、実行後も「元に戻す」で戻せます。</p>
      <div class="seg" style="margin-bottom:12px"><button data-ne="p-prep" class="${cur==='prep'?'on':''}">次の行事の準備（標準）</button><button data-ne="p-roster" class="${cur==='roster'?'on':''}">名簿・担任名も消す</button><button data-ne="p-all" class="${cur==='all'?'on':''}">すべて消す（初期化）</button></div>
      <div class="tiny muted" style="margin-bottom:10px">${cur==='prep'?'名簿・担任名・学校情報・文面・設定・きょうだい情報・枠数は残し、条件・配置・日程・行事名などだけを消します。次の行事を始めるときに便利です。<br><b>実行すると、前の行事の共有フォルダや学級用HTMLにはつながらなくなります（取り違え防止）。</b>次の行事では、新しい共有フォルダと、新しく書き出したHTML・バッチ・ショートカットを使ってください。フォームの名前と締め切り日も空に戻ります。':cur==='roster'?'学年が変わるときなどに。学校名・文面・設定は残ります。':cur==='all'?'名簿・日程・条件・配置・設定をすべて消して、最初の状態に戻します。':'自分で選んだ内容を消します。'}</div>
-     <div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:4px">対象の学級（条件・配置などを消す学級）</div><div class="cbar" style="margin-bottom:12px">${cl.map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-ne="tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}</button>`).join('')}<button class="btn ghost sm" data-ne="alltog">${cl.length&&cl.every(c=>sel.has(c.key))?'すべて解除':'すべて選ぶ'}</button></div>
+     <div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:4px">対象の学級（条件・配置などを消す学級）</div><div class="cbar" style="margin-bottom:12px">${cl.map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-ne="tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}</button>`).join('')}<button class="btn ghost sm" data-ne="all">すべて選ぶ</button><button class="btn ghost sm" data-ne="none">すべて解除</button></div>
      <div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:4px">行事ごとのデータ</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">${row(true)}</div>
      <div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:4px">学校・名簿の情報（ふつうは残します）</div><div style="display:flex;flex-direction:column;gap:6px">${row(false)}</div>
      ${st.roster?'<div class="ngbox" style="margin-top:10px">名簿を消すと、条件・配置もすべてなくなります。</div>':''}
@@ -4087,7 +4089,8 @@ A.newevent=()=>{
     const b=e.target.closest('[data-ne]');if(!b)return;const a=b.dataset.ne;
     if(a.startsWith('p-')){setPreset(a.slice(2));paint();return}
     if(a==='tog'){sel.has(b.dataset.k)?sel.delete(b.dataset.k):sel.add(b.dataset.k);paint();return}
-    if(a==='alltog'){if(cl.length&&cl.every(c=>sel.has(c.key)))sel.clear();else cl.forEach(c=>sel.add(c.key));paint();return}
+    if(a==='all'){cl.forEach(c=>sel.add(c.key));paint();return}
+    if(a==='none'){sel.clear();paint();return}
     if(a==='go'){
       if(!Object.values(st).some(Boolean)){toast('消す内容を選んでください');return}
       if(!sel.size&&(st.cond||st.sib||st.grid)){toast('対象の学級を選んでください');return}
@@ -4314,11 +4317,12 @@ document.addEventListener('change',e=>{const t=e.target;if(!t||!t.dataset||!t.da
 A['gs-copy']=()=>{   // この学級の時間割・時刻のルールを、ほかの学級にも反映
   const k=curCls(),src=P.classes[k];if(!src)return;const sel=new Set();
   const el=openDlg('',{}),box=$('.dlg',el);
-  const paint=()=>{const o=clsAuto(k),G=gridOf(k);box.innerHTML=`<h2>ほかの学級にも反映</h2><p class="muted tiny" style="margin-bottom:10px">「${esc(clsLabel(src.g,src.c))}」の次の設定を、選んだ学級にコピーします：<b>1枠の長さ ${G.len}分／開始 ${G.slots.length?G.slots[0].label:'-'}／時刻のルール ${{effort:'できれば',strict:'厳守',none:'制限なし'}[o.cutMode]}（${esc(o.cutTime)}）</b></p><div class="cbar">${classList().filter(c=>c.key!==k).map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-q="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${Object.values(c.obj.grid||{}).filter(x=>x.head).length?'配置あり':''}</small></button>`).join('')}<button class="btn ghost sm" data-q="*">${(()=>{const o=classList().filter(c=>c.key!==k);return o.length&&o.every(c=>sel.has(c.key))?'すべて解除':'すべて選ぶ'})()}</button></div><p class="tiny muted" style="margin-top:8px">枠が変わる学級は、配置済みの分と休憩（×）が外れます（元に戻せます）。</p><div class="acts"><button class="btn" data-q="x">やめる</button><button class="btn pri" data-q="go" ${sel.size?'':'disabled'}>コピーする（${sel.size}）</button></div>`};
+  const paint=()=>{const o=clsAuto(k),G=gridOf(k);box.innerHTML=`<h2>ほかの学級にも反映</h2><p class="muted tiny" style="margin-bottom:10px">「${esc(clsLabel(src.g,src.c))}」の次の設定を、選んだ学級にコピーします：<b>1枠の長さ ${G.len}分／開始 ${G.slots.length?G.slots[0].label:'-'}／時刻のルール ${{effort:'できれば',strict:'厳守',none:'制限なし'}[o.cutMode]}（${esc(o.cutTime)}）</b></p><div class="cbar">${classList().filter(c=>c.key!==k).map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-q="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${Object.values(c.obj.grid||{}).filter(x=>x.head).length?'配置あり':''}</small></button>`).join('')}<button class="btn ghost sm" data-q="*">すべて選ぶ</button><button class="btn ghost sm" data-q="-">すべて解除</button></div><p class="tiny muted" style="margin-top:8px">枠が変わる学級は、配置済みの分と休憩（×）が外れます（元に戻せます）。</p><div class="acts"><button class="btn" data-q="x">やめる</button><button class="btn pri" data-q="go" ${sel.size?'':'disabled'}>コピーする（${sel.size}）</button></div>`};
   paint();
   el.addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;const q=b.dataset.q;
     if(q==='x'){el._close();return}
-    if(q==='*'){const o=classList().filter(c=>c.key!==k);if(o.length&&o.every(c=>sel.has(c.key)))sel.clear();else o.forEach(c=>sel.add(c.key));paint();return}
+    if(q==='-'){sel.clear();paint();return}
+    if(q==='*'){classList().forEach(c=>{if(c.key!==k)sel.add(c.key)});paint();return}
     if(q==='go'){const o=clsAuto(k),G=gridOf(k),bm=+P.sched.slotMin||20,b0=parseT(P.sched.start),bs=b0==null?840:b0,t0=G.slots.length?G.slots[0].t:bs;
       el._close();act(()=>{for(const kk of sel){const c=P.classes[kk];if(!c)continue;const og=gridOf(kk),ch=og.len!==G.len||(og.slots[0]&&og.slots[0].t)!==t0;
         if(ch)takeSnap(kk);setProp(c,'slotMin',G.len===bm?0:G.len);setProp(c,'start',t0===bs?'':fmtT(t0));if(ch)for(const x of Object.keys(c.grid||{}))delProp(c.grid,x);
@@ -4444,14 +4448,15 @@ A['g-lockall']=()=>{
   const el=openDlg('',{}),box=$('.dlg',el);
   const paint=()=>{box.innerHTML=`<h2>配置ロックの一括操作</h2><p class="muted tiny">ロック中の学級は、「かこピタ（自動配置）」で動かされません。</p>
     <div class="cbar" style="margin:12px 0 8px">${cl.map(c=>{const lk=P.classes[c.key].locked;return `<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-lk="tog" data-k="${esc(c.key)}">${lk?ic('lock',12)+' ':''}${esc(clsLabel(c.g,c.c))}</button>`}).join('')}</div>
-    <div class="row"><button class="btn ghost sm" data-lk="all">${cl.length&&cl.every(c=>sel.has(c.key))?'選択をすべて外す':'すべて選ぶ'}</button><button class="btn ghost sm" data-lk="locked">ロック中だけ選ぶ</button></div>
+    <div class="row"><button class="btn ghost sm" data-lk="all">すべて選ぶ</button><button class="btn ghost sm" data-lk="locked">ロック中だけ選ぶ</button><button class="btn ghost sm" data-lk="none">選択をすべて外す</button></div>
     <div class="acts" style="flex-wrap:wrap"><button class="btn" data-close>閉じる</button><button class="btn" data-lk="lock" ${sel.size?'':'disabled'}>選んだ学級をロック</button><button class="btn pri" data-lk="unlock" ${sel.size?'':'disabled'}>選んだ学級のロックを解除</button><button class="btn pri" data-lk="unlockall">全学級のロックを解除</button></div>`};
   paint();
   el.addEventListener('click',e=>{
     if(e.target.closest('[data-close]')){el._close();return}
     const b=e.target.closest('[data-lk]');if(!b)return;const a=b.dataset.lk;
     if(a==='tog'){sel.has(b.dataset.k)?sel.delete(b.dataset.k):sel.add(b.dataset.k)}
-    else if(a==='all'){if(cl.length&&cl.every(c=>sel.has(c.key)))sel.clear();else cl.forEach(c=>sel.add(c.key))}
+    else if(a==='all')cl.forEach(c=>sel.add(c.key));
+    else if(a==='none')sel.clear();
     else if(a==='locked'){sel.clear();cl.forEach(c=>{if(P.classes[c.key].locked)sel.add(c.key)})}
     else{const val=a==='lock',keys=a==='unlockall'?cl.map(c=>c.key):[...sel];
       act(()=>{for(const k of keys)if(P.classes[k])setProp(P.classes[k],'locked',val)});UI.grid.lockMsg=0;
