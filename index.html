@@ -612,7 +612,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.973';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.980';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -737,8 +737,9 @@ function migrate(o){
   const d=newProject(),D=newProject();   // D＝既定値（dは下でoに上書きされるので、既定値は別に持つ）
   const p=Object.assign(d,(o&&typeof o==='object')?o:{});
   p.meta=Object.assign(D.meta,(o&&o.meta)||{});p.sched=Object.assign(D.sched,(o&&o.sched)||{});p.opt=Object.assign(D.opt,(o&&o.opt)||{});p.auto=Object.assign(D.auto,(o&&o.auto)||{});p.form=Object.assign(D.form,(o&&o.form)||{});
-  p.sched.dates=(Array.isArray(p.sched.dates)?p.sched.dates:[]).filter(x=>/^\d{4}-\d{2}-\d{2}$/.test(String(x)));
-  if(!(o&&o.sched&&o.sched.endT)||parseT(p.sched.endT)==null){const a0=parseT(p.sched.start),m0=+p.sched.slotMin||20,c0=+p.sched.slotCount||0;p.sched.endT=(a0!=null&&c0>0)?keyT(Math.min(1439,a0+m0*c0))  :'17:00'}   // 終了時刻：以前の版のデータは、いまの枠数と同じ終わりにするp.tpl=(o&&o.tpl)||{};
+  p.sched.dates=[...new Set((Array.isArray(p.sched.dates)?p.sched.dates:[]).map(String).filter(x=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(x))return false;const [y,m,d]=x.split('-').map(Number);const t=new Date(y,m-1,d);return t.getFullYear()===y&&t.getMonth()===m-1&&t.getDate()===d}))].sort();
+  if(!(o&&o.sched&&o.sched.endT)||parseT(p.sched.endT)==null){const a0=parseT(p.sched.start),m0=+p.sched.slotMin||20,c0=+p.sched.slotCount||0;p.sched.endT=(a0!=null&&c0>0)?keyT(Math.min(1439,a0+m0*c0))  :'17:00'}   // 終了時刻：以前の版のデータは、いまの枠数と同じ終わりにする
+  p.tpl=(o&&o.tpl)||{};
   if(o&&o.opt&&!(parseFloat(o.kpv)>=0.42)){if(p.opt.areaAuto===true)p.opt.areaAuto=null;if(p.opt.showAddr===true)p.opt.showAddr=null}   // v0.42: 既定を「家庭訪問のときだけ」に変更
   if(o&&o.form&&!(parseFloat(o.kpv)>=0.52)&&p.form.addr==='none')p.form.addr=null;   // v0.52: 住所の既定を「家庭訪問のときだけリスト」に（未設定に戻す）
   if(!p.term)p.term=p.id;   // 世代ID：古いデータはプロジェクトIDと同じ扱い（どのPCで読んでも同じ値になる）
@@ -746,7 +747,7 @@ function migrate(o){
   p.kpv='0.95';
   if(!Array.isArray(p.vari))p.vari=D.vari;
   p.students=(Array.isArray(p.students)?p.students:[]).filter(s=>s&&typeof s==='object').map(s=>{const t=Object.assign({sib:[],cond:{},cf:{},slots:1,ok:false,memo:'',kana:'',sex:'',addr:''},s);
-     if(!t.cond||typeof t.cond!=='object')t.cond={};if(!t.cf||typeof t.cf!=='object')t.cf={};if(!Array.isArray(t.sib))t.sib=[];return t});
+     if(!t.cond||typeof t.cond!=='object')t.cond={};if(!t.cf||typeof t.cf!=='object')t.cf={};if(!Array.isArray(t.sib))t.sib=[];t.sib=t.sib.filter(x=>x&&typeof x==='object');return t});
   p.classes=p.classes&&typeof p.classes==='object'?p.classes:{};
   for(const s of p.students){const k=s.g+'|'+s.c;if(!p.classes[k])p.classes[k]={g:s.g,c:s.c,teacher:'',locked:false,grid:{},slots:1};}
   for(const k in p.classes){const c=p.classes[k];c.grid=c.grid||{};c.teacher=c.teacher||''}
@@ -903,7 +904,7 @@ function putPlace(cls,st,k,exc){
 function cellNG(cls,k){ // head cell ng status
   const c=cls.grid[k];if(!c||!c.head||c.exc)return false;const st=stById(c.sid);if(!st)return false;return isNG(st,spanKeys(k,c.n,ckOf(cls))||[k],ckOf(cls));
 }
-function sibFind(sb){   // 学年・組・ふりがな → (同じ人が複数なら)漢字 → (それでも複数なら)出席番号 の順に探す
+function sibFind(sb){if(!sb||typeof sb!=='object')return null;   // 学年・組・ふりがな → (同じ人が複数なら)漢字 → (それでも複数なら)出席番号 の順に探す
   const arr=P.students,kk=sb.kana?norm(sb.kana):'',nn=sb.name?norm(sb.name):'';
   const gOK=s=>!sb.g||s.g==sb.g,cOK=s=>!sb.c||String(s.c)==String(sb.c);
   const narrow=m=>{
@@ -1294,8 +1295,8 @@ function buildRoster(){
     let g=num(cell('g')),c=cell('c').normalize('NFKC').replace(/組$|クラス$/,'').trim();
     if(fm.cls!=null&&(isNaN(g)||!c)){const m=/(\d+)\s*[年\-_ー]?\s*([0-9A-Za-zＡ-Ｚａ-ｚ]+)/.exec(cell('cls').normalize('NFKC'));if(m){g=parseInt(m[1],10);c=m[2]}}
     if(/^\d+$/.test(c))c=String(parseInt(c,10));
-    const n=num(cell('n')),name=cell('name').replace(/\s+/g,m=>m.length>1?' ':m);
-    if(isNaN(g)||!c||isNaN(n)||!name){bad.push({line,why:isNaN(g)?'学年が読めません':!c?'組が空です':isNaN(n)?'番号が読めません':'名前が空です'});return}
+    const nraw=cell('n').normalize('NFKC').trim(),n=/^[-−‐]/.test(nraw)?NaN:num(nraw),name=cell('name').replace(/\s+/g,m=>m.length>1?' ':m);
+    if(isNaN(g)||g<1||g>30||!c||isNaN(n)||n<1||n>999||!name){bad.push({line,why:(isNaN(g)||g<1||g>30)?'学年が読めません（1〜30の数字）':!c?'組が空です':(isNaN(n)||n<1||n>999)?'番号が読めません（1〜999の数字）':'名前が空です'});return}
     const key=g+'|'+c+'|'+n;if(seen.has(key)){dup.push({line,key,name});return}seen.set(key,1);
     out.push({g,c,n,name,kana:cell('kana'),addr:cell('addr'),teacher:cell('teacher'),sex:cell('sex')});
   });
@@ -1928,7 +1929,7 @@ A.auto=()=>{
     const seg=(key,opts)=>`<div class="seg">${opts.map(([v,l])=>`<button data-ac="${key}" data-v="${v}" class="${String(o[key])===String(v)?'on':''}">${l}</button>`).join('')}</div>`;
     const mem=members(rep).find(s=>s.addr),ex=mem?areaKeyM(mem,o.areaN,o.areaMode):'';
     box.innerHTML=`<h2>かこピタ（自動配置）</h2><p class="muted tiny" style="margin-bottom:12px">入力された都合に合わせて、児童生徒をピタッと自動で配置します。休憩（×）は残し、未回答の児童生徒は対象外です。<b>この画面の設定は学級ごとに保存</b>され、ほかの学級には影響しません。</p>
-     <div class="f aosel" style="margin-bottom:14px"><span style="font-weight:800;font-size:12.5px;color:var(--ink2)">対象の学級（設定の変更と、「指定した学級をかこピタ」に使います）</span><div class="cbar" style="margin-top:4px">${classList().map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-ao="tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${c.n}</small></button>`).join('')}<button class="btn ghost sm" data-ao="selall">すべて選ぶ</button><button class="btn ghost sm" data-ao="selnone">すべて解除</button></div>
+     <div class="f aosel" style="margin-bottom:14px"><span style="font-weight:800;font-size:12.5px;color:var(--ink2)">対象の学級（設定の変更と、「指定した学級をかこピタ」に使います）</span><div class="cbar" style="margin-top:4px">${classList().map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-ao="tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${c.n}</small></button>`).join('')}<button class="btn ghost sm" data-ao="seltog">${classList().length&&classList().every(c=>sel.has(c.key))?'すべて解除':'すべて選ぶ'}</button></div>
       <span class="tiny muted" style="font-weight:500">${ks.length>1?`表示は「${esc(clsLabel(P.classes[rep].g,P.classes[rep].c))}」の設定です。<b>変更した項目だけ</b>を、選んだ${ks.length}学級に反映します（変更しなければ、何も変わりません）。`:`いまは「${esc(clsLabel(P.classes[rep].g,P.classes[rep].c))}」だけの設定です。複数の学級を選ぶと、変更した項目だけをまとめて反映できます。`}</span></div>
      <div class="fgrid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px">
       <label class="f">自動配置の方針${seg('shuffle',[[0,'出席番号順優先'],[2,'シャッフル']])}<span class="tiny muted" style="font-weight:500">シャッフル＝実行のたびに別の案になります</span>${diff('shuffle')}</label>
@@ -1937,7 +1938,7 @@ A.auto=()=>{
       <label class="f">仕上げの探索<select data-ac-sel="refine">${[0,3,6,10].map(v=>`<option value="${v}" ${+o.refine===v?'selected':''}>${v?v+'秒まで':'しない（最初の解で終了）'}</option>`).join('')}</select><span class="tiny muted" style="font-weight:500">${esc(o.cutTime)}以降の人数や偏りが減る組み合わせを探します</span>${diff('refine')}</label>
       <label class="f">いまの配置${seg('keep',[['false','消して組み直す'],['true','残して、足りない分だけ']])}${diff('keep')}</label>
       <div class="f"><span class="tiny muted" style="font-weight:600">時刻のルール・1枠の長さは、「4. かこピタ(配置)」の上の欄で、学級ごとに決めます（すぐ日程表に反映されます）。</span></div></div>
-     <label class="tog" style="margin-top:14px"><input type="checkbox" data-ac-chk="sibAuto" ${o.sibAuto?'checked':''}>きょうだいの来校時刻を近づける（同時刻は避けます）</label>${diff('sibAuto')}
+     <label class="tog" style="margin-top:14px"><input type="checkbox" data-ac-chk="sibAuto" ${o.sibAuto?'checked':''}>きょうだいの予定時刻を近づける（同時刻は避けます）</label>${diff('sibAuto')}
      <div class="row" style="margin-top:8px"><label class="tog"><input type="checkbox" data-ac-chk="areaAuto" ${o.areaAuto?'checked':''} ${nAddr?'':'disabled'}>住所が近い児童生徒を近くに配置する（家庭訪問のときだけ最初からON）</label><span class="tiny muted">${nAddr?`住所あり ${nAddr} / ${P.students.length}名`:'名簿に住所がありません'}</span>${diff('areaAuto')}</div>
      <div class="row" style="margin-top:6px;padding-left:24px"><label class="tog">同じ地区の判定<select data-ac-sel="areaMode" style="padding:3px 6px"><option value="digitIncl" ${o.areaMode==='digitIncl'?'selected':''}>住所の最初の数字まで（おすすめ：同じ町内は近い時間に、数字の近い順に）</option><option value="digit" ${o.areaMode==='digit'?'selected':''}>住所の最初の数字の手前まで（町内ごとにまとめるだけ）</option><option value="n" ${o.areaMode==='n'?'selected':''}>指定した文字数の範囲で</option></select></label><label class="tog">${o.areaMode==='n'?'先頭':'数字のない住所は先頭'}<select data-ac-sel="areaN" style="padding:3px 6px">${[3,4,5,6,7,8,10].map(v=>`<option ${+o.areaN===v?'selected':''}>${v}</option>`).join('')}</select>文字</label><span class="tiny muted">${ex?`例：${esc(ex)}`:''}</span>${diff('areaMode','areaN')}</div>
      <div class="row" style="margin-top:8px"><label class="tog">きょうだいの間隔<select data-ac-sel="sibGap" style="padding:3px 6px"><option value="0" ${+o.sibGap===0?'selected':''}>続けて（間をあけない）</option><option value="1" ${+o.sibGap===1?'selected':''}>1枠あける</option><option value="2" ${+o.sibGap===2?'selected':''}>2枠あける</option></select></label>${diff('sibGap')}<label class="tog"><input type="checkbox" data-ac-chk="areaGap" ${o.areaGap?'checked':''}>離れていそうな住所どうしは、間に1枠あける（余裕があるとき）</label>${diff('areaGap')}</div>
@@ -1949,8 +1950,7 @@ A.auto=()=>{
     const a=b.dataset.ao;
     if(a==='close'){el._close();return}
     if(a==='tog'){const kk=b.dataset.k;UI.auto.sel.has(kk)?UI.auto.sel.delete(kk):UI.auto.sel.add(kk);paint();return}
-    if(a==='selall'){UI.auto.sel=new Set(classList().map(c=>c.key));paint();return}
-    if(a==='selnone'){UI.auto.sel=new Set();paint();return}
+    if(a==='seltog'){const ls=classList(),on=ls.length&&ls.every(c=>UI.auto.sel.has(c.key));UI.auto.sel=on?new Set():new Set(ls.map(c=>c.key));paint();return}
     if(a==='one'||a==='all'||a==='sel'){el._close();runAuto(a);return}});
   el.addEventListener('change',e=>{const t=e.target;
     if(t.hasAttribute('data-ac-time')){setK('cutTime',t.value||'17:00');paint();return}
@@ -2208,6 +2208,7 @@ function webPreviewHtml(code){
   let page;try{page=new Function(code+';return PAGE')()}catch(e){return '<p>プレビューを作れませんでした：'+esc(e.message)+'</p>'}
   return page.replace('</head>',()=>stub+'</head>').replace('<body>',()=>'<body>'+bar);
 }
+const jsLit=s=>JSON.stringify(String(s)).replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
 function buildWebGas(){
   const F=formOpt(),S=P.sched,SL=getSlots(),classes=classList(),X=formTxt();
   const title=(F.title||formTitleDefault()).trim();
@@ -2251,8 +2252,8 @@ const NEXT_DEPLOY = '【次にやること】\n' +
   '    （GASで作りたいときは、このコードの上のほうの PUBLIC_URL = \'\' の引用符の間にURLを貼り付けて保存し、\n' +
   '      上の「実行」で makeCodeImage を実行すると、マイドライブに画像が保存されます）';
 const CFG = __CFG__;
-const FREE = '__FREE__';
-const NG = '__NG__';
+const FREE = __FREE__;
+const NG = __NG__;
 
 // 管理用の関数は、保護者などウェブアプリの利用者からは呼べないようにしています
 function requireOwner_() {
@@ -2515,7 +2516,7 @@ init();
 <\/script></body></html>§;
 `;
   const T2=F.mail!==false?T:T.replace(/\/\/<MAIL>[\s\S]*?\/\/<\/MAIL>\n/g,'');
-  const code=T2.replace(/§/g,'`').replace('__FREE__',()=>X.free).replace('__NG__',()=>X.ng)
+  const code=T2.replace(/§/g,'`').replace('__FREE__',()=>jsLit(X.free)).replace('__NG__',()=>jsLit(X.ng))
     .replace('__CFG__',()=>J).replace('__CFGJSON__',()=>J.replace(/\\/g,'\\\\').replace(/`/g,'\\`').replace(/\$\{/g,'\\${'));
   return{code:code+'\n\n'+codeKit.toString()+'\n',dates:cfg.dates.length,slots:cfg.slots.length};
 }
@@ -3160,7 +3161,7 @@ function vPrint(){
    <section class="panel"><div class="seg" style="margin-bottom:6px;flex-wrap:wrap">${[['notice','日程のお知らせ'],['remind','未回答の催促状'],['table','学級の一覧表'],['blocks','条件ブロック']].map(([m,l])=>`<button data-act="p-mode" data-m="${m}" class="${U.mode===m?'on':''}">${l}</button>`).join('')}</div>
     <p class="tiny muted" style="margin-bottom:12px">${{notice:'児童生徒・保護者に手渡す個票です（標準はA4縦・上下2段。横にすると左右2段）。',remind:'未回答の保護者に渡す催促状です（標準はA4縦・上下2段）。',table:'担任が日程を把握するための一覧表です（標準は縦・学級ごとに1枚・白黒印刷向き）。児童生徒名が折り返さない大きさに自動で調整します。きょうだいは赤字と★で強調します。',blocks:'手作業で配置するための、児童生徒ごとの×○の一覧です。文字が小さめなので、A3での印刷をおすすめします。1学級が2枚に収まり、文字が最大になる向きを自動で選びます。'}[U.mode]}</p>
     <div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:4px">対象の学級</div>
-    <div class="cbar">${all.map(c=>`<button class="cp ${U.sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-act="p-tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${c.n}</small></button>`).join('')}<button class="btn ghost sm" data-act="p-all">すべて選ぶ</button><button class="btn ghost sm" data-act="p-none">すべて解除</button></div>
+    <div class="cbar">${all.map(c=>`<button class="cp ${U.sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-act="p-tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${c.n}</small></button>`).join('')}<button class="btn ghost sm" data-act="p-alltog">${all.length&&all.every(c=>U.sel.has(c.key))?'すべて解除':'すべて選ぶ'}</button></div>
     <div class="row" style="margin-top:12px"><label class="tog">番号<input type="number" min="1" data-ch="pfld" data-k="from" value="${esc(U.from!==''&&U.from!=null?U.from:1)}" style="width:68px" placeholder="1">番から</label><label class="tog"><input type="number" min="1" data-ch="pfld" data-k="to" value="${esc(U.to!==''&&U.to!=null?U.to:Math.max(1,...(all.filter(c=>U.sel.has(c.key)).length?all.filter(c=>U.sel.has(c.key)):all).flatMap(c=>members(c.key).map(s=>+s.n||0))))}" style="width:68px" placeholder="45">番まで</label><span class="tiny muted">（初期値＝選んだ学級の最大の番号＝全員）</span></div>
     ${paperRowHtml()}
     <div class="row" style="margin-top:12px"><b style="font-size:13px">名前のフォント</b><span style="font-family:var(--font-name);font-size:18px">${esc(nfSampleInfo().chars.slice(0,4).join(' ')||'髙 﨑 𠮷')}</span><span class="tiny muted">いま：${esc(nfLabel(nfLoad()))}</span><button class="btn sm" data-act="namefont">選ぶ…</button></div>
@@ -3173,7 +3174,7 @@ function vPrint(){
       <div class="row"><b style="font-size:13px;min-width:4em">状況</b><div class="seg"><button data-act="p-r" data-k="rState" data-v="after" class="${U.rState==='after'?'on':''}">締め切り後</button><button data-act="p-r" data-k="rState" data-v="before" class="${U.rState==='before'?'on':''}">締め切り前（期限内の催促）</button></div></div>
       <div class="row"><b style="font-size:13px;min-width:4em">日付</b><div class="seg"><button data-act="p-r" data-k="rDate" data-v="today" class="${U.rDate==='today'?'on':''}">本日</button><button data-act="p-r" data-k="rDate" data-v="next" class="${U.rDate==='next'?'on':''}">次の平日</button><button data-act="p-r" data-k="rDate" data-v="pick" class="${U.rDate==='pick'?'on':''}">指定</button></div>${U.rDate==='pick'?`<input type="date" data-ch="pfld" data-k="rDateVal" value="${esc(U.rDateVal)}">`:''}<span class="tiny muted">印刷する日付：${ymd(pDate())}</span></div></div>`}
     ${(U.mode==='notice'||U.mode==='remind')?`<label class="tog" style="margin-top:12px"><input type="checkbox" data-ch="pguard" ${pGuardian()?'checked':''}>あて名に「${U.mode==='remind'?'の':'と'}保護者の方へ」を入れる（二者懇談・教育相談のときは、最初から入れません）</label>`:''}
-    ${(U.mode==='notice'||U.mode==='remind')?`<label class="tog" style="margin-top:12px"><input type="checkbox" data-ch="paddrslip" ${pAddrSlip()?'checked':''}>個票に住所も印刷する（家庭訪問のときだけ、最初から印刷します）</label>`:''}
+    ${(U.mode==='notice'||U.mode==='remind')?`<label class="tog" style="margin-top:12px"><input type="checkbox" data-ch="paddrslip" ${pAddrSlip()?'checked':''}>個票に住所も印刷する</label>`:''}
     <div class="${(U.mode==='table'||U.mode==='blocks')?(DP.pages.length?'okbox':'warnbox'):(T.out.length?'okbox':'warnbox')}" style="margin-top:14px">${(U.mode==='table'||U.mode==='blocks')?`対象 <b>${docClassList().length}学級</b> → <b>${DP.pages.length}枚</b>（${paperLabel(U.mode)}）`:`対象 <b>${T.out.length}名</b> → ${paperLabel(U.mode)} <b>${pages}枚</b>（${PW[0]>PW[1]?'左右2段':'上下2段'}）${T.noPlace.length?`<br>日時未定のため除く：${T.noPlace.length}名`:''}${T.skipped.length?`<br>未回答のため除く：${T.skipped.length}名`:''}`}</div>
     ${U.mode==='blocks'?blocksWarnHtml():''}
     <div class="row" style="margin-top:12px"><button class="btn" data-act="p-tpl">${ic('gear',16)}文面を編集する</button><button class="btn" data-act="p-test" ${(DOC?DP.pages.length:T.out.length)?'':'disabled'}>${ic('print',16)}1枚だけ試し印刷</button></div>
@@ -3185,8 +3186,7 @@ function vPrint(){
 A['p-gm']=el=>{GLY.pm=el.dataset.v;lsSet('kp_glyphpm',GLY.pm);render()};
 A['p-mode']=el=>{UI.print.mode=el.dataset.m;render()};
 A['p-tog']=el=>{const s=UI.print.sel;s.has(el.dataset.k)?s.delete(el.dataset.k):s.add(el.dataset.k);render()};
-A['p-all']=()=>{UI.print.sel=new Set(classList().map(c=>c.key));render()};
-A['p-none']=()=>{UI.print.sel=new Set();render()};
+A['p-alltog']=()=>{const ls=classList(),on=ls.length&&ls.every(c=>UI.print.sel.has(c.key));UI.print.sel=on?new Set():new Set(ls.map(c=>c.key));render()};
 A['p-r']=el=>{UI.print[el.dataset.k]=el.dataset.v;render()};
 A['p-ps']=el=>{UI.print.pp[UI.print.mode].s=el.dataset.v;render()};
 A['p-po']=el=>{UI.print.pp[UI.print.mode].o=el.dataset.v;render()};
@@ -3640,7 +3640,7 @@ async function shEnsureUser(){
   if(shUser()){SH.user=shUser();return true}
   const el=await new Promise(res=>{
     const root=$('#modal-root'),e=document.createElement('div');e.className='scrim';
-    e.innerHTML=`<div class="dlg"><h2>あなたの名前</h2><p class="muted tiny" style="margin-bottom:10px">共有フォルダで「◯◯先生が編集中」と表示するために使います。</p><input type="text" id="shName" placeholder="例：青木" style="width:100%"><div class="acts"><button class="btn" data-n="0">やめる</button><button class="btn pri" data-n="1">決定</button></div></div>`;
+    e.innerHTML=`<div class="dlg"><h2>あなたの名前</h2><p class="muted tiny" style="margin-bottom:10px">共有フォルダで「◯◯さんが編集中」と表示するために使います。</p><input type="text" id="shName" placeholder="例：青木" style="width:100%"><div class="acts"><button class="btn" data-n="0">やめる</button><button class="btn pri" data-n="1">決定</button></div></div>`;
     e.addEventListener('click',ev=>{const b=ev.target.closest('[data-n]');if(!b)return;const v=$('#shName',e).value.trim();e.remove();res(b.dataset.n==='1'&&v?v:null)});
     root.appendChild(e);$('#shName',e).focus();$('#shName',e).addEventListener('keydown',ev=>{if(ev.key==='Enter')$('[data-n="1"]',e).click()});
   });
@@ -3992,7 +3992,7 @@ A.about=()=>{
 
 /* ---------- help ---------- */
 const HELP=[
- ['はじめに',()=>`<h3>最短の流れ（5ステップ）</h3><ol><li><b>1. 準備（名簿）</b>：学年・組・番号・名前・ふりがな（住所・担任名もいっしょに）を貼り付けるか、ファイルで読み込む</li><li><b>1. 準備（日程）</b>：実施日と、1日の時間割（開始時刻・1枠の長さ・枠数）を決める</li><li><b>2. フォーム</b>：Googleフォームを作るコード（GAS）をコピーして実行。集まった回答ファイルを取り込む（取り込む前に、どの列が何の情報かを確認する画面が出ます）</li><li><b>3. 条件</b>：児童生徒ごとの×（不可）・○（この時間のみ可）を確認・入力する（手入力だけでもOK）</li><li><b>4. かこピタ(配置)</b>：「かこピタ（自動配置）する」を押す。気になるところは、ドラッグで入れ替える</li><li><b>5. 印刷</b>：お知らせ・催促状・学級の一覧表・条件ブロックを印刷する（用紙はA4・A3・B5・B4の縦横から選べます）</li></ol>
+ ['はじめに',()=>`<h3>最短の流れ（5ステップ）</h3><ol><li><b>1. 準備（名簿）</b>：学年・組・番号・名前・ふりがな（住所・担任名もいっしょに）を貼り付けるか、ファイルで読み込む</li><li><b>1. 準備（日程）</b>：実施日と、1日の時間割（開始時刻・1枠の長さ・枠数）を決める</li><li><b>2. フォーム（任意）</b>：保護者から都合を集めるときだけ使います。GoogleフォームかWebアプリを作るコード（GAS）をコピーして実行。集まった回答ファイルを取り込む（取り込む前に、どの列が何の情報かを確認する画面が出ます）</li><li><b>3. 条件</b>：児童生徒ごとの×（不可）・○（この時間のみ可）を確認・入力する（手入力だけでもOK）</li><li><b>4. かこピタ(配置)</b>：「かこピタ（自動配置）する」を押す。気になるところは、ドラッグで入れ替える</li><li><b>5. 印刷</b>：お知らせ・催促状・学級の一覧表・条件ブロックを印刷する（縦・横を選べます）</li></ol>
   <div class="okbox" style="margin-top:12px"><b>複数人で使うとき（かんたんな流れ）</b>
    <ol style="margin:6px 0 0 18px;padding:0;line-height:1.8">
    <li><b>設定担当者</b>：「共有する」で共有フォルダを選び、「バッチで起動する」の<b>3つのファイル</b>をそこへ書き出します。</li>
@@ -4002,12 +4002,12 @@ const HELP=[
   <h3>初心者の方へ：最短で結果を出す3ステップ</h3><ol><li><b>希望データの準備</b>：保護者の希望を、3. 条件で×○に入力します。大変なときは、Googleフォームの回答を取り込めます（名前の空白・全角半角・ひらがなカタカナの違いは自動で吸収します）。</li><li><b>「かこピタ」で自動配置</b>：やり直したいときは「配置ロック中」ボタンを押してロックを解除し、もう一度かこピタします（ロック中に実行すると、画面の上に赤いお知らせが出ます）。条件が厳しくて誰かが入れないときは、実行前に名前つきで知らせます。時間がかかるときは「中断する」で止められます。</li><li><b>最終調整と印刷</b>：決まった案を直したいときは、名前を動かすだけ。最後に「5. 印刷」で、美しい個票を出力します。</li></ol>`],
  ['画面の使い方',()=>`<h3>1. 準備（名簿）</h3><p>Excel・CSV・貼り付けのどれでも取り込めます。列の順番は自由で、見出しがあれば自動で当てはめます。<b>担任名</b>も列として取り込めるほか、「担任名をまとめて設定」でも入力できます。住所は家庭訪問で近い家を続けたいときだけ入れてください（個人情報です）。</p>
   <h3>1. 準備（日程）</h3><p>日付は上限なし、期間で追加できます。実施日は「土日を除く」で、土日を除いて追加できます（祝日は自動では除かれないので、一覧から消してください）。時刻のルール（17:00以降の扱い）や、きょうだい・住所への配慮は、「4. かこピタ(配置)」のかこピタ（自動配置）の画面で、学級ごとに決めます。</p>
-  <h3>2. フォーム</h3><p>名簿と日程からGAS（Googleフォームを作るコード）を作ります。<b>script.new</b>（または Google Apps Script）に貼り付けて実行すると、実行ログに「フォーム作成完了：編集URL」「回答用URL」「【自動締め切り予約】…」が表示されます（Apps Scriptの画面の下の「実行ログ」）。住所は「聞かない／入力／リスト」から選べます（リストの最後には、必ず「この中には無い」が入ります）。きょうだい欄には、名前の次に「ふりがな」の欄ができ、学年・組・番号の入力ミスがあっても、ふりがなで名簿から探します。学年・組は、きょうだい欄と同じく「○年○組」を1つ選ぶ形です（学年と組が別々だった以前のフォームの回答も、そのまま読み込めます）。回答は、フォームの「回答」→スプレッドシート→ダウンロード（xlsx）で取り込みます。</p>
-  <h3>3. 条件</h3><p>ブラシ（×・○・未・消しゴム）を選んで、ドラッグで塗ります。日付や時刻の見出しをクリックすると、その日・その時刻をまとめて塗れます。枠数（連続枠）は1〜30。きょうだいの学年・組・番号を入れると、名簿と自動で照合します。<b>○がある児童生徒は、○の枠にだけ配置されます。</b></p>
-  <h3>4. かこピタ(配置)</h3><p>児童生徒を選ぶと、入れない時間帯が濃い斜線になります（他の児童生徒が入っているマスの上も同様です）。置きたいマスをクリック、またはドラッグ（置いた瞬間に選択は解除されます）。右クリックで外す／休憩（×）。「休憩（×）を置く」に切り替えると、空きマスをなぞってまとめて×にでき、日付をクリックするとその日の空きマスがすべて×になります（もう一度クリックで解除）。休憩モードで置いてある名前をクリックすると、配置モードに戻ります。「全員を外す」で、その学級の配置をまとめて外せます。名前の右に出る住所（地区）は、<b>家庭訪問のときだけ最初から表示</b>されます。ほかの行事では最初は非表示で、「住所を表示」にチェックを入れると表示できます。</p>
-  <h3>5. 印刷</h3><p>日程のお知らせ・未回答の催促状・各学級の一覧表・条件ブロックを印刷できます。<b>縦・横を選べます。</b>標準は、お知らせと催促状が縦（上下2段。横にすると左右2段）、学級の一覧表が縦（白黒印刷向き。児童生徒名が折り返さない大きさに自動調整。きょうだいは赤字と★で強調）です。条件ブロックは文字が小さめなので、A3での印刷をおすすめします。1学級2枚に収まり、文字がいちばん大きくなる向きを自動で選びます。住所の印刷も、家庭訪問のときだけ最初からオンです。文面は「文面を編集する」で書き換えられます（{名前}などの言葉が自動で入れ替わります）。</p>`],
+  <h3>2. フォーム（任意）</h3><p>保護者から都合を集めるための機能です。<b>使わなくても、「3. 条件」で手入力できます。</b>方式は2つあります。<br><b>Googleフォーム</b>：名簿と日程からGAS（Googleフォームを作るコード）を作ります。<b>script.new</b>（または Google Apps Script）に貼り付けて実行すると、実行ログに「フォーム作成完了」（編集URL）、「回答用URL」とその短縮URL、二次元コードの画像（PNG・SVG）の保存場所、「【自動締め切り予約】…」が表示されます（Apps Scriptの画面の下の「実行ログ」）。二次元コードの画像は、マイドライブにできます。<br><b>Webアプリ</b>：日付ごとに区切って表示する、スマホ向けの専用ページです。GASを実行して、「デプロイ」→「ウェブアプリ」にするとURLができます。そのURLを、かこピタの「二次元コードを、かこピタで作る」欄に貼ると、二次元コードを作れます。<br>説明・見出し・送信後のメッセージなどは、「フォームの文言を編集する」で、両方まとめて書き換えられます（回答表の見出しは変えられません）。住所は「聞かない／入力してもらう／リストから選ぶ」から選べます（最初は「聞かない」。リストの最後には、必ず「この中には無い」が入ります）。きょうだい欄には、名前の次に「ふりがな」の欄ができ、学年・組・番号の入力ミスがあっても、ふりがなで名簿から探します。学年・組は、きょうだい欄と同じく「○年○組」を1つ選ぶ形です（学年と組が別々だった以前のフォームの回答も、そのまま読み込めます）。回答は、フォームの「回答」（Webアプリは、回答がたまるスプレッドシート）→ダウンロード→「カンマ区切り形式（.CSV）」で取り込みます。</p>
+  <h3>3. 条件</h3><p>ブラシ（×・○・未・消しゴム）を選んで、ドラッグで囲んだ四角い範囲をまとめて塗ります（指を離したときに反映）。ブラシは、スクロールしても画面の上に固定されます。日付や時刻の見出しをクリックすると、その日・その時刻をまとめて塗れます。枠数（連続枠）は1〜30。きょうだいの学年・組・番号を入れると、名簿と自動で照合します。<b>○がある児童生徒は、○の枠にだけ配置されます。</b></p>
+  <h3>4. かこピタ(配置)</h3><p>児童生徒を選ぶと、入れない時間帯が濃い斜線になります（他の児童生徒が入っているマスの上も同様です）。置きたいマスをクリック、またはドラッグ（置いた瞬間に選択は解除されます）。右クリックで外す／休憩（×）（空きマスや休憩のマスは、右ボタンを押したままドラッグして、囲んだ四角い範囲をまとめて×にもできます）。「休憩（×）を置く」に切り替えると、空きマスを囲んでまとめて×にでき、日付をクリックするとその日の空きマスがすべて×になります（もう一度クリックで解除）。休憩モードで置いてある名前をクリックすると、配置モードに戻ります。「全員を外す」で、その学級の配置をまとめて外せます。名前の右に出る住所（地区）は、<b>家庭訪問のときだけ最初から表示</b>されます。ほかの行事では最初は非表示で、「住所を表示」にチェックを入れると表示できます。「かこピタ（自動配置）する」とロックのボタンは、画面の右下（スマホでは下）に固定されています。日付・開始時刻・1枠の長さ・最終時刻を変えて、配置が枠の外になったときは、その場で配置を外して、未配置にもどします（「元に戻す」で戻せます）。</p>
+  <h3>5. 印刷</h3><p>日程のお知らせ・未回答の催促状・各学級の一覧表・条件ブロックを印刷できます。<b>縦・横を選べます。</b>標準は、お知らせと催促状が縦（上下2段。横にすると左右2段）、学級の一覧表が縦（白黒印刷向き。児童生徒名が折り返さない大きさに自動調整。きょうだいは赤字と★で強調）です。条件ブロックは文字が小さめなので、A3での印刷をおすすめします。1学級2枚に収まり、文字がいちばん大きくなる向きを自動で選びます。住所の印刷は、学級の一覧表と条件ブロックでは、家庭訪問のときだけ最初からオンです（お知らせと催促状の個票は、家庭に配るので、家庭訪問でも最初はオフです）。文面は「文面を編集する」で書き換えられます（{名前}などの言葉が自動で入れ替わります）。「印刷する」ボタンは画面の左下に浮かんでいて、「印刷前の点検」に確認事項があると、オレンジ（重いときは赤）になり、「確認○件」と出ます。名前に、いまのフォントで表示できない字があるときは、「代わりの字」「ひらがな」「そのまま」から選べます。</p>`],
  ['かこピタの設定',()=>`<h3>かこピタ（自動配置）のメニュー</h3><p><b>この設定は学級ごとに保存</b>され、ほかの学級には影響しません。「全学級をかこピタ」「指定した学級をかこピタ」では、それぞれの学級の設定でかこピタします。まとめて設定したいときは、メニュー上部の「対象の学級」で学級を選んでから項目を変えると、<b>変えた項目だけ</b>が選んだ学級に反映されます（何も変えなければ、何も変わりません）。</p><ul><li><b>自動配置の方針</b>：「出席番号順優先」または「シャッフル」。シャッフルは実行のたびに別の案になるので、納得いく案を選べます。</li><li><b>日ごとの人数</b>：「均等にする」で、特定の日だけが過密になるのを防ぎます。</li><li><b>詰める時刻</b>：選んだ時刻に近い枠から使い、まとまった空き時間を作ります。</li><li><b>仕上げの探索</b>：区切りの時刻以降の人数や偏りが減る組み合わせを、指定した秒数まで探します。</li><li><b>いまの配置</b>：「消して組み直す」または「残して、足りない分だけ」。</li><li><b>時刻のルール</b>：「できれば」（まず区切りの時刻までで探し、入らなければ以降も使う）、「厳守」（以降は使わない）、「制限なし」。最初は「できれば17:00まで」です。「厳守」にすると、その学級の画面では区切り以降の枠も隠します。</li></ul><p class="tiny muted">4. かこピタ(配置)で児童生徒を選ぶと、入れない時間帯はいつでも濃い斜線で示されます（手動調整のミス防止）。</p>
-  <h3>きょうだい・住所への配慮</h3><ul><li><b>きょうだい配慮</b>：きょうだいが別の学級にいても、<b>同じ時刻にならない</b>ようにし、同じ日の近い時刻に寄せます。<b>間隔は「続けて」または「1〜2枠あける」から選べます</b>（既定は続けて）。</li><li><b>住所配慮</b>：同じ地区の児童生徒を、同じ日に続けて配置します。地区の判定は3つから選べます。<b>住所の最初の数字の手前まで</b>（初期設定。「大阪市北区梅田1丁目2-3」→「大阪市北区梅田」）、<b>住所の最初の数字まで</b>（→「大阪市北区梅田1」）、<b>指定した文字数の範囲で</b>（先頭◯文字）。数字のない住所は、先頭◯文字で判定します。余裕があるときは、離れていそうな地区（地区名が違う）どうしが隣り合わないよう、間に1枠あけます。<b>「住所が近い児童生徒を近くに配置する」は、行事が家庭訪問のときだけ最初からオンです</b>（ほかの行事では最初はオフ）。</li></ul>`],
+  <h3>きょうだい・住所への配慮</h3><ul><li><b>きょうだい配慮</b>：きょうだいが別の学級にいても、<b>同じ時刻にならない</b>ようにし、同じ日の近い時刻に寄せます。<b>間隔は「続けて」「1枠あける」「2枠あける」から選べます</b>（既定は続けて）。</li><li><b>住所配慮</b>：同じ地区の児童生徒を、同じ日に続けて配置します。地区の判定は3つから選べます。<b>住所の最初の数字の手前まで</b>（初期設定。「大阪市北区梅田1丁目2-3」→「大阪市北区梅田」）、<b>住所の最初の数字まで</b>（→「大阪市北区梅田1」）、<b>指定した文字数の範囲で</b>（先頭◯文字）。数字のない住所は、先頭◯文字で判定します。余裕があるときは、離れていそうな地区（地区名が違う）どうしが隣り合わないよう、間に1枠あけます。<b>「住所が近い児童生徒を近くに配置する」は、行事が家庭訪問のときだけ最初からオンです</b>（ほかの行事では最初はオフ）。</li></ul>`],
  ['便利な技',()=>`<ul><li><b>Ctrl+Z / Ctrl+Y</b>：取り消し／やり直し（配置・条件・名簿の取り込みなど、ほとんどの操作に効きます）</li><li><b>1・2・3・0 キー</b>（3. 条件）：ブラシを ×・○・未・消しゴム に切り替え</li><li><b>↑↓ キー</b>（3. 条件）：前後の児童生徒へ</li><li><b>選んでクリック</b>（4. かこピタ(配置)）：未配置の児童生徒を選び、置きたいマスをクリック。置いてある人を選んで別のマスをクリックすると、入れ替わります</li><li><b>右クリック</b>（4. かこピタ(配置)）：置いた人を外す／空きマスを休憩（×）に</li><li><b>名前で探す</b>：条件・配置の画面の検索欄で、児童生徒を名前ですばやく探せます</li><li><b>Ctrl+S</b>：今の状態をファイルに書き出す（バックアップ用）</li><li><b>休憩の予約</b>：「休憩（×）を置く」モードで空きマスをクリック、またはなぞって塗る。日付をクリックするとその日の空きマスがすべて×になります。かこピタはそこを避けます</li><li><b>枠数</b>：特別な支援や相談が必要な児童生徒に、連続した時間を確保できます</li></ul>`],
  ['保存・共有・オフライン',()=>`<h3>保存</h3><p>編集のたびに、自動で保存されます。共有フォルダにつないでいないときはこのブラウザの中、つないでいるときは共有フォルダの中です（切り替えは自動です）。最上部には、最後に保存した時刻が出ます。バックアップとして、「設定」→「保存とバックアップ」から、ファイルへの書き出し・読み込みや、「以前の状態に戻す」（自動バックアップ12件）ができます。</p>
 <h3>共有のしかた（まず A。できなければ B、それもできなければ C）</h3>
@@ -4016,11 +4016,11 @@ const HELP=[
   <p><b>Aができない場合 → B．共有フォルダを選ぶ（Chrome／Edge）</b><br>Windows以外のPCや、バッチが使えない場合の方法です。各担任が最初の1回だけ「共有する」→「共有フォルダを選ぶ」で、同じフォルダを選びます。2回目からは「前回のフォルダに再接続」を押すだけです。ネットワークは使わず、パソコンの中だけで動きます。<br><b>職場のネットワークで、インターネットが別のブラウザ（リモートで隔離されたブラウザなど）に切り替わり、Aがうまく開かないとき</b>も、Bをお使いください（Aのバッチは、かこピタを自分のPCの一時フォルダにコピーして、ローカルのファイルとしてEdgeまたはChromeで開きます）。それでもAで開けない場合の予備として、「手動用バッチ」があります。コマンドプロンプトの画面に「file:///…」のアドレスが表示されるので、それを自分のPCで動くブラウザに貼り付けて開きます（ふだんは使いません）。</p>
   <p><b>Bもできない場合 → C．学級ファイルの書き出し・取り込み</b><br>Chrome／Edge以外のブラウザなどで、フォルダを選べないときの方法です。「学級ファイルの書き出し・取り込み」で、学級ごとのファイルをやりとりします（共有は自動ではなくなります）。</p>
   <p class="tiny muted">「学級専用のHTML」（オプション）は、担任に<b>自分の学級の画面だけ</b>を渡したいときに使います（共有する → 学級専用のHTMLを作る）。</p>
-  <h3>持ち出して作業するとき</h3><p>学級専用のHTMLには、その学級のデータが入っています。ただし<b>データの本体は共有フォルダの中のデータ（JSONファイル）</b>で、HTMLの中身は持ち出した時点のコピーです。JSONを自分でコピーする必要はありません。<br>① 持ち出す前：共有フォルダにつないだ状態で、自分の学級のHTMLを開き、「共有する」→「このHTMLを保存し直す」で最新のデータを入れ、USBなどでHTMLを持ち出す。<br>② 自宅：そのHTMLを開いて作業する。終わったら、もう一度「このHTMLを保存し直す」（ダウンロードされます）。<br>③ 職場：持ち帰ったHTMLを、共有フォルダの自分の学級のHTMLと入れ替えて開き、フォルダにつなぐと、作業内容が共有フォルダのデータに反映されます。持ち出している間にほかの人が更新して、サーバー側のほうが新しかった場合は、どちらを使うか確認が出ます。<br>※自宅で保存し直さずにHTMLだけ持ち帰っても、自宅での作業は反映されません。</p>
+  <h3>持ち出して作業するとき</h3><p>学級専用のHTMLには、その学級のデータが入っています。ただし<b>データの本体は共有フォルダの中のデータ（JSONファイル）</b>で、HTMLの中身は持ち出した時点のコピーです。JSONを自分でコピーする必要はありません。<br>① 持ち出す前：共有フォルダにつないだ状態で、自分の学級のHTMLを開き、「共有する」→「（HTMLの名前）.html を保存し直す」で最新のデータを入れ、USBなどでHTMLを持ち出す。<br>② 自宅：そのHTMLを開いて作業する。終わったら、もう一度「（HTMLの名前）.html を保存し直す」（ダウンロードされます）。<br>③ 職場：持ち帰ったHTMLを、共有フォルダの自分の学級のHTMLと入れ替えて開き、フォルダにつなぐと、作業内容が共有フォルダのデータに反映されます。持ち出している間にほかの人が更新して、サーバー側のほうが新しかった場合は、どちらを使うか確認が出ます。<br>※自宅で保存し直さずにHTMLだけ持ち帰っても、自宅での作業は反映されません。</p>
   <h3>オフラインで使う</h3><p>このアプリは<b>1つのHTMLファイル</b>で、インターネットなしで動きます。名簿を扱う作業は、インターネットのない環境で行い、フォームを作るときだけ、インターネットにつないで「script.new」を開いてください。</p>
   <h3>データを消す（新しい行事を始めるとき）</h3><p>「設定」→「データを消す…」を押すと、消す内容を選べます。標準の「次の行事の準備」は、<b>名簿・担任名・学校情報・文面・設定は残し</b>、条件・配置・日程・取り込み履歴だけを消します。「名簿・担任名も消す」「すべて消す（初期化）」も、ボタンひとつで選べます。実行前に自動でバックアップを取るので、「元に戻す」で戻せます。</p><p><b>【前の行事のファイルへの誤接続に注意】</b>「次の行事の準備」をしないまま新しい日程づくりを始めると、前の行事の共有フォルダ・学級専用HTML・起動バッチにつながったままになり、前の行事のデータを上書きしたり、新旧のデータが混ざったりするおそれがあります。準備をしたあとは、新しい共有フォルダと、新しく書き出したHTML・バッチ・ショートカットを使い、前の行事のものは使わないでください。</p>`],
  ['よくある質問',()=>`<h3>名簿との照合のしかたは？</h3><p>回答の<b>学年・組・ふりがな</b>で探します。同じふりがなの児童生徒が同じ学級にいるときだけ、<b>漢字</b>を確認し、漢字も同じ場合だけ<b>出席番号</b>まで確認します。そのため、保護者が出席番号や漢字を間違えても、電話での確認なしで取り込めます。自動で補正した件数と内訳は、取り込み前の確認画面に出ます。</p>
-  <h3>保護者の都合を、5分ごとに細かく入力できますか？</h3><p>できます。「3. 条件」の「1人ずつ」で、<b>入力の細かさ</b>を「日程の枠（20分など）」から「5分ごと」に切り替えます。5分ごとに塗ったあと「日程の枠」に戻すと、一部だけ塗った枠は<b>斜線</b>で表示されます（データは5分のままなので、何度切り替えても広がりません）。×は少しでも重なれば×の枠ですが、○は<b>枠の全部が○のときだけ</b>○の枠として使います（一部だけ○の人は「○の時間だけ可」の扱いのまま、その枠には置きません）。枠をまとめて塗ると、枠の中の5分ごとの入力は上書きされます。配置のときは、×と少しでも重なる枠がNGになります。<br>条件を元に戻したいときは、<b>「条件を戻す…」</b>（この人／この学級／全員）を使います。戻す先は2つです。<br>・<b>時間割を変える前</b>：学級の「1枠の長さ」「開始時刻」を、取り込みのあと最初に変えた瞬間の条件（学級ごとに自動で記録）に戻します。それまでに手で直した分は残ります。<br>・<b>取り込んだ回答どおり</b>：最後に取り込んだ回答だけの状態にします。手で直した分は、消えます。</p>
+  <h3>保護者の都合を、5分ごとに細かく入力できますか？</h3><p>できます。「3. 条件」の「1人ずつ」で、<b>入力の細かさ</b>を「日程の枠（20分など）」から「5分ごと」に切り替えます。5分ごとに塗ったあと「日程の枠」に戻すと、一部だけ塗った枠は<b>斜線</b>で表示されます（データは5分のままなので、何度切り替えても広がりません）。×は少しでも重なれば×の枠ですが、○は<b>枠の全部が○のときだけ</b>○の枠として使い、○を付けた人は、その○の枠のどこかに配置します（一部だけ○の枠には、置きません）。枠をまとめて塗ると、枠の中の5分ごとの入力は上書きされます。配置のときは、×と少しでも重なる枠がNGになります。<br>条件を元に戻したいときは、<b>「条件を戻す…」</b>（この人／この学級／全員）を使います。戻す先は2つです。<br>・<b>時間割を変える前</b>：学級の「1枠の長さ」「開始時刻」を、取り込みのあと最初に変えた瞬間の条件（学級ごとに自動で記録）に戻します。それまでに手で直した分は残ります。<br>・<b>取り込んだ回答どおり</b>：最後に取り込んだ回答だけの状態にします。手で直した分は、消えます。</p>
   <h3>学級ごとに、1枠の長さ（15分・20分など）や開始時刻を変えられますか？</h3><p>変えられます。「4. かこピタ(配置)」の上の欄で、学級ごとに<b>1枠の長さ・開始時刻・時刻のルール</b>を変えると、下の日程表がすぐに変わります（自動配置のボタンを押す前に確認できます）。自動配置は、その学級の枠にそろえた位置に置きます。保護者の×は、日程の枠（例：20分）のまま保存し、学級の枠（例：15分）と<b>少しでも重なる枠をNG</b>にします。ほかの学級にも同じ設定をコピーできます。枠が変わると、その学級の配置済みの分と休憩（×）は外れます（元に戻せます）。</p>
   <h3>回答を集めたあとで、日程全体の1枠の長さ（20分→15分など）を変えられますか？</h3><p>変えられます。「1. 準備（日程）」で1枠の長さ（または開始時刻）を変えると、すでに入っている○×は、<b>時間はそのまま</b>で新しい枠に引き継がれます。例：20分で14:00と14:20が×（14:00〜14:40）→ 15分にしても×は14:00〜14:40のまま（最後の14:30の枠は、一部だけの×なので斜線）→ 20分に戻すと、もとの14:00と14:20の×に戻ります。何度変えても、×の時間は広がりません。<br>○は逆に、<b>枠の全部が○のときだけ</b>○の枠になります。例：20分で14:00〜14:20が○ → 15分にすると、○の枠は14:00〜14:15だけです（14:15〜14:30は一部だけなので、○の枠にはなりません）。20分に戻すと、もとの○に戻ります。あとから回答ファイルを取り込むときも、フォームの1枠の長さ（例：20分）と、いまの日程（例：15分）が違っていても、時間の重なりで判定します。<br>※この「1. 準備（日程）」の1枠の長さは、保護者に答えてもらう単位です。実際に組む枠の長さは、上の質問のとおり学級ごとに変えられます。</p>
   <h3>きょうだいの照合も、同じ順番ですか？</h3><p>はい、同じです（v.0.58で統一しました）。<b>学年・組・ふりがな</b>で探し、同じ人が複数いるときだけ<b>漢字</b>、それでも複数いるときだけ<b>出席番号</b>で絞ります。学年・組の入力を間違えていても、ふりがなで見つけます。</p>
@@ -4075,7 +4075,7 @@ A.newevent=()=>{
     box.innerHTML=`<h2>データを消す</h2><p class="muted tiny" style="margin-bottom:10px">消す内容を選びます。実行前に自動でバックアップを取り、実行後も「元に戻す」で戻せます。</p>
      <div class="seg" style="margin-bottom:12px"><button data-ne="p-prep" class="${cur==='prep'?'on':''}">次の行事の準備（標準）</button><button data-ne="p-roster" class="${cur==='roster'?'on':''}">名簿・担任名も消す</button><button data-ne="p-all" class="${cur==='all'?'on':''}">すべて消す（初期化）</button></div>
      <div class="tiny muted" style="margin-bottom:10px">${cur==='prep'?'名簿・担任名・学校情報・文面・設定・きょうだい情報・枠数は残し、条件・配置・日程・行事名などだけを消します。次の行事を始めるときに便利です。<br><b>実行すると、前の行事の共有フォルダや学級用HTMLにはつながらなくなります（取り違え防止）。</b>次の行事では、新しい共有フォルダと、新しく書き出したHTML・バッチ・ショートカットを使ってください。フォームの名前と締め切り日も空に戻ります。':cur==='roster'?'学年が変わるときなどに。学校名・文面・設定は残ります。':cur==='all'?'名簿・日程・条件・配置・設定をすべて消して、最初の状態に戻します。':'自分で選んだ内容を消します。'}</div>
-     <div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:4px">対象の学級（条件・配置などを消す学級）</div><div class="cbar" style="margin-bottom:12px">${cl.map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-ne="tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}</button>`).join('')}<button class="btn ghost sm" data-ne="all">すべて</button><button class="btn ghost sm" data-ne="none">解除</button></div>
+     <div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:4px">対象の学級（条件・配置などを消す学級）</div><div class="cbar" style="margin-bottom:12px">${cl.map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-ne="tog" data-k="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}</button>`).join('')}<button class="btn ghost sm" data-ne="alltog">${cl.length&&cl.every(c=>sel.has(c.key))?'すべて解除':'すべて選ぶ'}</button></div>
      <div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:4px">行事ごとのデータ</div><div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">${row(true)}</div>
      <div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:4px">学校・名簿の情報（ふつうは残します）</div><div style="display:flex;flex-direction:column;gap:6px">${row(false)}</div>
      ${st.roster?'<div class="ngbox" style="margin-top:10px">名簿を消すと、条件・配置もすべてなくなります。</div>':''}
@@ -4087,8 +4087,7 @@ A.newevent=()=>{
     const b=e.target.closest('[data-ne]');if(!b)return;const a=b.dataset.ne;
     if(a.startsWith('p-')){setPreset(a.slice(2));paint();return}
     if(a==='tog'){sel.has(b.dataset.k)?sel.delete(b.dataset.k):sel.add(b.dataset.k);paint();return}
-    if(a==='all'){cl.forEach(c=>sel.add(c.key));paint();return}
-    if(a==='none'){sel.clear();paint();return}
+    if(a==='alltog'){if(cl.length&&cl.every(c=>sel.has(c.key)))sel.clear();else cl.forEach(c=>sel.add(c.key));paint();return}
     if(a==='go'){
       if(!Object.values(st).some(Boolean)){toast('消す内容を選んでください');return}
       if(!sel.size&&(st.cond||st.sib||st.grid)){toast('対象の学級を選んでください');return}
@@ -4315,11 +4314,11 @@ document.addEventListener('change',e=>{const t=e.target;if(!t||!t.dataset||!t.da
 A['gs-copy']=()=>{   // この学級の時間割・時刻のルールを、ほかの学級にも反映
   const k=curCls(),src=P.classes[k];if(!src)return;const sel=new Set();
   const el=openDlg('',{}),box=$('.dlg',el);
-  const paint=()=>{const o=clsAuto(k),G=gridOf(k);box.innerHTML=`<h2>ほかの学級にも反映</h2><p class="muted tiny" style="margin-bottom:10px">「${esc(clsLabel(src.g,src.c))}」の次の設定を、選んだ学級にコピーします：<b>1枠の長さ ${G.len}分／開始 ${G.slots.length?G.slots[0].label:'-'}／時刻のルール ${{effort:'できれば',strict:'厳守',none:'制限なし'}[o.cutMode]}（${esc(o.cutTime)}）</b></p><div class="cbar">${classList().filter(c=>c.key!==k).map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-q="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${Object.values(c.obj.grid||{}).filter(x=>x.head).length?'配置あり':''}</small></button>`).join('')}<button class="btn ghost sm" data-q="*">すべて選ぶ</button></div><p class="tiny muted" style="margin-top:8px">枠が変わる学級は、配置済みの分と休憩（×）が外れます（元に戻せます）。</p><div class="acts"><button class="btn" data-q="x">やめる</button><button class="btn pri" data-q="go" ${sel.size?'':'disabled'}>コピーする（${sel.size}）</button></div>`};
+  const paint=()=>{const o=clsAuto(k),G=gridOf(k);box.innerHTML=`<h2>ほかの学級にも反映</h2><p class="muted tiny" style="margin-bottom:10px">「${esc(clsLabel(src.g,src.c))}」の次の設定を、選んだ学級にコピーします：<b>1枠の長さ ${G.len}分／開始 ${G.slots.length?G.slots[0].label:'-'}／時刻のルール ${{effort:'できれば',strict:'厳守',none:'制限なし'}[o.cutMode]}（${esc(o.cutTime)}）</b></p><div class="cbar">${classList().filter(c=>c.key!==k).map(c=>`<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-q="${esc(c.key)}">${esc(clsLabel(c.g,c.c))}<small>${Object.values(c.obj.grid||{}).filter(x=>x.head).length?'配置あり':''}</small></button>`).join('')}<button class="btn ghost sm" data-q="*">${(()=>{const o=classList().filter(c=>c.key!==k);return o.length&&o.every(c=>sel.has(c.key))?'すべて解除':'すべて選ぶ'})()}</button></div><p class="tiny muted" style="margin-top:8px">枠が変わる学級は、配置済みの分と休憩（×）が外れます（元に戻せます）。</p><div class="acts"><button class="btn" data-q="x">やめる</button><button class="btn pri" data-q="go" ${sel.size?'':'disabled'}>コピーする（${sel.size}）</button></div>`};
   paint();
   el.addEventListener('click',e=>{const b=e.target.closest('[data-q]');if(!b)return;const q=b.dataset.q;
     if(q==='x'){el._close();return}
-    if(q==='*'){classList().forEach(c=>{if(c.key!==k)sel.add(c.key)});paint();return}
+    if(q==='*'){const o=classList().filter(c=>c.key!==k);if(o.length&&o.every(c=>sel.has(c.key)))sel.clear();else o.forEach(c=>sel.add(c.key));paint();return}
     if(q==='go'){const o=clsAuto(k),G=gridOf(k),bm=+P.sched.slotMin||20,b0=parseT(P.sched.start),bs=b0==null?840:b0,t0=G.slots.length?G.slots[0].t:bs;
       el._close();act(()=>{for(const kk of sel){const c=P.classes[kk];if(!c)continue;const og=gridOf(kk),ch=og.len!==G.len||(og.slots[0]&&og.slots[0].t)!==t0;
         if(ch)takeSnap(kk);setProp(c,'slotMin',G.len===bm?0:G.len);setProp(c,'start',t0===bs?'':fmtT(t0));if(ch)for(const x of Object.keys(c.grid||{}))delProp(c.grid,x);
@@ -4445,15 +4444,14 @@ A['g-lockall']=()=>{
   const el=openDlg('',{}),box=$('.dlg',el);
   const paint=()=>{box.innerHTML=`<h2>配置ロックの一括操作</h2><p class="muted tiny">ロック中の学級は、「かこピタ（自動配置）」で動かされません。</p>
     <div class="cbar" style="margin:12px 0 8px">${cl.map(c=>{const lk=P.classes[c.key].locked;return `<button class="cp ${sel.has(c.key)?'on':''}" style="${gStyle(c.g)}" data-lk="tog" data-k="${esc(c.key)}">${lk?ic('lock',12)+' ':''}${esc(clsLabel(c.g,c.c))}</button>`}).join('')}</div>
-    <div class="row"><button class="btn ghost sm" data-lk="all">すべて選ぶ</button><button class="btn ghost sm" data-lk="locked">ロック中だけ選ぶ</button><button class="btn ghost sm" data-lk="none">選択を外す</button></div>
+    <div class="row"><button class="btn ghost sm" data-lk="all">${cl.length&&cl.every(c=>sel.has(c.key))?'選択をすべて外す':'すべて選ぶ'}</button><button class="btn ghost sm" data-lk="locked">ロック中だけ選ぶ</button></div>
     <div class="acts" style="flex-wrap:wrap"><button class="btn" data-close>閉じる</button><button class="btn" data-lk="lock" ${sel.size?'':'disabled'}>選んだ学級をロック</button><button class="btn pri" data-lk="unlock" ${sel.size?'':'disabled'}>選んだ学級のロックを解除</button><button class="btn pri" data-lk="unlockall">全学級のロックを解除</button></div>`};
   paint();
   el.addEventListener('click',e=>{
     if(e.target.closest('[data-close]')){el._close();return}
     const b=e.target.closest('[data-lk]');if(!b)return;const a=b.dataset.lk;
     if(a==='tog'){sel.has(b.dataset.k)?sel.delete(b.dataset.k):sel.add(b.dataset.k)}
-    else if(a==='all')cl.forEach(c=>sel.add(c.key));
-    else if(a==='none')sel.clear();
+    else if(a==='all'){if(cl.length&&cl.every(c=>sel.has(c.key)))sel.clear();else cl.forEach(c=>sel.add(c.key))}
     else if(a==='locked'){sel.clear();cl.forEach(c=>{if(P.classes[c.key].locked)sel.add(c.key)})}
     else{const val=a==='lock',keys=a==='unlockall'?cl.map(c=>c.key):[...sel];
       act(()=>{for(const k of keys)if(P.classes[k])setProp(P.classes[k],'locked',val)});UI.grid.lockMsg=0;
