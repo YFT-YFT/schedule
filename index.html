@@ -612,7 +612,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.983';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.985';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -715,6 +715,7 @@ const IC={
  trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
  swap:'<path d="M7 4L3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/>'
 };
+IC.copy='<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/>';
 const ic=(n,s=18)=>`<svg class="ic" viewBox="0 0 24 24" width="${s}" height="${s}" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[n]||''}</svg>`;
 
 /* ---------- constants ---------- */
@@ -1078,7 +1079,7 @@ function maybeAddrNotice(){
   if(UI.view!=='form'||formOpt().addr!=='list')return;
   const key='kp_ab:'+(P.term||P.id);try{if(localStorage.getItem(key)==='1')return}catch(e){}
   const n=areaChoices().length,el=openDlg(`<h2>住所をリストから選んでもらいます</h2>
-   <div class="warnbox" style="font-size:19px;font-weight:800;line-height:1.7;margin:10px 0 12px">リストから選ぶ場合は必ず<u>「選択肢」欄に住所を入力</u>してから、<u>「GASをコピーする」ボタン</u>を押して下さい。</div>
+   <div class="warnbox" style="font-size:19px;font-weight:800;line-height:1.7;margin:10px 0 12px">リストから選ぶ場合は必ず<u>「選択肢」欄に住所を入力</u>してから、<u>「GASをコピーする」ボタン</u>を押してください。</div>
    <p class="muted" style="margin-bottom:14px">${n?`いまの選択肢は ${n} 件です。`:'<b style="color:var(--ng)">いまは選択肢が1つもありません。</b>このままだと、フォームに住所の質問が入りません。'}</p>
    <div style="display:flex;flex-direction:column;gap:10px"><button class="btn pri big" data-ab="ok">OK</button><button class="btn ghost" data-ab="hide">次回以降表示しない（新しい行事では、また表示します）</button></div>`);
   el.addEventListener('click',e=>{const b=e.target.closest('[data-ab]');if(!b)return;if(b.dataset.ab==='hide'){try{localStorage.setItem(key,'1')}catch(_){}}el._close()});
@@ -2058,15 +2059,15 @@ function codeBytes_(a) { return a.map(b => b > 127 ? b - 256 : b); }
 // フォーム版・Webアプリ版のGASで共通の文言。ここを直すと、両方に反映されます（回答表の見出しは、回答の取り込みの読み取りと合わせてあります）
 const FORM_TXT_DEF={
   classT:'学年・組',numT:'出席番号',nameT:'児童生徒名（漢字等）',kanaT:'ふりがな（漢字以外）',hopeT:'希望について',
-  addrListT:'住所（地区）',addrTextT:n=>`住所（先頭${n}文字ほど）`,addrNone:'この中には無い',
+  addrListT:'住所（地区）',addrTextT:n=>`住所（先頭${n}文字ほど）`,addrNone:'この中にはない',
   sibName:i=>`きょうだい${i}：名前`,sibKana:i=>`きょうだい${i}：ふりがな（漢字以外）`,sibClass:i=>`きょうだい${i}：学年・組`,sibNum:i=>`きょうだい${i}：出席番号（わかれば）`,
   contact:'内容の変更やご相談がある場合は、直接担任までお電話ください。',
-  closedManual:'今回のWEBでの希望調査は締め切りました。',
+  closedManual:'今回のWebでの希望調査は締め切りました。',
   closedAuto:d=>'今回の調査は '+d+' をもって終了しました。',
-  confirm:['ご回答ありがとうございました。','・二次元コードやURLは学年・クラスによって異なることもあります。きょうだいなど複数の児童生徒が在籍している場合はそれぞれが持ち帰った二次元コードやURLで入力お願いします。','・同一児童生徒の複数回のご回答に対しては、最新の回答のみが有効になります。','・間違った内容を送信した場合は、再度ご回答下さい。最新の回答のみが有効になります。','・ご回答内容についてお電話で相談させていただくことがあります。','・調整結果は後日連絡いたします。'],
+  confirm:['ご回答ありがとうございました。','・二次元コードやURLは学年・組によって異なることもあります。きょうだいなど複数の児童生徒が在籍している場合はそれぞれが持ち帰った二次元コードやURLで入力をお願いします。','・同一児童生徒の複数回のご回答に対しては、最新の回答のみが有効になります。','・間違った内容を送信した場合は、再度ご回答ください。最新の回答のみが有効になります。','・ご回答内容についてお電話で相談させていただくことがあります。','・調整結果は後日ご連絡いたします。'],
   nameHelp:'（例：松原 マッキー）',kanaHelp:'（例：まつばら　Mackey）',kanaNg:'ひらがな等の、漢字以外で入力してください。',
   addrTextHelp:'家庭訪問の順番を考える参考にします。（例：みどり町1丁目）',
-  addrListHelp:'お住まいの地区を選んでください。当てはまるものが無いときは「この中には無い」を選んでください。',
+  addrListHelp:'お住まいの地区を選んでください。当てはまるものがないときは「この中にはない」を選んでください。',
   sibHead:'【在学きょうだい情報】',sibHelp:'本校にきょうだいが在籍している場合のみ入力してください。',
   sibKanaHelp:'（例：まつばら　Mackey）　学年・組・出席番号を間違えたときの確認に使います。',
   dayHead:'【日時について】',free:'いつでも大丈夫です。都合のつかない日時はありません。',
@@ -2084,7 +2085,7 @@ const FTX=[
   {k:'ngLabel',l:'選択肢「都合のつかない日時がある」の画面の表示',w:'Webのみ'},{k:'ngPage',l:'日時を選ぶページの題名',w:'フォームのみ'},
   {k:'ngHelpForm',l:'日時を選ぶ案内',w:'フォームのみ'},{k:'ngHelp',l:'日時を選ぶ案内',w:'Webのみ'},{k:'ngSubmit',l:'「送信」ボタンを押す案内',w:'共通'},
   {k:'confirm',l:'送信後のメッセージ（1行に1項目。1行目が見出し、2行目から箇条書き）',w:'共通',area:7},
-  {k:'contact',l:'締め切り後の、連絡の案内',w:'共通'},{k:'closedManual',l:'締め切り後の案内（締め切りの日時を決めていないとき）',w:'共通'},
+  {k:'contact',l:'締め切り後の、連絡の案内',w:'共通'},{k:'closedManual',l:'締め切り後の案内（手動で受付を止めたとき。フォームは、締め切りの日時を決めていない場合に、Webアプリは、GASで stopNow を実行した場合に表示されます）',w:'共通'},
   {k:'closedAuto',l:'締め切り後の案内（{日時} が、締め切りの日時に入れ替わります）',w:'共通'},
   {k:'secure',l:'安心の文言（ページの一番下）',w:'Webのみ',area:4}];
 const ftxtDef=k=>{const v=FORM_TXT_DEF[k];return k==='confirm'?v.join('\n'):k==='closedAuto'?v('{日時}'):String(v)};
@@ -2111,6 +2112,8 @@ A['f-txt']=()=>{
     const r=e.target.closest('[data-fr]');if(r){P.ftxt=P.ftxt||{};delete P.ftxt[r.dataset.fr];VER++;scheduleSave();paint();return}
     if(e.target.closest('[data-fall]')){P.ftxt={};VER++;scheduleSave();paint()}});
 };
+const closeJpStr=s=>{const m=/^(\d{4})\/(\d{1,2})\/(\d{1,2}) (\d{1,2}):(\d{2})$/.exec(String(s));if(!m)return s;const w='日月火水木金土'[new Date(+m[1],+m[2]-1,+m[3]).getDay()];return `${m[1]}年${+m[2]}月${+m[3]}日（${w}）${+m[4]}:${m[5]}`};
+const contactFull=X=>X.contact+(P.meta.tel?`\n（${P.meta.school?P.meta.school+'　':''}電話 ${P.meta.tel}）`:'');
 function buildGas(){
   const F=formOpt(),S=P.sched,SL=getSlots(),classes=classList(),X=formTxt();
   const title=gasEsc((F.title||formTitleDefault()).trim());
@@ -2130,7 +2133,7 @@ function buildGas(){
   L.push(`  try { form.setCollectEmail(false); } catch (e) {}`);
   L.push(`  try { form.setLimitOneResponsePerUser(false); } catch (e) {}`);
   L.push(`  try { form.setRequireLogin(false); } catch (e) {}`,``);
-  L.push(`  form.setCustomClosedFormMessage('${gasEsc((F.autoClose&&closeStr?X.closedAuto(closeStr):X.closedManual)+'\n'+X.contact)}');`,``);
+  L.push(`  form.setCustomClosedFormMessage('${gasEsc((F.autoClose&&closeStr?X.closedAuto(closeJpStr(closeStr)):X.closedManual)+'\n'+contactFull(X))}');`,``);
   L.push(`  form.setConfirmationMessage('${gasEsc(X.confirm.join('\n'))}');`,``);
   L.push(`  const classMaster = [${master}];`);
   L.push(``);
@@ -2195,7 +2198,7 @@ function buildGas(){
   L.push(`  }`);
   L.push(`}`,``);
   L.push(`function setTrigger(dateStr) {`);
-  L.push(`  const triggerDate = new Date(dateStr);`);
+  L.push(`  const triggerDate = new Date(String(dateStr).split('/').join('-').replace(' ', 'T') + ':00+09:00');`);
   L.push(`  const triggers = ScriptApp.getProjectTriggers();`);
   L.push(`  triggers.forEach(t => { if (t.getHandlerFunction() === 'autoCloseForm') ScriptApp.deleteTrigger(t); });`);
   L.push(`  ScriptApp.newTrigger('autoCloseForm').timeBased().at(triggerDate).create();`);
@@ -2217,7 +2220,7 @@ function buildWebGas(){
   const closeStr=F.autoClose&&F.closeDate?`${F.closeDate.replace(/-/g,'/')} ${F.closeTime||'17:00'}`:'';
   const an=clamp(+F.addrN||5,2,12);
   const cfg={title,closeStr,
-    closed:(closeStr?X.closedAuto(closeStr):X.closedManual)+'\n'+X.contact,
+    closedAutoT:X.closedAuto('{日時}'),closedManual:X.closedManual,contact:contactFull(X),school:(P.meta.school||'').trim(),
     classes:classes.map(c=>clsLabel(c.g,c.c)),
     maxNum:P.students.length?Math.max(1,...P.students.map(s=>s.n)):45,
     dates:S.dates.map(d=>{const p=dp(d);return{k:p.m+'/'+p.d,l:p.m+'月'+p.d+'日（'+WD[p.wd]+'）'}}),
@@ -2244,6 +2247,7 @@ function buildWebGas(){
 //  ※ 日程を変えてコードを貼り直したときは「デプロイを管理」→鉛筆→バージョン「新バージョン」→「デプロイ」
 //     （URLも二次元コードも回答のスプレッドシートも、そのままです）。「新しいデプロイ」にするとURLが変わります
 //  ※ 回答の保存先を見直したいときは showUrls を実行する
+//  ※ 受付をすぐ止めたいとき：stopNow を実行（再開は reopenNow）。締め切りを延ばす（決める）とき：下の EXTEND_TO に「2026/11/25 17:00」の形で日時を入れて保存し、extendDeadline を実行（デプロイのやり直しは要りません）
 const PUBLIC_URL = '';
 const NEXT_DEPLOY = '【次にやること】\n' +
   ' 1. 右上の「デプロイ」→「新しいデプロイ」→ 種類の歯車で「ウェブアプリ」を選ぶ\n' +
@@ -2256,10 +2260,54 @@ const CFG = __CFG__;
 const FREE = __FREE__;
 const NG = __NG__;
 
-// 管理用の関数は、保護者などウェブアプリの利用者からは呼べないようにしています
+// 管理用の関数は、保護者などWebアプリの利用者からは呼べないようにしています
 function requireOwner_() {
   const a = Session.getActiveUser().getEmail(), e = Session.getEffectiveUser().getEmail();
   if (a !== e) throw new Error('この操作は、GASの持ち主だけが実行できます。');
+}
+
+// ── 締め切りの判定（日本時間で判定します。GASの時間帯の設定に左右されません）──
+function jst_(s) { return new Date(String(s).split('/').join('-').replace(' ', 'T') + ':00+09:00'); }
+function closeStr_() { return PropertiesService.getScriptProperties().getProperty('CLOSE_AT') || CFG.closeStr || ''; }
+function isClosed_() {
+  if (PropertiesService.getScriptProperties().getProperty('STOPPED')) return true;
+  const s = closeStr_();
+  return !!s && new Date() > jst_(s);
+}
+function closeJp_(s) {
+  const d = jst_(s), w = '日月火水木金土';
+  return Utilities.formatDate(d, 'Asia/Tokyo', 'yyyy年M月d日') + '（' + w.charAt(Number(Utilities.formatDate(d, 'Asia/Tokyo', 'u')) % 7) + '）' + Utilities.formatDate(d, 'Asia/Tokyo', 'H:mm');
+}
+function closedMsg_() {
+  const t = PropertiesService.getScriptProperties().getProperty('STOPPED') ? CFG.closedManual : CFG.closedAutoT.split('{日時}').join(closeJp_(closeStr_()));
+  return t + '\n' + CFG.contact;
+}
+function esc_(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+// 受付をすぐ止める（締め切りの日時を決めていないときの止め方にも使えます）。再開は reopenNow
+function stopNow() {
+  requireOwner_();
+  PropertiesService.getScriptProperties().setProperty('STOPPED', '1');
+  Logger.log('受付を止めました。保護者がページを開くと、「締め切りました」の案内が出ます。再開するときは reopenNow を実行してください。');
+}
+function reopenNow() {
+  requireOwner_();
+  PropertiesService.getScriptProperties().deleteProperty('STOPPED');
+  Logger.log('受付を再開しました（締め切りの日時がすでに過ぎているときは、extendDeadline で日時を延ばしてください）。');
+}
+
+// 締め切りを延ばす（または、あとから決める）：下の EXTEND_TO に日時を入れて保存し、extendDeadline を実行する（日本時間）
+const EXTEND_TO = '';   // 例： '2026/11/25 17:00'
+function extendDeadline() {
+  requireOwner_();
+  const m = /^(\d{4})\/(\d{1,2})\/(\d{1,2}) (\d{1,2}):(\d{2})$/.exec(String(EXTEND_TO || '').trim());
+  if (!m) throw new Error('上のほうの EXTEND_TO に、「2026/11/25 17:00」の形で日時を入れて保存してから、もう一度実行してください。');
+  const z = function (n) { return ('0' + n).slice(-2); };
+  const s = m[1] + '/' + z(m[2]) + '/' + z(m[3]) + ' ' + z(m[4]) + ':' + m[5];
+  const p = PropertiesService.getScriptProperties();
+  p.setProperty('CLOSE_AT', s); p.deleteProperty('STOPPED'); p.deleteProperty('MAILED');
+  if (typeof setTrigger_ === 'function') setTrigger_(s);
+  Logger.log('締め切りを ' + closeJp_(s) + ' に変えました（日本時間）。');
 }
 
 function hdr_() {
@@ -2302,13 +2350,13 @@ function createWebApp() {
 //<MAIL>
 function setTrigger_(dateStr) {
   ScriptApp.getProjectTriggers().forEach(t => { if (t.getHandlerFunction() === 'autoCloseWeb') ScriptApp.deleteTrigger(t); });
-  ScriptApp.newTrigger('autoCloseWeb').timeBased().at(new Date(dateStr)).create();
+  ScriptApp.newTrigger('autoCloseWeb').timeBased().at(jst_(dateStr)).create();
 }
 
 // 締め切り時刻に自動で動き、あなた宛に回答数つきのメールを送る（受付自体は、時刻を過ぎると自動で止まる）。何度呼ばれても、メールは1回だけ
 function autoCloseWeb() {
   const props = PropertiesService.getScriptProperties();
-  if (props.getProperty('MAILED') || !CFG.closeStr || new Date() < new Date(CFG.closeStr)) return;
+  if (props.getProperty('MAILED') || !closeStr_() || new Date() < jst_(closeStr_())) return;
   props.setProperty('MAILED', '1');
   const ss = SpreadsheetApp.openById(props.getProperty('SS_ID'));
   const n = Math.max(0, ss.getSheetByName('回答').getLastRow() - 1);
@@ -2327,39 +2375,44 @@ function showUrls() {
   requireOwner_();
   const ss = SpreadsheetApp.openById(PropertiesService.getScriptProperties().getProperty('SS_ID'));
   Logger.log(describe_(ss));
-  Logger.log('■保護者に配るURL（ウェブアプリ）: 右上の「デプロイ」→「デプロイを管理」に出ています（エディタからは正しいURLを取れないため、ここには出しません）');
+  Logger.log('■保護者に配るURL（Webアプリ）: 右上の「デプロイ」→「デプロイを管理」に出ています（エディタからは正しいURLを取れないため、ここには出しません）');
 }
 
-// ウェブアプリのURLから、二次元コードの画像（PNG・SVG）を作って、マイドライブに保存する
+// WebアプリのURLから、二次元コードの画像（PNG・SVG）を作って、マイドライブに保存する
 function makeCodeImage() {
   requireOwner_();
   const props = PropertiesService.getScriptProperties();
   let url = String(PUBLIC_URL || '').trim();
   if (url) props.setProperty('PUBLIC_URL', url); else url = props.getProperty('PUBLIC_URL') || '';
-  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) throw new Error('上のほうの PUBLIC_URL に、デプロイで出たウェブアプリのURL（https://script.google.com/…/exec）を貼り付けて保存してから、もう一度実行してください。');
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) throw new Error('上のほうの PUBLIC_URL に、デプロイで出たWebアプリのURL（https://script.google.com/…/exec）を貼り付けて保存してから、もう一度実行してください。');
   const kit = codeKit(), r = kit.build(url), name = CFG.title + '_二次元コード';
   const png = Utilities.newBlob(r_toBytes_(kit.png(r.m, 10, 2)), 'image/png', name + '.png');
   const f1 = DriveApp.createFile(png);
   const f2 = DriveApp.createFile(Utilities.newBlob(kit.svg(r.m, 2), 'image/svg+xml', name + '.svg'));
-  Logger.log('ウェブアプリのURL: ' + url);
+  Logger.log('WebアプリのURL: ' + url);
   Logger.log('二次元コード（PNG）: ' + f1.getUrl());
   Logger.log('二次元コード（SVG・拡大しても粗くなりません）: ' + f2.getUrl());
   Logger.log('保存場所: マイドライブ ／ ' + r.size + '×' + r.size + 'マス（これより小さくならないよう、誤り訂正は最小にしています）');
   Logger.log('【次にやること】\n 1. スマホで二次元コードを読み取り、テスト送信を1件してみる\n 2. 回答のスプレッドシートに、その1行が入ったことを確認して、テストの行は消す\n 3. 問題なければ、保護者にURLか二次元コードを配る\n （回答のスプレッドシートを共有ドライブへ移すときは、あなたのアカウントがその共有ドライブの「投稿者」以上であることを確認してから移し、もう一度テスト送信してください）');
   //<MAIL>
-  try { MailApp.sendEmail(Session.getEffectiveUser().getEmail(), '【かこピタ】二次元コードを作成しました', CFG.title + '\n\nウェブアプリのURL:\n' + url + '\n\n二次元コード（PNG）を添付しました。SVGはマイドライブにあります。\n' + f2.getUrl() + '\n\n【次にやること】スマホで読み取ってテスト送信を1件 → スプレッドシートに入ったことを確認（テスト行は削除）→ 保護者に配る', { attachments: [png] }); } catch (e) {}
+  try { MailApp.sendEmail(Session.getEffectiveUser().getEmail(), '【かこピタ】二次元コードを作成しました', CFG.title + '\n\nWebアプリのURL:\n' + url + '\n\n二次元コード（PNG）を添付しました。SVGはマイドライブにあります。\n' + f2.getUrl() + '\n\n【次にやること】スマホで読み取ってテスト送信を1件 → スプレッドシートに入ったことを確認（テスト行は削除）→ 保護者に配る', { attachments: [png] }); } catch (e) {}
   //</MAIL>
 }
 
 function r_toBytes_(a) { return a.map(b => b > 127 ? b - 256 : b); }
 
 function doGet() {
-  if (CFG.closeStr && new Date() > new Date(CFG.closeStr)) {
-    return HtmlService.createHtmlOutput('<div style="font-family:sans-serif;padding:24px;line-height:1.9;color:#1E3350">' + CFG.closed.replace(/\n/g, '<br>') + '</div>')
-      .setTitle(CFG.title).addMetaTag('viewport', 'width=device-width, initial-scale=1');
+  const meta = 'width=device-width, initial-scale=1';
+  if (isClosed_()) {
+    const html = '<div style="font-family:sans-serif;padding:24px;line-height:1.9;color:#1E3350;max-width:560px;margin:0 auto">'
+      + '<h1 style="font-size:20px;margin:0 0 4px">' + esc_(CFG.title) + '</h1>'
+      + (CFG.school ? '<div style="color:#5B6B82;font-size:14px;margin-bottom:14px">' + esc_(CFG.school) + '</div>' : '')
+      + '<p>' + esc_(closedMsg_()).split('\n').join('<br>') + '</p></div>';
+    return HtmlService.createHtmlOutput(html).setTitle(CFG.title).addMetaTag('viewport', meta);
   }
-  return HtmlService.createHtmlOutput(PAGE).setTitle(CFG.title)
-    .addMetaTag('viewport', 'width=device-width, initial-scale=1');
+  const s = closeStr_();
+  const dl = s ? '<p class="lead" style="font-weight:700">📌 回答の締め切り：' + esc_(closeJp_(s)) + '</p>' : '';
+  return HtmlService.createHtmlOutput(PAGE.split('<!--DEADLINE-->').join(dl)).setTitle(CFG.title).addMetaTag('viewport', meta);
 }
 
 function txt_(v, max) { return String(v == null ? '' : v).replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, max); }
@@ -2368,7 +2421,7 @@ const BAD = '入力内容を確認できませんでした。ページを開き�
 
 // 保護者のブラウザから送られてくる値は、すべて疑って確かめる（このページからは「追加」しかできず、読み出しはできません）
 function submitAnswer(o) {
-  if (CFG.closeStr && new Date() > new Date(CFG.closeStr)) throw new Error(CFG.closed);
+  if (isClosed_()) throw new Error(closedMsg_());
   if (!o || typeof o !== 'object') throw new Error(BAD);
   const gc = txt_(o.gc, 30), n = txt_(o.n, 4), name = txt_(o.name, 40), kana = txt_(o.kana, 60);
   if (CFG.classes.indexOf(gc) < 0 || !/^\d{1,3}$/.test(n) || +n < 1 || !name || !kana) throw new Error(BAD);
@@ -2447,7 +2500,7 @@ button.go:disabled{background:#9DB3C6;box-shadow:none}
 .fin p{margin:6px 0;font-size:14px}
 .ft{text-align:center;font-size:12px;color:var(--ink2);margin-top:18px}
 </style></head><body>
-<div class="hd"><div class="hi"><span class="tag">日時のご希望調査</span><h1 id="t"></h1><div class="sub" id="sub" style="display:none"></div><p class="lead">スマートフォンでも、かんたんに入力できます。</p></div></div>
+<div class="hd"><div class="hi"><span class="tag">日時のご希望調査</span><h1 id="t"></h1><div class="sub" id="sub" style="display:none"></div><p class="lead">スマートフォンでも、かんたんに入力できます。</p><!--DEADLINE--></div></div>
 <div class="w"><div id="app"></div></div>
 <script>
 var C=__CFGJSON__, ng={}, mode='';
@@ -2961,7 +3014,7 @@ function vForm(){
    ${UI.form.prevWeb&&wg?`<div style="margin-top:10px;text-align:center"><iframe sandbox="allow-scripts" srcdoc="${esc(webPreviewHtml(wg.code))}" style="width:min(100%,400px);height:720px;border:8px solid #1E3350;border-radius:26px;background:#fff"></iframe><div class="tiny muted">スマートフォンの画面の大きさで表示しています（実際の見た目は端末で少し変わります）</div></div>`:''}
    ${UI.form.showWeb&&wg?`<textarea class="paste" readonly style="min-height:200px;margin-top:10px" onfocus="this.select()">${esc(wg.code)}</textarea>`:''}
    ${chkSteps('w',`<ol class="steps"><li><a href="https://script.new" target="_blank" rel="noopener">script.new</a> を開く（Googleにログインした状態で）<br><b>または</b> <a href="https://script.google.com" target="_blank" rel="noopener">Google Apps Script</a> を開いて「新しいプロジェクト」を作る<span class="tiny muted">（セキュリティ設定でリンクから開けないときは、Googleにログインしたブラウザで「Google Apps Script」を検索して開いてください）</span>。</li><li>最初からあるコードを<b>すべて消して</b>、コピーしたGASを貼り付ける。</li><li>上の「実行」で <b>createWebApp</b> を<b>1回だけ</b>実行する（初回は権限の承認が出ます。<b>表示される権限は、すべて許可</b>してください。一部だけだと失敗します。「Googleで確認されていません」と出たら「詳細」→「（安全ではないページ）に移動」→「許可」を押します。自分で貼り付けたコードなので問題ありません）。回答がたまる<b>スプレッドシートが、あなたのマイドライブの直下に作られます</b>。そのURLは、画面下の「実行ログ」に出ます（メール通知がオンなら、あなた宛のメールにも届きます）。</li><li>右上の<b>「デプロイ」→「新しいデプロイ」</b>→「種類の選択」の歯車で<b>「ウェブアプリ」</b>を選ぶ。<b>次のユーザーとして実行：自分／アクセスできるユーザー：全員</b>にして「デプロイ」（この操作だけは手作業が必要です。最初の1回だけです）。</li><li>出てきた<b>「ウェブアプリのURL」</b>をコピーし、下の<b>「二次元コードを、かこピタで作る」欄</b>に貼り付けて、二次元コードを作り、<b>PNG（またはSVG）で保存</b>する。
-<details class="det hl" style="margin-top:8px"><summary>▼ クリックして開く：GASで作りたいとき（任意：マイドライブに画像を自動で保存したいとき）</summary><div class="detb tiny muted">かこピタで作るものと、<b>同じマス数・同じ大きさの二次元コード</b>ができます。違いは、画像がマイドライブに自動で保存され、メール通知がオンならメールにも添付されることです。GASの上のほうにある <b>PUBLIC_URL = ''</b> の引用符の間にURLを貼り付けて保存し、<b>makeCodeImage</b> を実行します。</div></details></li><li>スマホで二次元コードを読み取り、ページが開くか確かめる。<b>テスト送信を1件</b>して、回答のスプレッドシートにその1行が入ったことを確認し、テストの行は削除する。</li><li>問題なければ、保護者に二次元コードかURLを配る。</li><li><b>（回答のスプレッドシートを共有ドライブへ移すとき）</b>スプレッドシートを共有ドライブへ移動します。スプレッドシートのURLも、ウェブアプリのURLも、二次元コードも<b>そのまま使えます</b>。ただし、このGASを動かす<b>あなたのアカウントが、その共有ドライブの「投稿者」以上のメンバー</b>である必要があります（外れると、回答が保存できなくなります）。移したあとに、もう一度テスト送信をして確かめてください。</li><li><b>日程などを変えたとき</b>：新しいGASを貼り直し、「デプロイ」→「デプロイを管理」→鉛筆→バージョン「新バージョン」→「デプロイ」。<b>URLも二次元コードも、回答のスプレッドシートも、そのまま</b>です（GASで二次元コードを作る場合は、貼り直したあと、PUBLIC_URL にもう一度URLを貼ります）。「新しいデプロイ」にするとURLが変わるので、二次元コードを作り直してください（スプレッドシートは同じです）。別のプロジェクトに貼って実行したときだけ、新しいスプレッドシートが作られます。</li><li>回答は、そのスプレッドシートを「カンマ区切り形式（.CSV）」でダウンロードするか、表をコピーして、「回答を取り込む」の欄で読み込みます。</li></ol>`)}
+<details class="det hl" style="margin-top:8px"><summary>▼ クリックして開く：GASで作りたいとき（任意：マイドライブに画像を自動で保存したいとき）</summary><div class="detb tiny muted">かこピタで作るものと、<b>同じマス数・同じ大きさの二次元コード</b>ができます。違いは、画像がマイドライブに自動で保存され、メール通知がオンならメールにも添付されることです。GASの上のほうにある <b>PUBLIC_URL = ''</b> の引用符の間にURLを貼り付けて保存し、<b>makeCodeImage</b> を実行します。</div></details></li><li>スマホで二次元コードを読み取り、ページが開くか確かめる。<b>テスト送信を1件</b>して、回答のスプレッドシートにその1行が入ったことを確認し、テストの行は削除する。</li><li>問題なければ、保護者に二次元コードかURLを配る。</li><li><b>（回答のスプレッドシートを共有ドライブへ移すとき）</b>スプレッドシートを共有ドライブへ移動します。スプレッドシートのURLも、WebアプリのURLも、二次元コードも<b>そのまま使えます</b>。ただし、このGASを動かす<b>あなたのアカウントが、その共有ドライブの「投稿者」以上のメンバー</b>である必要があります（外れると、回答が保存できなくなります）。移したあとに、もう一度テスト送信をして確かめてください。</li><li><b>日程などを変えたとき</b>：新しいGASを貼り直し、「デプロイ」→「デプロイを管理」→鉛筆→バージョン「新バージョン」→「デプロイ」。<b>URLも二次元コードも、回答のスプレッドシートも、そのまま</b>です（GASで二次元コードを作る場合は、貼り直したあと、PUBLIC_URL にもう一度URLを貼ります）。「新しいデプロイ」にするとURLが変わるので、二次元コードを作り直してください（スプレッドシートは同じです）。別のプロジェクトに貼って実行したときだけ、新しいスプレッドシートが作られます。</li><li>回答は、そのスプレッドシートを「カンマ区切り形式（.CSV）」でダウンロードするか、表をコピーして、「回答を取り込む」の欄で読み込みます。</li></ol>`)}
    <div class="panel" style="margin-top:14px;padding:12px"><b>二次元コードを、かこピタで作る</b><span class="tiny muted">（URLを貼ると、すぐにできます。通信はせず、この画面の中だけで作ります）</span>
     <div class="row" style="margin-top:8px"><input id="codeIn" type="text" placeholder="https://…" value="${esc(UI.form.codeIn||'')}" style="flex:1;min-width:200px" autocomplete="off" spellcheck="false"></div>
     <div id="codeOut">${codeHtml(UI.form.code)}</div></div></section>`;
@@ -3064,13 +3117,13 @@ A['f-open-go']=()=>{UI.afterOpen=true;openFile()};
 /* ================= 6. print (notice / reminder) ================= */
 const TPL_DEF={
  meeting:{title:'{行事} 日程のお知らせ',who:'{学年}年{組}組　{番}番\n{名前} さんと保護者の方へ',when:'{日付}　{時刻}',
-  body:'上記の日程で {行事} を\n{学年}年{組}組 の教室で行います。 よろしくお願いします。\n＊ ご都合が悪ければ {学校}（電話 {電話}）までご連絡ください。\n＊ 保護者証とスリッパをご持参ください。\n＊ 時間が多少前後する場合もありますのでご了承下さい。',
+  body:'上記の日程で {行事} を\n{学年}年{組}組 の教室で行います。 よろしくお願いします。\n＊ ご都合が悪ければ {学校}（電話 {電話}）までご連絡ください。\n＊ 保護者証とスリッパをご持参ください。\n＊ 時間が多少前後する場合もありますのでご了承ください。',
   foot:'{学校}',teacher:'{学年}年{組}組 担任　{担任}'},
  visit:{title:'{行事} 日程のお知らせ',who:'{学年}年{組}組　{番}番\n{名前} さんと保護者の方へ',when:'{日付}　{時刻}',
-  body:'上記の日程で {行事} に伺います。 よろしくお願いします。\n＊ ご都合が悪ければ {学校}（電話 {電話}）までご連絡ください。\n＊ 時間が多少前後する場合もありますのでご了承下さい。',
+  body:'上記の日程で {行事} に伺います。 よろしくお願いします。\n＊ ご都合が悪ければ {学校}（電話 {電話}）までご連絡ください。\n＊ 時間が多少前後する場合もありますのでご了承ください。',
   foot:'{学校}',teacher:'{学年}年{組}組 担任　{担任}'},
  remindAfter:{to:'{学年}年{組}組　{番}番\n{名前} さんの保護者の方へ',title:'{行事} の日時希望調査について',
-  body:'締め切り時点で未回答となっているようです。\n担任までご連絡願います。\n（電話番号 {電話}）\n行き違いがありましたら申し訳ございません。',foot:'{日付}',teacher:'{学校}　{学年}年{組}組 担任　{担任}'},
+  body:'締め切り時点で未回答となっているようです。\n担任までご連絡ください。\n（電話番号 {電話}）\n行き違いがありましたら申し訳ございません。',foot:'{日付}',teacher:'{学校}　{学年}年{組}組 担任　{担任}'},
  remindBefore:{to:'{学年}年{組}組　{番}番\n{名前} さんの保護者の方へ',title:'{行事} の日時希望調査について',
   body:'{今} 時点で未回答となっているようです。\n期限までにご回答ください。\n（入力間違いも未回答処理されています。）\n行き違いがありましたら申し訳ございません。',foot:'{日付}',teacher:'{学校}　{学年}年{組}組 担任　{担任}'}};
 const TPL_NAMES={meeting:'お知らせ（懇談用）',visit:'お知らせ（家庭訪問用）',remindAfter:'催促状（締め切り後）',remindBefore:'催促状（締め切り前）'};
@@ -3168,7 +3221,7 @@ function vPrint(){
     <div class="row" style="margin-top:12px"><b style="font-size:13px">名前のフォント</b><span style="font-family:var(--font-name);font-size:18px">${esc(nfSampleInfo().chars.slice(0,4).join(' ')||'髙 﨑 𠮷')}</span><span class="tiny muted">いま：${esc(nfLabel(nfLoad()))}</span><button class="btn sm" data-act="namefont">選ぶ…</button></div>
     ${(()=>{const gn=glIssues().length;return `<div class="row" style="margin-top:8px${gn?'':';opacity:.55'}"><b style="font-size:13px">表示できない字は</b><div class="seg">${[['alt','代わりの字'],['kana','ひらがな'],['none','そのまま']].map(([v,l])=>`<button data-act="p-gm" data-v="${v}" class="${GLY.pm===v?'on':''}">${l}</button>`).join('')}</div><span class="tiny muted">${gn?`該当 ${gn}名。`:'該当なし（名前に、いまのフォントで表示できない字があるときに使われます）。'}代わりの字＝読み替えの表の字（髙→高）／ひらがな＝名簿のふりがなで名前全体を置き換え</span></div>`})()}
     ${(U.mode==='table'||U.mode==='blocks')?`<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><label class="tog"><input type="checkbox" data-ch="paddrdoc" ${pAddrDoc()?'checked':''}>住所も印刷する（家庭訪問のときだけ、最初から印刷します）</label>
-      ${U.mode==='table'?`<div class="row"><b style="font-size:13px;min-width:4em">きょうだい</b><div class="seg">${[['out','表の外に一覧'],['in','表の中に'],['both','両方']].map(([v,l])=>`<button data-act="p-r" data-k="sibMode" data-v="${v}" class="${(U.sibMode||'both')===v?'on':''}">${l}</button>`).join('')}</div><span class="tiny muted">赤字と★で強調（白黒でも目立ちます）</span></div><div class="row" style="margin-top:8px"><button class="btn sm" data-act="p-xlsx">${ic('down',15)}選んだ学級をExcelで保存</button><button class="btn sm" data-act="p-csv-t">${ic('down',15)}CSV（表の形）</button><button class="btn sm" data-act="p-csv-l">${ic('down',15)}CSV（1人1行）</button><span class="tiny muted">Excelは学級ごとの表＋並べ替え用の「一覧データ」シートです</span></div>`:''}
+      ${U.mode==='table'?`<div class="row"><b style="font-size:13px;min-width:4em">きょうだい</b><div class="seg">${[['out','表の外に一覧'],['in','表の中に'],['both','両方']].map(([v,l])=>`<button data-act="p-r" data-k="sibMode" data-v="${v}" class="${(U.sibMode||'both')===v?'on':''}">${l}</button>`).join('')}</div><span class="tiny muted">赤字と★で強調（白黒でも目立ちます）</span></div><div class="row" style="margin-top:8px"><button class="btn sm" data-act="p-export">${ic('down',15)}書き出し…（Excel・CSV・カレンダー）</button><span class="tiny muted">選んだ学級の表を、Excel・CSVで保存したり、カレンダー用の予定を作ったりします</span></div>`:''}
       ${U.mode==='blocks'?`<div class="row"><b style="font-size:13px;min-width:4em">枚数</b><div class="seg">${[['2','2枚（標準）'],['3','3枚'],['4','4枚'],['auto','自動（読める最小）']].map(([v,l])=>`<button data-act="p-r" data-k="pages" data-v="${v}" class="${String(U.pages)===v?'on':''}">${l}</button>`).join('')}</div><span class="tiny muted">（1学級あたり）</span></div><label class="tog"><input type="checkbox" data-ch="pplace" ${U.showPlace?'checked':''}>配置済みの日時も印字する</label>`:''}</div>`
      :U.mode==='notice'?`<label class="tog" style="margin-top:10px"><input type="checkbox" data-ch="pskip" ${U.skipUnplaced?'checked':''}>日時が決まっていない児童生徒は印刷しない</label>`
       :`<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><div class="row"><b style="font-size:13px;min-width:4em">対象</b><div class="seg"><button data-act="p-r" data-k="rTarget" data-v="unans" class="${U.rTarget==='unans'?'on':''}">回答が必要な人</button><button data-act="p-r" data-k="rTarget" data-v="all" class="${U.rTarget==='all'?'on':''}">全員</button></div><span class="tiny muted">回答が必要な人＝未回答のほか、回答が読み取れず（組・名前が合わない等）反映できていない人</span></div>
@@ -3971,15 +4024,27 @@ async function downloadApp(){
   }catch(e){toast('ダウンロードできませんでした。ブラウザの「名前を付けて保存」（Ctrl+S）でも保存できます',{ms:7000});return false}
 }
 A['dl-app']=()=>downloadApp();
+async function copyAppSource(){   // このページの元のHTMLを、まるごとコピーする（職場のセキュリティで、ダウンロードしたファイルの中身が簡略化されるときの代わりの方法）
+  try{const r=await fetch(location.href.split('#')[0],{cache:'no-store'});if(!r.ok)throw new Error(r.status);const t=await r.text();
+    if(!/かこピタ/.test(t)||!/<\/html>\s*$/i.test(t))throw new Error('unexpected');
+    if(await copyText(t)){toast(`ソースコードをすべてコピーしました（${Math.round(t.length/1024).toLocaleString()}KB）。メモ帳に貼り付けてください`,{ms:8000});return true}
+  }catch(e){}
+  toast('コピーできませんでした。ページの上で右クリック→「ページのソースを表示」（Ctrl+U）で開き、Ctrl+A → Ctrl+C でも、コピーできます',{ms:10000});return false;
+}
+A['src-copy']=()=>copyAppSource();
 function maybeDownloadDialog(){
   if(!isHostedPage())return;
-  try{if(localStorage.getItem('kp_dl_hide')==='1')return}catch(e){}
+  if(!/[?&]dl=1\b/.test(location.search)){try{if(localStorage.getItem('kp_dl_hide')==='1')return}catch(e){}}
   const el=openDlg(`<h2>ダウンロードして、オフラインでも使えます</h2>
    <p class="muted" style="line-height:1.8">このページ（かこピタ）は、<b>1つのファイルをダウンロードするだけで、インターネットがない環境でも使えます</b>。名簿など個人情報を扱う作業は、ダウンロードしたファイルで行うと安心です。</p>
    <ul class="muted" style="line-height:1.9;margin:8px 0 0;padding-left:1.3em"><li>ダウンロードしたファイルをダブルクリックすると、ブラウザで開きます</li><li>名簿や日程のデータは、そのパソコンの中だけに保存されます</li><li>GoogleフォームのGAS作成のときだけ、インターネットにつないでください</li></ul>
+   <div class="warnbox" style="margin-top:14px"><b>ダウンロードしたファイルが動かないとき</b><span class="tiny">（職場のセキュリティで、中身が簡略化されることがあります）</span>
+    <ol class="steps" style="margin:6px 0 0"><li>下の「ソースコードをコピー」を押す</li><li>メモ帳を開いて、貼り付ける（Ctrl+V）</li><li>「名前を付けて保存」で、ファイル名を「かこピタ.html」、文字コードを<b>UTF-8</b>、ファイルの種類を<b>すべてのファイル</b>にして保存する</li><li>保存したファイルをダブルクリックして開く</li></ol>
+    <div class="row" style="margin-top:8px"><button class="btn sm" data-dl="src">${ic('copy',15)}ソースコードをコピー</button></div></div>
    <label class="tog" style="margin-top:14px"><input type="checkbox" id="dlHide">次回から表示しない</label>
    <div class="acts"><button class="btn" data-dl="later">あとで</button><button class="btn pri big" data-dl="go">${ic('down',17)}ダウンロードする</button></div>`);
   el.addEventListener('click',async e=>{const b=e.target.closest('[data-dl]');if(!b)return;
+    if(b.dataset.dl==='src'){await copyAppSource();return}
     if($('#dlHide',el).checked){try{localStorage.setItem('kp_dl_hide','1')}catch(_){}}
     if(b.dataset.dl==='go')await downloadApp();el._close()});
 }
@@ -3994,23 +4059,23 @@ A.about=()=>{
 
 /* ---------- help ---------- */
 const HELP=[
- ['はじめに',()=>`<h3>最短の流れ（5ステップ）</h3><ol><li><b>1. 準備（名簿）</b>：学年・組・番号・名前・ふりがな（住所・担任名もいっしょに）を貼り付けるか、ファイルで読み込む</li><li><b>1. 準備（日程）</b>：実施日と、1日の時間割（開始時刻・1枠の長さ・枠数）を決める</li><li><b>2. フォーム（任意）</b>：保護者から都合を集めるときだけ使います。GoogleフォームかWebアプリを作るコード（GAS）をコピーして実行。集まった回答ファイルを取り込む（取り込む前に、どの列が何の情報かを確認する画面が出ます）</li><li><b>3. 条件</b>：児童生徒ごとの×（不可）・○（この時間のみ可）を確認・入力する（手入力だけでもOK）</li><li><b>4. かこピタ(配置)</b>：「かこピタ（自動配置）する」を押す。気になるところは、ドラッグで入れ替える</li><li><b>5. 印刷</b>：お知らせ・催促状・学級の一覧表・条件ブロックを印刷する（縦・横を選べます）</li></ol>
+ ['はじめに',()=>`<h3>最短の流れ（5ステップ）</h3><ol><li><b>1. 準備（名簿・日程）</b>：名簿（学年・組・番号・名前・ふりがな。住所・担任名もいっしょに）を貼り付けるか、ファイルで読み込みます。続けて、実施日と、1日の時間割（開始時刻・1枠の長さ・枠数）を決めます</li><li><b>2. フォーム（任意）</b>：保護者から都合を集めるときだけ使います。GoogleフォームかWebアプリを作るコード（GAS）をコピーして実行。集まった回答ファイルを取り込む（取り込む前に、どの列が何の情報かを確認する画面が出ます）</li><li><b>3. 条件</b>：児童生徒ごとの×（不可）・○（この時間のみ可）を確認・入力する（手入力だけでもOK）</li><li><b>4. かこピタ(配置)</b>：「かこピタ（自動配置）する」を押す。気になるところは、ドラッグで入れ替える</li><li><b>5. 印刷</b>：お知らせ・催促状・学級の一覧表・条件ブロックを印刷する（縦・横を選べます）</li></ol>
   <div class="okbox" style="margin-top:12px"><b>複数人で使うとき（かんたんな流れ）</b>
    <ol style="margin:6px 0 0 18px;padding:0;line-height:1.8">
    <li><b>設定担当者</b>：「共有する」で共有フォルダを選び、「バッチで起動する」の<b>3つのファイル</b>をそこへ書き出します。</li>
    <li><b>担任</b>：共有フォルダの<b>「かこピタ起動_…」のバッチをダブルクリック</b>するだけです（フォルダ選びは不要）。デスクトップに「かこピタ」のショートカットもできるので、次回からはそれで開けます。</li>
    <li>各担任は<b>自分の学級だけ</b>を組みます。ほかの人が編集中の学級は、見るだけになります。</li></ol>
    <div class="tiny muted" style="margin-top:6px">バッチが使えないとき（Windows以外のPCなど）：各担任が最初の1回だけ「共有する」→「共有フォルダを選ぶ」で、同じフォルダを選びます。2回目からは「前回のフォルダに再接続」を押すだけです。<br>「学級専用のHTML」（オプション）は、担任に<b>自分の学級の画面だけ</b>を渡したいときに使います。</div></div>
-  <h3>初心者の方へ：最短で結果を出す3ステップ</h3><ol><li><b>希望データの準備</b>：保護者の希望を、3. 条件で×○に入力します。大変なときは、Googleフォームの回答を取り込めます（名前の空白・全角半角・ひらがなカタカナの違いは自動で吸収します）。</li><li><b>「かこピタ」で自動配置</b>：やり直したいときは「配置ロック中」ボタンを押してロックを解除し、もう一度かこピタします（ロック中に実行すると、画面の上に赤いお知らせが出ます）。条件が厳しくて誰かが入れないときは、実行前に名前つきで知らせます。時間がかかるときは「中断する」で止められます。</li><li><b>最終調整と印刷</b>：決まった案を直したいときは、名前を動かすだけ。最後に「5. 印刷」で、美しい個票を出力します。</li></ol>`],
+  <h3>初心者の方へ：最短で結果を出す3ステップ</h3><ol><li><b>希望データの準備</b>：保護者の希望を、3. 条件で×○に入力します。大変なときは、Googleフォームの回答を取り込めます（名前の空白・全角半角・ひらがなカタカナの違いは自動で吸収します）。</li><li><b>「かこピタ」で自動配置</b>：やり直したいときは「配置ロック中」ボタンを押してロックを解除し、もう一度かこピタします（ロック中に実行すると、画面の上に赤いお知らせが出ます）。条件が厳しくて誰かが入れないときは、実行前に名前つきで知らせます。時間がかかるときは「中断する」で止められます。</li><li><b>最終調整と印刷</b>：決まった案を直したいときは、名前を動かすだけ。最後に「5. 印刷」で、見やすい個票を出力します。</li></ol>`],
  ['画面の使い方',()=>`<h3>1. 準備（名簿）</h3><p>Excel・CSV・貼り付けのどれでも取り込めます。列の順番は自由で、見出しがあれば自動で当てはめます。<b>担任名</b>も列として取り込めるほか、「担任名をまとめて設定」でも入力できます。住所は家庭訪問で近い家を続けたいときだけ入れてください（個人情報です）。</p>
   <h3>1. 準備（日程）</h3><p>日付は上限なし、期間で追加できます。実施日は「土日を除く」で、土日を除いて追加できます（祝日は自動では除かれないので、一覧から消してください）。時刻のルール（17:00以降の扱い）や、きょうだい・住所への配慮は、「4. かこピタ(配置)」のかこピタ（自動配置）の画面で、学級ごとに決めます。</p>
-  <h3>2. フォーム（任意）</h3><p>保護者から都合を集めるための機能です。<b>使わなくても、「3. 条件」で手入力できます。</b>方式は2つあります。<br><b>Googleフォーム</b>：名簿と日程からGAS（Googleフォームを作るコード）を作ります。<b>script.new</b>（または Google Apps Script）に貼り付けて実行すると、実行ログに「フォーム作成完了」（編集URL）、「回答用URL」とその短縮URL、二次元コードの画像（PNG・SVG）の保存場所、「【自動締め切り予約】…」が表示されます（Apps Scriptの画面の下の「実行ログ」）。二次元コードの画像は、マイドライブにできます。<br><b>Webアプリ</b>：日付ごとに区切って表示する、スマホ向けの専用ページです。GASを実行して、「デプロイ」→「ウェブアプリ」にするとURLができます。そのURLを、かこピタの「二次元コードを、かこピタで作る」欄に貼ると、二次元コードを作れます。<br>説明・見出し・送信後のメッセージなどは、「フォームの文言を編集する」で、両方まとめて書き換えられます（回答表の見出しは変えられません）。住所は「聞かない／入力してもらう／リストから選ぶ」から選べます（最初は「聞かない」。リストの最後には、必ず「この中には無い」が入ります）。きょうだい欄には、名前の次に「ふりがな」の欄ができ、学年・組・番号の入力ミスがあっても、ふりがなで名簿から探します。学年・組は、きょうだい欄と同じく「○年○組」を1つ選ぶ形です（学年と組が別々だった以前のフォームの回答も、そのまま読み込めます）。回答は、フォームの「回答」（Webアプリは、回答がたまるスプレッドシート）→ダウンロード→「カンマ区切り形式（.CSV）」で取り込みます。</p>
+  <h3>2. フォーム（任意）</h3><p>保護者から都合を集めるための機能です。<b>使わなくても、「3. 条件」で手入力できます。</b>方式は2つあります。<br><b>Googleフォーム</b>：名簿と日程からGAS（Googleフォームを作るコード）を作ります。<b>script.new</b>（または Google Apps Script）に貼り付けて実行すると、実行ログに「フォーム作成完了」（編集URL）、「回答用URL」とその短縮URL、二次元コードの画像（PNG・SVG）の保存場所、「【自動締め切り予約】…」が表示されます（Apps Scriptの画面の下の「実行ログ」）。二次元コードの画像は、マイドライブにできます。<br><b>Webアプリ</b>：日付ごとに区切って表示する、スマホ向けの専用ページです。GASを実行して、「デプロイ」→「ウェブアプリ」にするとURLができます。そのURLを、かこピタの「二次元コードを、かこピタで作る」欄に貼ると、二次元コードを作れます。受付をすぐ止めたいときは、GASで stopNow を実行します。締め切りを延ばしたいときは、EXTEND_TO に日時を入れて extendDeadline を実行します（デプロイのやり直しは要りません）。<br>説明・見出し・送信後のメッセージなどは、「フォームの文言を編集する」で、両方まとめて書き換えられます（回答表の見出しは変えられません）。住所は「聞かない／入力してもらう／リストから選ぶ」から選べます（最初は「聞かない」。リストの最後には、必ず「この中にはない」が入ります）。きょうだい欄には、名前の次に「ふりがな」の欄ができ、学年・組・番号の入力ミスがあっても、ふりがなで名簿から探します。学年・組は、きょうだい欄と同じく「○年○組」を1つ選ぶ形です（学年と組が別々だった以前のフォームの回答も、そのまま読み込めます）。回答は、フォームの「回答」（Webアプリは、回答がたまるスプレッドシート）→ダウンロード→「カンマ区切り形式（.CSV）」で取り込みます。</p>
   <h3>3. 条件</h3><p>ブラシ（×・○・未・消しゴム）を選んで、ドラッグで囲んだ四角い範囲をまとめて塗ります（指を離したときに反映）。ブラシは、スクロールしても画面の上に固定されます。日付や時刻の見出しをクリックすると、その日・その時刻をまとめて塗れます。枠数（連続枠）は1〜30。きょうだいの学年・組・番号を入れると、名簿と自動で照合します。<b>○がある児童生徒は、○の枠にだけ配置されます。</b></p>
-  <h3>4. かこピタ(配置)</h3><p>児童生徒を選ぶと、入れない時間帯が濃い斜線になります（他の児童生徒が入っているマスの上も同様です）。置きたいマスをクリック、またはドラッグ（置いた瞬間に選択は解除されます）。右クリックで外す／休憩（×）（空きマスや休憩のマスは、右ボタンを押したままドラッグして、囲んだ四角い範囲をまとめて×にもできます）。「休憩（×）を置く」に切り替えると、空きマスを囲んでまとめて×にでき、日付をクリックするとその日の空きマスがすべて×になります（もう一度クリックで解除）。休憩モードで置いてある名前をクリックすると、配置モードに戻ります。「全員を外す」で、その学級の配置をまとめて外せます。名前の右に出る住所（地区）は、<b>家庭訪問のときだけ最初から表示</b>されます。ほかの行事では最初は非表示で、「住所を表示」にチェックを入れると表示できます。「かこピタ（自動配置）する」とロックのボタンは、画面の右下（スマホでは下）に固定されています。日付・開始時刻・1枠の長さ・最終時刻を変えて、配置が枠の外になったときは、その場で配置を外して、未配置にもどします（「元に戻す」で戻せます）。</p>
-  <h3>5. 印刷</h3><p>日程のお知らせ・未回答の催促状・各学級の一覧表・条件ブロックを印刷できます。<b>縦・横を選べます。</b>標準は、お知らせと催促状が縦（上下2段。横にすると左右2段）、学級の一覧表が縦（白黒印刷向き。児童生徒名が折り返さない大きさに自動調整。きょうだいは赤字と★で強調）です。条件ブロックは文字が小さめなので、A3での印刷をおすすめします。1学級2枚に収まり、文字がいちばん大きくなる向きを自動で選びます。住所の印刷は、学級の一覧表と条件ブロックでは、家庭訪問のときだけ最初からオンです（お知らせと催促状の個票は、家庭に配るので、家庭訪問でも最初はオフです）。文面は「文面を編集する」で書き換えられます（{名前}などの言葉が自動で入れ替わります）。「印刷する」ボタンは画面の左下に浮かんでいて、「印刷前の点検」に確認事項があると、オレンジ（重いときは赤）になり、「確認○件」と出ます。名前に、いまのフォントで表示できない字があるときは、「代わりの字」「ひらがな」「そのまま」から選べます。</p>`],
+  <h3>4. かこピタ(配置)</h3><p>児童生徒を選ぶと、入れない時間帯が濃い斜線になります（他の児童生徒が入っているマスの上も同様です）。置きたいマスをクリック、またはドラッグ（置いた瞬間に選択は解除されます）。右クリックで外す／休憩（×）（空きマスや休憩のマスは、右ボタンを押したままドラッグして、囲んだ四角い範囲をまとめて×にもできます）。「休憩（×）を置く」に切り替えると、空きマスを囲んでまとめて×にでき、日付をクリックするとその日の空きマスがすべて×になります（もう一度クリックで解除）。休憩モードで置いてある名前をクリックすると、配置モードに戻ります。「全員を外す」で、その学級の配置をまとめて外せます。「書き出し」ボタンでは、この学級の表をExcel（.xlsx）・CSVで保存できるほか、Googleカレンダー用の予定も作れます（くわしくは「書き出し」の項目）。名前の右に出る住所（地区）は、<b>家庭訪問のときだけ最初から表示</b>されます。ほかの行事では最初は非表示で、「住所を表示」にチェックを入れると表示できます。「かこピタ（自動配置）する」とロックのボタンは、画面の右下（スマホでは下）に固定されています。日付・開始時刻・1枠の長さ・最終時刻を変えて、配置が枠の外になったときは、その場で配置を外して、未配置にもどします（「元に戻す」で戻せます）。</p>
+  <h3>5. 印刷</h3><p>日程のお知らせ・未回答の催促状・各学級の一覧表・条件ブロックを印刷できます。<b>縦・横を選べます。</b>標準は、お知らせと催促状が縦（上下2段。横にすると左右2段）、学級の一覧表が縦（白黒印刷向き。児童生徒名が折り返さない大きさに自動調整。きょうだいは赤字と★で強調）です。条件ブロックは文字が小さめなので、A3での印刷をおすすめします。1学級2枚に収まり、文字がいちばん大きくなる向きを自動で選びます。住所の印刷は、学級の一覧表と条件ブロックでは、家庭訪問のときだけ最初からオンです（お知らせと催促状の個票は、家庭に配るので、家庭訪問でも最初はオフです）。文面は「文面を編集する」で書き換えられます（{名前}などの言葉が自動で入れ替わります）。「印刷する」ボタンは画面の左下に浮かんでいて、「印刷前の点検」に確認事項があると、オレンジ（重いときは赤）になり、「確認○件」と出ます。名前に、いまのフォントで表示できない字があるときは、「代わりの字」「ひらがな」「そのまま」から選べます。学級の一覧表では、「書き出し」から、選んだ学級の表をExcel・CSV・カレンダー用の予定にできます。</p>`],
  ['かこピタの設定',()=>`<h3>かこピタ（自動配置）のメニュー</h3><p><b>この設定は学級ごとに保存</b>され、ほかの学級には影響しません。「全学級をかこピタ」「指定した学級をかこピタ」では、それぞれの学級の設定でかこピタします。まとめて設定したいときは、メニュー上部の「対象の学級」で学級を選んでから項目を変えると、<b>変えた項目だけ</b>が選んだ学級に反映されます（何も変えなければ、何も変わりません）。</p><ul><li><b>自動配置の方針</b>：「出席番号順優先」または「シャッフル」。シャッフルは実行のたびに別の案になるので、納得いく案を選べます。</li><li><b>日ごとの人数</b>：「均等にする」で、特定の日だけが過密になるのを防ぎます。</li><li><b>詰める時刻</b>：選んだ時刻に近い枠から使い、まとまった空き時間を作ります。</li><li><b>仕上げの探索</b>：区切りの時刻以降の人数や偏りが減る組み合わせを、指定した秒数まで探します。</li><li><b>いまの配置</b>：「消して組み直す」または「残して、足りない分だけ」。</li><li><b>時刻のルール</b>：「できれば」（まず区切りの時刻までで探し、入らなければ以降も使う）、「厳守」（以降は使わない）、「制限なし」。最初は「できれば17:00まで」です。「厳守」にすると、その学級の画面では区切り以降の枠も隠します。</li></ul><p class="tiny muted">4. かこピタ(配置)で児童生徒を選ぶと、入れない時間帯はいつでも濃い斜線で示されます（手動調整のミス防止）。</p>
   <h3>きょうだい・住所への配慮</h3><ul><li><b>きょうだい配慮</b>：きょうだいが別の学級にいても、<b>同じ時刻にならない</b>ようにし、同じ日の近い時刻に寄せます。<b>間隔は「続けて」「1枠あける」「2枠あける」から選べます</b>（既定は続けて）。</li><li><b>住所配慮</b>：同じ地区の児童生徒を、同じ日に続けて配置します。地区の判定は3つから選べます。<b>住所の最初の数字の手前まで</b>（初期設定。「大阪市北区梅田1丁目2-3」→「大阪市北区梅田」）、<b>住所の最初の数字まで</b>（→「大阪市北区梅田1」）、<b>指定した文字数の範囲で</b>（先頭◯文字）。数字のない住所は、先頭◯文字で判定します。余裕があるときは、離れていそうな地区（地区名が違う）どうしが隣り合わないよう、間に1枠あけます。<b>「住所が近い児童生徒を近くに配置する」は、行事が家庭訪問のときだけ最初からオンです</b>（ほかの行事では最初はオフ）。</li></ul>`],
- ['便利な技',()=>`<ul><li><b>Ctrl+Z / Ctrl+Y</b>：取り消し／やり直し（配置・条件・名簿の取り込みなど、ほとんどの操作に効きます）</li><li><b>1・2・3・0 キー</b>（3. 条件）：ブラシを ×・○・未・消しゴム に切り替え</li><li><b>↑↓ キー</b>（3. 条件）：前後の児童生徒へ</li><li><b>選んでクリック</b>（4. かこピタ(配置)）：未配置の児童生徒を選び、置きたいマスをクリック。置いてある人を選んで別のマスをクリックすると、入れ替わります</li><li><b>右クリック</b>（4. かこピタ(配置)）：置いた人を外す／空きマスを休憩（×）に</li><li><b>名前で探す</b>：条件・配置の画面の検索欄で、児童生徒を名前ですばやく探せます</li><li><b>Ctrl+S</b>：今の状態をファイルに書き出す（バックアップ用）</li><li><b>休憩の予約</b>：「休憩（×）を置く」モードで空きマスをクリック、またはなぞって塗る。日付をクリックするとその日の空きマスがすべて×になります。かこピタはそこを避けます</li><li><b>枠数</b>：特別な支援や相談が必要な児童生徒に、連続した時間を確保できます</li></ul>`],
+ ['便利な技',()=>`<ul><li><b>Ctrl+Z / Ctrl+Y</b>（Macは⌘）：取り消し／やり直し。Shift+Ctrl+Zでも、やり直せます（配置・条件・名簿の取り込みなど、ほとんどの操作に効きます）</li><li><b>1・2・3・0 キー</b>（3. 条件）：ブラシを ×・○・未・消しゴム に切り替え</li><li><b>↑↓ キー</b>（3. 条件）：前後の児童生徒へ</li><li><b>選んでクリック</b>（4. かこピタ(配置)）：未配置の児童生徒を選び、置きたいマスをクリック。置いてある人を選んで別のマスをクリックすると、入れ替わります</li><li><b>右クリック</b>（4. かこピタ(配置)）：置いた人を外す／空きマスを休憩（×）に</li><li><b>名前で探す</b>：条件・配置の画面の検索欄で、児童生徒を名前ですばやく探せます</li><li><b>Ctrl+S</b>（Macは⌘+S）：今の状態をファイルに書き出す（バックアップ用）</li><li><b>休憩の予約</b>：「休憩（×）を置く」モードで空きマスをクリック、またはなぞって塗る。日付をクリックするとその日の空きマスがすべて×になります。かこピタはそこを避けます</li><li><b>枠数</b>：特別な支援や相談が必要な児童生徒に、連続した時間を確保できます</li></ul>`],
  ['保存・共有・オフライン',()=>`<h3>保存</h3><p>編集のたびに、自動で保存されます。共有フォルダにつないでいないときはこのブラウザの中、つないでいるときは共有フォルダの中です（切り替えは自動です）。最上部には、最後に保存した時刻が出ます。バックアップとして、「設定」→「保存とバックアップ」から、ファイルへの書き出し・読み込みや、「以前の状態に戻す」（自動バックアップ12件）ができます。</p>
 <h3>共有のしかた（まず A。できなければ B、それもできなければ C）</h3>
   <p><b>共通の準備</b>：設定担当者が、共有フォルダ（学校のサーバー、クラウドの同期フォルダなど）を決めます。学級ごとにファイルが作られ、<b>30秒ごとに最新を確認</b>します。ほかの人が編集中の学級には「◯◯さんが編集中」と表示され、見るだけの状態になります。同時に編集してしまったときは、どちらを使うか選べます。</p>
@@ -4019,7 +4084,7 @@ const HELP=[
   <p><b>Bもできない場合 → C．学級ファイルの書き出し・取り込み</b><br>Chrome／Edge以外のブラウザなどで、フォルダを選べないときの方法です。「学級ファイルの書き出し・取り込み」で、学級ごとのファイルをやりとりします（共有は自動ではなくなります）。</p>
   <p class="tiny muted">「学級専用のHTML」（オプション）は、担任に<b>自分の学級の画面だけ</b>を渡したいときに使います（共有する → 学級専用のHTMLを作る）。</p>
   <h3>持ち出して作業するとき</h3><p>学級専用のHTMLには、その学級のデータが入っています。ただし<b>データの本体は共有フォルダの中のデータ（JSONファイル）</b>で、HTMLの中身は持ち出した時点のコピーです。JSONを自分でコピーする必要はありません。<br>① 持ち出す前：共有フォルダにつないだ状態で、自分の学級のHTMLを開き、「共有する」→「（HTMLの名前）.html を保存し直す」で最新のデータを入れ、USBなどでHTMLを持ち出す。<br>② 自宅：そのHTMLを開いて作業する。終わったら、もう一度「（HTMLの名前）.html を保存し直す」（ダウンロードされます）。<br>③ 職場：持ち帰ったHTMLを、共有フォルダの自分の学級のHTMLと入れ替えて開き、フォルダにつなぐと、作業内容が共有フォルダのデータに反映されます。持ち出している間にほかの人が更新して、サーバー側のほうが新しかった場合は、どちらを使うか確認が出ます。<br>※自宅で保存し直さずにHTMLだけ持ち帰っても、自宅での作業は反映されません。</p>
-  <h3>オフラインで使う</h3><p>このアプリは<b>1つのHTMLファイル</b>で、インターネットなしで動きます。名簿を扱う作業は、インターネットのない環境で行い、フォームを作るときだけ、インターネットにつないで「script.new」を開いてください。</p>
+  <h3>オフラインで使う</h3><p>このアプリは<b>1つのHTMLファイル</b>で、インターネットなしで動きます。名簿を扱う作業は、インターネットのない環境で行い、フォームを作るときだけ、インターネットにつないで「script.new」を開いてください。</p><p>職場のセキュリティで、ダウンロードしたファイルの中身が簡略化されて動かないときは、インターネットで開いたときのダイアログ（出ないときは、アドレスの最後に <b>?dl=1</b> を付けて開く）の「ソースコードをコピー」を押し、メモ帳に貼り付けて、ファイル名「かこピタ.html」・文字コードUTF-8・種類「すべてのファイル」で保存してください。</p>
   <h3>データを消す（新しい行事を始めるとき）</h3><p>「設定」→「データを消す…」を押すと、消す内容を選べます。標準の「次の行事の準備」は、<b>名簿・担任名・学校情報・文面・設定は残し</b>、条件・配置・日程・取り込み履歴だけを消します。「名簿・担任名も消す」「すべて消す（初期化）」も、ボタンひとつで選べます。実行前に自動でバックアップを取るので、「元に戻す」で戻せます。</p><p><b>【前の行事のファイルへの誤接続に注意】</b>「次の行事の準備」をしないまま新しい日程づくりを始めると、前の行事の共有フォルダ・学級専用HTML・起動バッチにつながったままになり、前の行事のデータを上書きしたり、新旧のデータが混ざったりするおそれがあります。準備をしたあとは、新しい共有フォルダと、新しく書き出したHTML・バッチ・ショートカットを使い、前の行事のものは使わないでください。</p>`],
  ['よくある質問',()=>`<h3>名簿との照合のしかたは？</h3><p>回答の<b>学年・組・ふりがな</b>で探します。同じふりがなの児童生徒が同じ学級にいるときだけ、<b>漢字</b>を確認し、漢字も同じ場合だけ<b>出席番号</b>まで確認します。そのため、保護者が出席番号や漢字を間違えても、電話での確認なしで取り込めます。自動で補正した件数と内訳は、取り込み前の確認画面に出ます。</p>
   <h3>保護者の都合を、5分ごとに細かく入力できますか？</h3><p>できます。「3. 条件」の「1人ずつ」で、<b>入力の細かさ</b>を「日程の枠（20分など）」から「5分ごと」に切り替えます。5分ごとに塗ったあと「日程の枠」に戻すと、一部だけ塗った枠は<b>斜線</b>で表示されます（データは5分のままなので、何度切り替えても広がりません）。×は少しでも重なれば×の枠ですが、○は<b>枠の全部が○のときだけ</b>○の枠として使い、○を付けた人は、その○の枠のどこかに配置します（一部だけ○の枠には、置きません）。枠をまとめて塗ると、枠の中の5分ごとの入力は上書きされます。配置のときは、×と少しでも重なる枠がNGになります。<br>条件を元に戻したいときは、<b>「条件を戻す…」</b>（この人／この学級／全員）を使います。戻す先は2つです。<br>・<b>時間割を変える前</b>：学級の「1枠の長さ」「開始時刻」を、取り込みのあと最初に変えた瞬間の条件（学級ごとに自動で記録）に戻します。それまでに手で直した分は残ります。<br>・<b>取り込んだ回答どおり</b>：最後に取り込んだ回答だけの状態にします。手で直した分は、消えます。</p>
@@ -4037,17 +4102,43 @@ const HELP=[
   <h3>【Compassion】かゆいところに手が届く、現場目線のディテール</h3><p>本ツールには、フジイヨウスケ氏の現場経験に基づく「魂のディテール」が宿っています。例えば、5. 配置で児童生徒を選ぶと、入れない時間帯が濃い斜線で示され、きょうだいの配置も一目でわかります。都合の悪い時間に置こうとすると、置く前に確認してくれます。3. 条件では、日付や時刻の見出しをクリックするだけで、その日・その時刻をまとめて塗れ、45人の名簿でも「名前で探す」ですぐ目的の子にたどり着けます。休憩（×）はなぞって塗れて、17時以降を隠す表示切替や、学級ごとの自動配置の設定もあります。これらは仕様書には現れにくいですが、実際に毎日使うユーザーにとって最も価値のある『配慮』という名の機能です。</p>
   <h3>【Credit】</h3><p>かこピタ v.${APP_VER}　Created by ${APP_AUTHOR} with Gemini ／ Special Thanks to ウチムラヨウスケ<br>Web（HTML）版は、原作の機能と考え方を引き継いで移設したものです。</p>`]
 ];
+HELP.push(['書き出し',()=>`<h3>Excel・CSV</h3><p>「4. かこピタ(配置)」の「書き出し」では、いま開いている学級を、「5. 印刷」の「学級の一覧表」では、選んだ学級を書き出せます。</p>
+  <ul><li><b>Excel（.xlsx）</b>：学級ごとの表のシート（画面と同じ「時間×日付」の形。2枠の人は結合されます）と、並べ替えできる「一覧データ」シート（1人1行。日付と時刻は、Excelの日付・時刻の値）が入ります。</li>
+  <li><b>CSV（表の形）</b>：画面と同じ形です。複数の学級は、空行で区切ります。</li>
+  <li><b>CSV（1人1行）</b>：名前・日時・枠数などが1行ずつ並びます。並べ替えや集計向きです。</li></ul>
+  <p class="tiny muted">学級ごとの表には、罫線と色が付きます（A4横・1ページの幅に収まる印刷設定にしてあります）。表には児童生徒の個人情報が含まれるので、使い終わったら、速やかに削除してください。</p>
+  <h3>カレンダー（Googleカレンダーなど）</h3>
+  <p>配置が決まっている児童生徒を、予定にできます。<b>個人情報の扱いには十分注意してください。予定が終われば、速やかに削除し、削除できたことを確認してください。</b></p>
+  <ul><li><b>題名</b>：「学年・組・出席番号・名前」から入れるものを選べます。名前を入れるときは「名前（1-1-23）」、入れないときは「1-1-23」だけです（初期設定は、名前なし）。書き方は、「1-1-23」「1年1組23番」「1123」から選べます（10組以上やアルファベットの組がある学校は、「1-1-23」がおすすめです）。</li>
+  <li><b>場所</b>：住所を入れるを選ぶと、予定の「場所」の欄に入ります。</li>
+  <li><b>通知</b>：オン・オフと、何分前かを選べます（初期設定は、オフ）。</li>
+  <li><b>カレンダー用GAS（おすすめ）</b>：専用のカレンダーを作り、予定を入れます。<b>懇談の最終日の翌日に、カレンダーごと予定を自動で削除</b>します。</li>
+  <li><b>ICSファイル</b>：どのカレンダーアプリにも取り込めますが、<b>自動では削除されません</b>。専用のカレンダーに取り込み、終わったらカレンダーごと削除してください。</li></ul>`]);
 A.help=(el0,e,tab=0)=>{
-  const el=openDlg('',{wide:true}),box=$('.dlg',el);let cur=tab;
-  const paint=()=>{box.innerHTML=`<h2>使い方</h2><div class="helpnav">${HELP.map((h,i)=>`<button class="btn sm ${i===cur?'pri':''}" data-hp="${i}">${h[0]}</button>`).join('')}</div><div class="helpbody" style="min-height:300px">${HELP[cur][1]()}</div><div class="acts"><button class="btn pri" data-close>閉じる</button></div>`};
-  paint();el.addEventListener('click',e=>{if(e.target.closest('[data-close]')){el._close();return}const b=e.target.closest('[data-hp]');if(b){cur=+b.dataset.hp;paint();box.scrollTop=0}});
+  const el=openDlg('',{wide:true}),box=$('.dlg',el);let cur=tab,q='';
+  const plain=HELP.map(h=>h[1]().replace(/<[^>]*>/g,' ').replace(/\s+/g,' '));
+  const VIEWS=[['1. 準備（名簿・日程）','setup'],['1. 準備（名簿）','setup'],['1. 準備（日程）','setup'],['2. フォーム（任意）','form'],['2. フォーム','form'],['3. 条件','cond'],['4. かこピタ(配置)','grid'],['5. 印刷','print']];
+  const VRE=new RegExp(VIEWS.map(v=>v[0].replace(/[.()]/g,'\\$&')).join('|'),'g'),TRE=new RegExp('「('+HELP.map(h=>h[0]).join('|')+')」の項目','g');
+  const LS='color:var(--brand,#1278bd);text-decoration:underline;cursor:pointer';
+  const linkify=html=>{let h3=0,an=0;return html.replace(/(<[^>]*>)|([^<]+)/g,(m,t,x)=>{if(t){if(/^<h3/i.test(t))h3++;else if(/^<\/h3/i.test(t))h3--;else if(/^<a[\s>]/i.test(t))an++;else if(/^<\/a/i.test(t))an--;return t}
+    if(h3>0||an>0)return x;
+    return x.replace(VRE,s=>`<a href="#" class="hlink" style="${LS}" data-gov="${VIEWS.find(v=>v[0]===s)[1]}">${s}</a>`).replace(TRE,(s,t)=>`<a href="#" class="hlink" style="${LS}" data-hpl="${HELP.findIndex(h=>h[0]===t)}">${s}</a>`)})};
+  const mark=(html,w)=>w?html.replace(/(<[^>]*>)|([^<]+)/g,(m,t,x)=>t?t:x.split(w).join('<mark>'+esc(w)+'</mark>')):html;
+  const results=()=>{if(!q)return'';const out=[],ql=q.toLowerCase();HELP.forEach((h,i)=>{const pl=plain[i].toLowerCase();let p=0,n=0;while(n<3){const at=pl.indexOf(ql,p);if(at<0)break;out.push(`<button class="btn sm ghost" style="display:block;text-align:left;white-space:normal;margin:2px 0" data-hp="${i}">${esc(h[0])}：…${esc(plain[i].slice(Math.max(0,at-16),at+q.length+30))}…</button>`);p=at+q.length;n++}});return out.length?out.slice(0,10).join(''):'<span class="muted tiny">見つかりませんでした</span>'};
+  const paint=()=>{box.innerHTML=`<h2>使い方</h2><div class="helpnav">${HELP.map((h,i)=>`<button class="btn sm ${i===cur?'pri':''}" data-hp="${i}">${h[0]}</button>`).join('')}</div><div style="margin:10px 0 4px"><input type="search" id="hpq" placeholder="ことばで探す（例：締め切り）" value="${esc(q)}" style="width:100%;box-sizing:border-box"></div><div id="hpr">${results()}</div><div class="helpbody" style="min-height:300px">${mark(linkify(HELP[cur][1]()),q)}</div><div class="acts"><button class="btn pri" data-close>閉じる</button></div>`};
+  paint();
+  el.addEventListener('input',ev=>{if(ev.target.id!=='hpq')return;q=ev.target.value.trim();$('#hpr',el).innerHTML=results();const hb=$('.helpbody',el);hb.innerHTML=mark(linkify(HELP[cur][1]()),q)});
+  el.addEventListener('click',ev=>{if(ev.target.closest('[data-close]')){el._close();return}
+    const g=ev.target.closest('[data-gov]');if(g){ev.preventDefault();el._close();go(g.dataset.gov);return}
+    const hl=ev.target.closest('[data-hpl]');if(hl){ev.preventDefault();cur=+hl.dataset.hpl;paint();box.scrollTop=0;return}
+    const b=ev.target.closest('[data-hp]');if(b){cur=+b.dataset.hp;paint();const mk=box.querySelector('.helpbody mark');if(mk)mk.scrollIntoView({block:'center'});else box.scrollTop=0;const i=$('#hpq',el);if(i&&q){i.focus();i.setSelectionRange(q.length,q.length)}}});
 };
 
 /* ---------- teachers: bulk set ---------- */
 A.teachers=()=>{
   const cl=classList();
   const el=openDlg(`<h2>担任名をまとめて設定</h2><p class="muted tiny" style="margin-bottom:8px">1行に1学級。「学年　組　担任名」の形で、貼り付けるか書き換えてください（Excelの表からそのまま貼り付けられます）。<br>例：<code>1 1 青木</code>　<code>1年2組　池田</code>　<code>2-1,上野</code></p>
-   <textarea class="paste" id="tchBox" style="min-height:220px">${cl.map(c=>`${c.g}年${c.c}組\t${c.teacher||''}`).join('\n')}</textarea>
+   <textarea class="paste" id="tchBox" style="min-height:220px">${esc(cl.map(c=>`${c.g}年${c.c}組\t${c.teacher||''}`).join('\n'))}</textarea>
    <div id="tchMsg" class="tiny muted" style="margin-top:6px"></div>
    <div class="acts"><button class="btn" data-close>やめる</button><button class="btn pri" data-tch="1">${ic('check',16)}この内容で設定する</button></div>`,{wide:true});
   el.addEventListener('click',e=>{
@@ -4144,7 +4235,7 @@ function vCond(){
   const st=stById(C.sid);
   const brushes=[['x','✕','都合が悪い','1'],['o','○','この時間のみ可','2'],['u','未','回答なし','3'],['e','','消しゴム','0']];
   let h=`<div class="page ${shBlocked(k)?'ro':''}">${roBanner(k)}<div class="ph"><div><h1>3. 条件</h1><p>児童生徒ごとの、都合が悪い日時（✕）や、この時間なら大丈夫な日時（○）を入力します。ドラッグでまとめて塗れます。</p></div><span class="grow"></span>
-   <button class="btn sm" data-act="go" data-v="form">${ic('send',15)}フォームの回答を取り込む</button><button class="btn sm" data-act="resp-menu" title="時間割を変える前の状態／取り込んだ回答どおりの状態に戻します">${ic('undo',15)}条件を戻す…</button><div class="seg"><button class="${C.mode==='one'?'on':''}" data-act="c-mode" data-m="one">1人ずつ</button><button class="${C.mode==='all'?'on':''}" data-act="c-mode" data-m="all">クラス全体</button></div></div>
+   <button class="btn sm" data-act="go" data-v="form">${ic('send',15)}フォームの回答を取り込む</button><button class="btn sm" data-act="resp-menu" title="時間割を変える前の状態／取り込んだ回答どおりの状態に戻します">${ic('undo',15)}条件を戻す…</button><div class="seg"><button class="${C.mode==='one'?'on':''}" data-act="c-mode" data-m="one">1人ずつ</button><button class="${C.mode==='all'?'on':''}" data-act="c-mode" data-m="all">学級全体</button></div></div>
    <div class="row" style="margin-bottom:12px">${classBar(k,'c-cls')}</div>
    <div class="brushes stk">${brushes.map(b=>`<button class="bz ${C.brush===b[0]?'on':''}" data-act="brush" data-b="${b[0]}"><span class="gl ${b[0]}">${b[1]||'⌫'}</span>${b[2]}<kbd>${b[3]}</kbd></button>`).join('')}
    <span class="grow"></span>${clsAutoC().cutMode==='effort'?`<label class="tog"><input type="checkbox" data-ch="hide17" ${P.opt.hide17?'checked':''}>${esc(clsAutoC().cutTime)}以降を隠す</label>`:''}</div>`;
@@ -4207,7 +4298,7 @@ function condSide(st,mem){
   const I=info(st),sl=getSlots(),sm=+P.sched.slotMin||20,stt=stStatus(st);
   let h=`<section class="panel"><h2>この児童生徒の枠数</h2><div class="row"><div class="stepper"><button data-act="c-slots" data-d="-1" aria-label="減らす">−</button><input type="number" min="1" max="30" data-ch="cslots" value="${st.slots}"><button data-act="c-slots" data-d="1" aria-label="増やす">＋</button></div><span class="muted">${st.slots*sm}分</span></div>
    <div class="qpick" style="margin-top:10px">${[1,2,3,4,5,6].map(n=>`<button class="${st.slots===n?'on':''}" data-act="c-slotsn" data-n="${n}">${n}</button>`).join('')}</div>
-   <p class="tiny muted" style="margin:8px 0 8px">2枠以上は、連続した時間を使います。</p><button class="btn sm" data-act="c-slots-all">${ic('users',15)}このクラス全員を ${st.slots}枠にする</button></section>
+   <p class="tiny muted" style="margin:8px 0 8px">2枠以上は、連続した時間を使います。</p><button class="btn sm" data-act="c-slots-all">${ic('users',15)}この学級全員を ${st.slots}枠にする</button></section>
   <section class="panel"><h2>状況<small>${STL[stt]}</small></h2><div class="row" style="margin-bottom:10px"><span class="badge ng">✕ ${I.nx}</span><span class="badge ok">○ ${I.no}</span><span class="badge u">未 ${I.nu}</span></div>
    <div class="row"><button class="btn sm" data-act="q" data-q="allo">いつでも可</button><button class="btn sm" data-act="q" data-q="amx">午前を✕</button><button class="btn sm" data-act="q" data-q="pmx">午後を✕</button><button class="btn sm" data-act="q" data-q="copy">前の人と同じ</button><button class="btn sm" data-act="q" data-q="u">未回答にする</button><button class="btn sm danger" data-act="q" data-q="clear">全部消す</button></div>
    <label class="tog" style="margin-top:10px"><input type="checkbox" data-ch="stok" ${st.ok?'checked':''}>いつでも大丈夫（確認済み）</label></section>
@@ -4351,8 +4442,7 @@ function vGrid(){
     ${P.students.some(s=>s.addr)?`<label class="tog"><input type="checkbox" data-ch="addrshow" ${showAddr()?'checked':''}>住所を表示</label>`:''}
     ${eff?`<label class="tog"><input type="checkbox" data-ch="hide17" ${P.opt.hide17?'checked':''}>${esc(clsAutoC().cutTime)}以降を隠す</label>`:''}
     <button class="btn sm" data-act="g-print" title="この学級の一覧表をA4などで印刷します">${ic('print',14)}一覧表を印刷</button>
-    <button class="btn sm" data-act="g-xlsx" title="この学級の一覧表を、Excel（.xlsx）ファイルで保存します">${ic('down',14)}Excelで保存</button>
-    <button class="btn sm" data-act="g-csv-t" title="この学級の一覧表を、表の形のCSVで保存します">${ic('down',14)}CSV（表の形）</button><button class="btn sm" data-act="g-csv-l" title="1人1行のCSVで保存します（並べ替え・集計向き）">${ic('down',14)}CSV（1人1行）</button>
+    <button class="btn sm" data-act="g-export" title="この学級の表を、Excel・CSVで保存したり、カレンダー用の予定を作ったりします">${ic('down',14)}書き出し…</button>
     ${used||brks?`<button class="btn sm danger" data-act="g-clear" title="この学級の配置をまとめて外します">${ic('trash',15)}全員を外す</button>`:''}</div>
    <div style="min-height:44px">${sel?`<div class="hint" style="margin-bottom:12px">${esc(sel.name)} さんを選択中：${pm.has(sel.id)?'移動したいマスをクリックすると、その場所へ移ります（入っている人とは入れ替わります）':'置きたいマスをクリックしてください'}　<span style="opacity:.7">Escで解除</span></div>`:''}</div>
    <div class="gv"><aside><section class="panel" style="padding:12px" data-drop="un"><h2 style="margin-bottom:8px">未配置<small>${un.length}名 / 使用 ${used}${brks?`＋休憩${brks}`:''} / ${total}枠${(()=>{const hd=Object.values(P.classes[k].grid).filter(c=>c.head).length-pm.size;return hd>0?` ／ <b style="color:var(--ng)">日程の範囲外 ${hd}名</b>`:''})()}</small></h2>
@@ -4461,25 +4551,28 @@ function xlBuild(keys){
       if(first<0){first=0;last=Math.min(SL.length-1,9)}
       const rows=SL.slice(first,last+1),skip=new Set(),merges=[];
       const cnt=dates.map(d=>{let n=0;for(const x of SL){const cc=cls.grid[d+'|'+x.key];if(cc&&cc.head&&stById(cc.sid))n++}return n});
+      const sty=[[XS.title],[XS.info],[XS.head,...dates.map(()=>XS.head)],[XS.count,...dates.map(()=>XS.count)]];
       const aoa=[[`${lab}　${kindName()} 日程表${c.teacher?'　'+c.teacher+' 先生':''}${P.meta.school?'　'+P.meta.school:''}`],
-                 ['時間',...dates.map(mdw)],['人数',...cnt.map(n=>n+'名')]];
-      merges.push({s:{r:0,c:0},e:{r:0,c:dates.length}});
+                 [`実施：${mdw(dates[0])}～${mdw(dates[dates.length-1])}　出力日：${todayISO()}`],['時間',...dates.map(mdw)],['人数',...cnt.map(n=>n+'名')]];
+      merges.push({s:{r:0,c:0},e:{r:0,c:dates.length}},{s:{r:1,c:0},e:{r:1,c:dates.length}});
       rows.forEach((x,ri)=>{
-        const line=[x.label];
+        const line=[x.label],sl2=[XS.time];
         dates.forEach((d,di)=>{
-          const k=d+'|'+x.key;if(skip.has(k)){line.push(null);return}
-          const cc=cls.grid[k];if(!cc){line.push(null);return}
-          if(cc.brk){line.push('休憩');return}
-          const st=cc.head?stById(cc.sid):null;if(!st){line.push(null);return}
+          const k=d+'|'+x.key;if(skip.has(k)){line.push(null);sl2.push(XS.stu);return}
+          const cc=cls.grid[k];if(!cc){line.push(null);sl2.push(XS.cell);return}
+          if(cc.brk){line.push('休憩');sl2.push(XS.brk);return}
+          const st=cc.head?stById(cc.sid):null;if(!st){line.push(null);sl2.push(XS.cell);return}
           const n=Math.min(cc.n||1,rows.length-ri);
           for(let j=1;j<n;j++){const s2=SL[first+ri+j];if(s2)skip.add(d+'|'+s2.key)}
-          if(n>1)merges.push({s:{r:3+ri,c:di+1},e:{r:3+ri+n-1,c:di+1}});
-          line.push(st.name+((cc.n||1)>1?`　${cc.n}枠`:''));
+          if(n>1)merges.push({s:{r:4+ri,c:di+1},e:{r:4+ri+n-1,c:di+1}});
+          line.push(st.name+((cc.n||1)>1?`　${cc.n}枠`:''));sl2.push(XS.stu);
         });
-        aoa.push(line);
+        aoa.push(line);sty.push(sl2);
       });
+      aoa.push([],['※ 児童生徒の個人情報が含まれます。取り扱いには十分注意し、使い終わったら速やかに削除してください。']);sty.push([],[XS.note]);
       const ws=XLSX.utils.aoa_to_sheet(aoa);
-      ws['!merges']=merges;ws['!cols']=[{wch:9},...dates.map(()=>({wch:18}))];
+      ws['!merges']=merges;ws['!cols']=[{wch:9},...dates.map(()=>({wch:22}))];
+      ws['!kp']={kind:'table',sty,freeX:1,freeY:4,rowH:{0:30}};
       let nm=lab.replace(/[\\\/\?\*\[\]:]/g,'').slice(0,28)||'学級',base=nm,q=2;while(usedNames.has(nm))nm=base+'_'+(q++);
       usedNames.add(nm);XLSX.utils.book_append_sheet(wb,ws,nm);
       // 並べ替え用の一覧（1人1行）
@@ -4496,32 +4589,254 @@ function xlBuild(keys){
     if(!wb.SheetNames.length){toast('書き出せる学級がありません',{kind:'warn'});return}
     const head=['学級','番','名前','日付','曜日','時刻','枠数','状況',...(showAddr?['住所']:[]),'きょうだい'];
     const wl=XLSX.utils.aoa_to_sheet([head,...longRows]);
-    wl['!cols']=[{wch:9},{wch:5},{wch:16},{wch:9},{wch:6},{wch:8},{wch:6},{wch:9},...(showAddr?[{wch:24}]:[]),{wch:34}];
+    const colSt=[XS.lcell,XS.lcenter,XS.lcell,XS.ldate,XS.lcenter,XS.ltime,XS.lcenter,XS.lcenter];
+    wl['!kp']={kind:'list',freeX:0,freeY:1,sty:[head.map(()=>XS.lhead),...longRows.map(()=>head.map((_,i)=>colSt[i]!==undefined?colSt[i]:XS.lcell))]};
+    wl['!cols']=[{wch:9},{wch:5},{wch:20},{wch:9},{wch:6},{wch:8},{wch:6},{wch:9},...(showAddr?[{wch:24}]:[]),{wch:34}];
     wl['!autofilter']={ref:XLSX.utils.encode_range({s:{r:0,c:0},e:{r:longRows.length,c:head.length-1}})};
     XLSX.utils.book_append_sheet(wb,wl,'一覧データ');
     return wb;
   }
 }
+
+/* ---- 罫線・色つきの .xlsx を直接書き出す（Excel用の部品だけでは、書式を付けられないため）---- */
+const XS={def:0,title:1,info:2,head:3,time:4,cell:5,stu:6,brk:7,count:8,note:9,lhead:10,lcell:11,ldate:12,ltime:13,lcenter:14};
+function xlsxBytes(wb){
+  const enc=new TextEncoder(),X=s=>String(s).replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  const HDR='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n',NS='xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"',RNS='http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const fnt=(sz,b,it,col)=>`<font>${b?'<b/>':''}${it?'<i/>':''}<sz val="${sz}"/><color rgb="FF${col}"/><name val="Yu Gothic"/><family val="2"/></font>`;
+  const fill=c=>`<fill><patternFill patternType="solid"><fgColor rgb="FF${c}"/><bgColor indexed="64"/></patternFill></fill>`;
+  const bd='<border><left style="thin"><color rgb="FFB8C4D4"/></left><right style="thin"><color rgb="FFB8C4D4"/></right><top style="thin"><color rgb="FFB8C4D4"/></top><bottom style="thin"><color rgb="FFB8C4D4"/></bottom><diagonal/></border>';
+  const xf=(nf,fo,fi,bo,al)=>`<xf numFmtId="${nf}" fontId="${fo}" fillId="${fi}" borderId="${bo}" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment ${al}/></xf>`;
+  const C='horizontal="center" vertical="center"',CW=C+' wrapText="1"';
+  const styles=HDR+`<styleSheet ${NS}><numFmts count="2"><numFmt numFmtId="164" formatCode="m/d"/><numFmt numFmtId="165" formatCode="h:mm"/></numFmts>`
+    +`<fonts count="5">${fnt(11,0,0,'1E3350')}${fnt(14,1,0,'1E3350')}${fnt(10,0,0,'5B6B82')}${fnt(11,1,0,'1E3350')}${fnt(10,0,1,'7A8699')}</fonts>`
+    +`<fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>${fill('DCEBFA')}${fill('EEF2F7')}${fill('FCE9D6')}${fill('E5E8ED')}</fills>`
+    +`<borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border>${bd}</borders>`
+    +`<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>`
+    +`<cellXfs count="15">${[xf(0,0,0,0,'vertical="center"'),xf(0,1,0,0,'vertical="center"'),xf(0,2,0,0,'vertical="center"'),xf(0,3,2,1,CW),xf(0,3,3,1,C),xf(0,0,0,1,CW),xf(0,3,4,1,'horizontal="left" vertical="center" wrapText="1" indent="1"'),xf(0,4,5,1,C),xf(0,2,0,1,C),xf(0,2,0,0,'vertical="top"'),xf(0,3,2,1,C),xf(0,0,0,1,'vertical="center"'),xf(164,0,0,1,C),xf(165,0,0,1,C),xf(0,0,0,1,C)].join('')}</cellXfs>`
+    +`<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>`;
+  const abs=r=>r.replace(/([A-Z]+)(\d+)/g,'$$$1$$$2');
+  const sheetXml=(ws,idx)=>{
+    const kp=ws['!kp']||{},sty=kp.sty||[],ref=XLSX.utils.decode_range(ws['!ref']||'A1:A1');
+    const R=Math.max(ref.e.r,sty.length-1),CN=Math.max(ref.e.c,...sty.map(r=>r.length-1));
+    let rowsX='';
+    for(let r=0;r<=R;r++){
+      let cells='';
+      for(let c=0;c<=CN;c++){
+        const addr=XLSX.utils.encode_cell({r,c}),cell=ws[addr],s=(sty[r]&&sty[r][c])||0;
+        if(!cell&&!s)continue;
+        if(!cell||cell.v==null||cell.v===''){cells+=`<c r="${addr}" s="${s}"/>`;continue}
+        if(cell.t==='n'&&typeof cell.v==='number')cells+=`<c r="${addr}" s="${s}"><v>${cell.v}</v></c>`;
+        else cells+=`<c r="${addr}" s="${s}" t="inlineStr"><is><t xml:space="preserve">${X(cell.v)}</t></is></c>`;
+      }
+      const ht=kp.rowH&&kp.rowH[r];
+      rowsX+=`<row r="${r+1}"${ht?` ht="${ht}" customHeight="1"`:''}>${cells}</row>`;
+    }
+    const fx=kp.freeX||0,fy=kp.freeY||0,tl=XLSX.utils.encode_cell({r:fy,c:fx});
+    const pane=fx||fy?`<pane ${fx?`xSplit="${fx}" `:''}${fy?`ySplit="${fy}" `:''}topLeftCell="${tl}" activePane="${fx&&fy?'bottomRight':'bottomLeft'}" state="frozen"/>`+(fx&&fy?`<selection pane="topRight"/><selection pane="bottomLeft"/><selection pane="bottomRight" activeCell="${tl}" sqref="${tl}"/>`:`<selection pane="bottomLeft" activeCell="${tl}" sqref="${tl}"/>`):'';
+    const cols=ws['!cols']?`<cols>${ws['!cols'].map((c,i)=>`<col min="${i+1}" max="${i+1}" width="${c.wch+1}" customWidth="1"/>`).join('')}</cols>`:'';
+    const mc=ws['!merges']&&ws['!merges'].length?`<mergeCells count="${ws['!merges'].length}">${ws['!merges'].map(m=>`<mergeCell ref="${XLSX.utils.encode_range(m)}"/>`).join('')}</mergeCells>`:'';
+    const af=kp.kind==='list'&&ws['!autofilter']?`<autoFilter ref="${ws['!autofilter'].ref}"/>`:'';
+    return HDR+`<worksheet ${NS}><sheetPr><pageSetUpPr fitToPage="1"/></sheetPr><dimension ref="A1:${XLSX.utils.encode_cell({r:R,c:CN})}"/><sheetViews><sheetView ${kp.kind==='table'?'showGridLines="0" ':''}${idx===0?'tabSelected="1" ':''}workbookViewId="0">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="22" customHeight="1"/>${cols}<sheetData>${rowsX}</sheetData>${af}${mc}<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/><pageSetup paperSize="9" orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+  };
+  const names=wb.SheetNames,files=[];
+  const dn=names.map((n,i)=>{const w=wb.Sheets[n];return w['!kp']&&w['!kp'].kind==='list'&&w['!autofilter']?`<definedName name="_xlnm._FilterDatabase" localSheetId="${i}" hidden="1">'${X(n)}'!${abs(w['!autofilter'].ref)}</definedName>`:''}).join('');
+  files.push(['[Content_Types].xml',HDR+`<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${names.map((n,i)=>`<Override PartName="/xl/worksheets/sheet${i+1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>`]);
+  files.push(['_rels/.rels',HDR+`<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="${RNS}/officeDocument" Target="xl/workbook.xml"/></Relationships>`]);
+  files.push(['xl/workbook.xml',HDR+`<workbook ${NS} xmlns:r="${RNS}"><bookViews><workbookView/></bookViews><sheets>${names.map((n,i)=>`<sheet name="${X(n)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('')}</sheets>${dn?`<definedNames>${dn}</definedNames>`:''}</workbook>`]);
+  files.push(['xl/_rels/workbook.xml.rels',HDR+`<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${names.map((n,i)=>`<Relationship Id="rId${i+1}" Type="${RNS}/worksheet" Target="worksheets/sheet${i+1}.xml"/>`).join('')}<Relationship Id="rId${names.length+1}" Type="${RNS}/styles" Target="styles.xml"/></Relationships>`]);
+  files.push(['xl/styles.xml',styles]);
+  names.forEach((n,i)=>files.push([`xl/worksheets/sheet${i+1}.xml`,sheetXml(wb.Sheets[n],i)]));
+  // ZIP（無圧縮）
+  const T=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;T[n]=c>>>0}
+  const crc=u=>{let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=T[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0};
+  const parts=[],cen=[];let off=0;
+  for(const [name,text] of files){
+    const nm=enc.encode(name),data=enc.encode(text),cr=crc(data),sz=data.length;
+    const lh=new DataView(new ArrayBuffer(30));lh.setUint32(0,0x04034b50,true);lh.setUint16(4,20,true);lh.setUint16(6,0x0800,true);lh.setUint16(12,0x21,true);lh.setUint32(14,cr,true);lh.setUint32(18,sz,true);lh.setUint32(22,sz,true);lh.setUint16(26,nm.length,true);
+    parts.push(new Uint8Array(lh.buffer),nm,data);
+    const ch=new DataView(new ArrayBuffer(46));ch.setUint32(0,0x02014b50,true);ch.setUint16(4,20,true);ch.setUint16(6,20,true);ch.setUint16(8,0x0800,true);ch.setUint16(14,0x21,true);ch.setUint32(16,cr,true);ch.setUint32(20,sz,true);ch.setUint32(24,sz,true);ch.setUint16(28,nm.length,true);ch.setUint32(42,off,true);
+    cen.push(new Uint8Array(ch.buffer),nm);off+=30+nm.length+sz;
+  }
+  let cs=0;for(const c of cen)cs+=c.length;
+  const end=new DataView(new ArrayBuffer(22));end.setUint32(0,0x06054b50,true);end.setUint16(8,files.length,true);end.setUint16(10,files.length,true);end.setUint32(12,cs,true);end.setUint32(16,off,true);
+  const all=[...parts,...cen,new Uint8Array(end.buffer)],out=new Uint8Array(all.reduce((a,u)=>a+u.length,0));let p=0;for(const u of all){out.set(u,p);p+=u.length}
+  return out;
+}
 const xlName=(keys,ext)=>{const c=keys.length===1?(classList().find(x=>x.key===keys[0])||{}):null;return `かこピタ_${c?clsLabel(c.g,c.c):'一覧表'}_${todayISO()}.${ext}`};
 function exportXlsx(keys){
   try{const wb=xlBuild(keys);if(!wb)return;
-    dlText(XLSX.write(wb,{bookType:'xlsx',type:'array'}),xlName(keys,'xlsx'),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    let bytes;try{bytes=xlsxBytes(wb)}catch(e){console.warn('罫線つきの書き出しに失敗したため、書式なしで書き出します',e);bytes=XLSX.write(wb,{bookType:'xlsx',type:'array'})}
+    dlText(bytes,xlName(keys,'xlsx'),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     toast(`Excelファイルをダウンロードしました（${keys.length}学級）。学級ごとの表のほか、並べ替え用の「一覧データ」シートも入っています`,{ms:6000})}
   catch(e){toast('Excelに書き出せませんでした：'+(e.message||e),{kind:'warn'})}
 }
 function exportCsv(keys,form){   // form: 't'=表の形（学級ごと、空行で区切る） / 'l'=1人1行
   try{const wb=xlBuild(keys);if(!wb)return;
+    const safe=ws=>{for(const a in ws){if(a[0]==='!')continue;const c=ws[a];if(c&&c.t==='s'&&/^[=+\-@\t\r]/.test(c.v)){c.v="'"+c.v;delete c.w}}};   // 先頭が「=」などの文字が、Excelで計算式として動かないように
+    wb.SheetNames.forEach(n=>safe(wb.Sheets[n]));
     const csv=form==='l'?XLSX.utils.sheet_to_csv(wb.Sheets['一覧データ']):wb.SheetNames.filter(n=>n!=='一覧データ').map(n=>XLSX.utils.sheet_to_csv(wb.Sheets[n]).replace(/\n+$/,'')).join('\n\n');
     dlText('\ufeff'+csv,xlName(keys,'csv').replace('.csv',form==='l'?'_1人1行.csv':'_表.csv'),'text/csv;charset=utf-8');
     toast(form==='l'?'CSV（1人1行）をダウンロードしました。並べ替えやフィルターに向いています':'CSV（表の形）をダウンロードしました。'+(keys.length>1?'学級ごとに空行で区切ってあります':''),{ms:6000})}
   catch(e){toast('CSVに書き出せませんでした：'+(e.message||e),{kind:'warn'})}
 }
-A['g-xlsx']=()=>{const k=curCls();if(!k)return;exportXlsx([k])};
-A['g-csv-t']=()=>{const k=curCls();if(k)exportCsv([k],'t')};
-A['g-csv-l']=()=>{const k=curCls();if(k)exportCsv([k],'l')};
-A['p-xlsx']=()=>{const ks=docClassList().map(c=>c.key);if(!ks.length){toast('学級が選ばれていません',{kind:'warn'});return}exportXlsx(ks)};
-A['p-csv-t']=()=>{const ks=docClassList().map(c=>c.key);if(!ks.length){toast('学級が選ばれていません',{kind:'warn'});return}exportCsv(ks,'t')};
-A['p-csv-l']=()=>{const ks=docClassList().map(c=>c.key);if(!ks.length){toast('学級が選ばれていません',{kind:'warn'});return}exportCsv(ks,'l')};
+
+/* ---- 書き出し：Excel・CSV・カレンダー（ICSファイル／予定を自動で削除するGAS）---- */
+const CAL_NOTE='個人情報の扱いには十分注意してください。予定が終われば、速やかに削除し、削除できたことを確認してください。';
+const CAL_DESC_TXT='【個人情報の取り扱い注意】この予定には、児童生徒の情報が含まれる場合があります。共有したり、他の人に見せたりしないよう、取り扱いには十分注意してください。行事が終わったら、速やかにこの予定（カレンダー）を削除し、削除できたことを確認してください。';
+const calDefaults=()=>({g:true,c:true,n:true,name:false,addr:false,fmt:'dash',kind:false,alarm:false,min:10});
+function calOpt(){let o={};try{o=JSON.parse(localStorage.getItem('kp_cal')||'{}')}catch(e){}return Object.assign(calDefaults(),o)}
+function calSave(o){try{localStorage.setItem('kp_cal',JSON.stringify(o))}catch(e){}}
+function calIdText(g,c,n,o){
+  if(o.fmt==='jp')return (o.g?g+'年':'')+(o.c?c+'組':'')+(o.n?n+'番':'');
+  const a=[];if(o.g)a.push(g);if(o.c)a.push(c);if(o.n)a.push(n);
+  return a.join(o.fmt==='tight'?'':'-');
+}
+function calTitle(g,c,s,o){   // 名前が入るときは「名前（学年組番）」、入らないときは学年組番だけ
+  const id=calIdText(g,c,s.n,o);
+  let t=o.name&&s.name?(id?`${s.name}（${id}）`:s.name):id;
+  if(!t)t=kindName();
+  return (o.kind?`【${kindName()}】`:'')+t;
+}
+function calDates(){const ds=[...P.sched.dates].sort(),last=ds[ds.length-1]||todayISO(),p=dp(last);return{first:ds[0]||last,last,del:isoOf(new Date(p.y,p.m-1,p.d+1))}}
+const jpDate=iso=>{const p=dp(iso);return `${p.y}年${p.m}月${p.d}日（${'日月火水木金土'[p.wd]}）`};
+function calEvents(keys,o){
+  const out=[],slotMin=+P.sched.slotMin||20,dl=calDates();
+  for(const key of keys){
+    const cls=P.classes[key];if(!cls)continue;
+    const c=classList().find(x=>x.key===key)||{},SL=gslots(key);
+    for(const s of members(key)){
+      const hk=headKey(cls,s.id);if(!hk)continue;
+      const [dd,t]=hk.split('|'),cc=cls.grid[hk],sl=SL.find(x=>x.key===t),m=/^(\d{1,2}):(\d{2})/.exec(sl?sl.label:t);if(!m)continue;
+      const st=+m[1]*60+ +m[2],en=Math.min(st+((cc&&cc.n)||1)*slotMin,24*60-1),f=x=>`${dd}T${String(Math.floor(x/60)).padStart(2,'0')}:${String(x%60).padStart(2,'0')}`;
+      out.push({uid:`${P.id||'kp'}-${key}-${s.id}-${dd}-${st}`.replace(/[^0-9A-Za-z_-]/g,'_'),s:f(st),e:f(en),
+        title:calTitle(c.g,c.c,s,o),loc:o.addr?(s.addr||''):'',
+        desc:`${kindName()}（かこピタで作成）\n${CAL_DESC_TXT}\n※ この予定は自動では削除されない場合があります。${jpDate(dl.del)}（懇談の最終日の翌日）を目安に、削除してください。`});
+    }
+  }
+  return out.sort((a,b)=>a.s<b.s?-1:a.s>b.s?1:a.title<b.title?-1:1);
+}
+function buildIcs(ev,o){
+  const esc=s=>String(s).replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\r?\n/g,'\\n');
+  const utc=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso);return new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4]-9,+m[5])).toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z')};
+  const fold=ln=>{const enc=new TextEncoder();let out='',cur='',n=0;for(const ch of ln){const b=enc.encode(ch).length;if(n+b>75){out+=cur+'\r\n';cur=' '+ch;n=1+b}else{cur+=ch;n+=b}}return out+cur};
+  const now=utc(new Date(Date.now()+9*3600e3).toISOString().slice(0,16));
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Kakopita//Calendar//JA','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:'+esc(`かこピタ ${kindName()}`),'X-WR-TIMEZONE:Asia/Tokyo','X-WR-CALDESC:'+esc(CAL_DESC_TXT)];
+  for(const e of ev){
+    L.push('BEGIN:VEVENT','UID:'+e.uid+'@kakopita','DTSTAMP:'+now,'DTSTART:'+utc(e.s),'DTEND:'+utc(e.e),'SUMMARY:'+esc(e.title));
+    if(e.loc)L.push('LOCATION:'+esc(e.loc));
+    L.push('DESCRIPTION:'+esc(e.desc));
+    if(o.alarm)L.push('BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+esc(`${o.min}分前です`),'TRIGGER:-PT'+(+o.min||10)+'M','END:VALARM');
+    L.push('END:VEVENT');
+  }
+  L.push('END:VCALENDAR');
+  return L.map(fold).join('\r\n')+'\r\n';
+}
+const CAL_GAS_T=String.raw`// かこピタ カレンダー登録GAS（__KIND__）
+// ＜使い方＞
+//  ① 上の「実行」で registerCalendar を1回実行する（初回は、カレンダーと、時刻で動く仕組み（トリガー）の権限の承認が出ます。すべて許可してください）
+//  ② Googleカレンダーの左の一覧に、専用のカレンダーができて、予定が入ります（自分のカレンダーとは別なので、あとで丸ごと消せます）
+//  ③ このカレンダーは、__DELJP__の1時ごろ（懇談の最終日の翌日）に、予定ごと自動で削除されます。いますぐ消したいときは deleteCalendarNow を実行します
+//  ※ 個人情報の扱いには十分注意してください。予定が終われば、速やかに削除し、削除できたこと（Googleカレンダーの一覧から消えていること）を確認してください
+//  ※ もう一度 registerCalendar を実行すると、前に作ったカレンダーを消してから、作り直します
+const EVENTS = __EVENTS__;   // [題名, 開始, 終了, 場所, 説明]（日時は日本時間）
+const CAL_NAME = __NAME__;
+const CAL_DESC = __DESC__;
+const NOTICE_MIN = __MIN__;   // 予定の何分前に通知するか（通知しないときは 0）
+const DELETE_AT = __DEL__;   // この日時に、カレンダーを予定ごと自動で削除します（日本時間）
+
+function jst_(s) { return new Date(s + ':00+09:00'); }
+
+function registerCalendar() {
+  const p = PropertiesService.getScriptProperties();
+  const oldId = p.getProperty('CAL_ID');
+  if (oldId) { try { const o = CalendarApp.getCalendarById(oldId); if (o) o.deleteCalendar(); } catch (e) {} }
+  const cal = CalendarApp.createCalendar(CAL_NAME, { summary: CAL_DESC, timeZone: 'Asia/Tokyo' });
+  p.setProperty('CAL_ID', cal.getId());
+  EVENTS.forEach(function (e, i) {
+    const ev = cal.createEvent(e[0], jst_(e[1]), jst_(e[2]), { location: e[3], description: e[4] });
+    ev.removeAllReminders();
+    if (NOTICE_MIN > 0) ev.addPopupReminder(NOTICE_MIN);
+    if (i % 20 === 19) Utilities.sleep(1000);
+  });
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'deleteCalendar_') ScriptApp.deleteTrigger(t); });
+  ScriptApp.newTrigger('deleteCalendar_').timeBased().at(jst_(DELETE_AT)).create();
+  Logger.log('カレンダー「' + CAL_NAME + '」を作り、' + EVENTS.length + '件の予定を入れました。\n' + DELETE_AT.replace('T', ' ') + ' ごろ、予定ごと自動で削除されます。\n個人情報の扱いには十分注意し、予定が終われば、速やかに削除できたかを確認してください。');
+}
+
+function deleteCalendar_() {
+  const p = PropertiesService.getScriptProperties(), id = p.getProperty('CAL_ID');
+  if (id) { try { const c = CalendarApp.getCalendarById(id); if (c) c.deleteCalendar(); } catch (e) {} p.deleteProperty('CAL_ID'); }
+  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'deleteCalendar_') ScriptApp.deleteTrigger(t); });
+}
+
+function deleteCalendarNow() {
+  deleteCalendar_();
+  Logger.log('カレンダーを削除しました。Googleカレンダーの左の一覧から、なくなっていることを確認してください。');
+}
+`;
+function buildCalGas(ev,o){
+  const dl=calDates(),lit=s=>JSON.stringify(s).replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
+  const name=`かこピタ_${kindName()}_${dl.first.slice(5).replace('-','/')}～${dl.last.slice(5).replace('-','/')}`;
+  return CAL_GAS_T.replace('__KIND__',()=>kindName()).replace('__DELJP__',()=>jpDate(dl.del)).replace('__EVENTS__',()=>lit(ev.map(e=>[e.title,e.s,e.e,e.loc,e.desc])))
+    .replace('__NAME__',()=>lit(name)).replace('__DESC__',()=>lit(CAL_DESC_TXT)).replace('__MIN__',()=>String(o.alarm?(+o.min||10):0)).replace('__DEL__',()=>lit(dl.del+'T01:00'));
+}
+function exportDlg(keys,scope){
+  const o0=calOpt(),chk=(k,l)=>`<label class="tog"><input type="checkbox" data-cal="${k}" ${o0[k]?'checked':''}>${l}</label>`,dl=calDates();
+  const el=openDlg(`<h2>書き出し</h2>
+   <p class="muted tiny" style="margin-bottom:10px">対象：${esc(scope)}</p>
+   <h3 style="font-size:15px;margin:10px 0 6px">Excel・CSV</h3>
+   <div class="row" style="flex-wrap:wrap;gap:8px"><button class="btn sm" data-ex="xlsx">${ic('down',15)}Excel（.xlsx）</button><button class="btn sm" data-ex="csvt">${ic('down',15)}CSV（表の形）</button><button class="btn sm" data-ex="csvl">${ic('down',15)}CSV（1人1行）</button></div>
+   <p class="tiny muted" style="margin-top:6px">Excelには、学級ごとの表（罫線・色つき）と、並べ替えできる「一覧データ」シートが入ります。どれも、児童生徒の個人情報を含みます。使い終わったら、速やかに削除してください。</p>
+   <h3 style="font-size:15px;margin:16px 0 6px">カレンダー（Googleカレンダーなど）</h3>
+   <div class="warnbox" style="margin-bottom:10px"><b>⚠ ${CAL_NOTE}</b></div>
+   <div class="tiny" style="font-weight:700;margin:0 0 4px">予定の題名に入れるもの</div>
+   <div class="row" style="flex-wrap:wrap;gap:6px 16px">${chk('g','学年')}${chk('c','組')}${chk('n','出席番号')}${chk('name','名前')}</div>
+   <div class="row" style="flex-wrap:wrap;gap:6px 16px;margin-top:6px"><label class="tog">学年・組・番号の書き方 <select data-cal="fmt"><option value="dash" ${o0.fmt==='dash'?'selected':''}>1-1-23（推奨）</option><option value="jp" ${o0.fmt==='jp'?'selected':''}>1年1組23番</option><option value="tight" ${o0.fmt==='tight'?'selected':''}>1123（詰める）</option></select></label>${chk('kind','題名の先頭に行事名を付ける')}</div>
+   <div class="row" style="flex-wrap:wrap;gap:6px 16px;margin-top:6px">${chk('addr','住所（予定の「場所」の欄に入れる）')}</div>
+   <div class="row" style="flex-wrap:wrap;gap:6px 16px;margin-top:6px">${chk('alarm','予定の前に通知する')}<label class="tog"><select data-cal="min">${[5,10,15,30,60].map(m=>`<option value="${m}" ${+o0.min===m?'selected':''}>${m}分前</option>`).join('')}</select></label></div>
+   <div class="tiny muted" id="calEx" style="margin:8px 0"></div>
+   <h3 style="margin:14px 0 0;font-size:15px">方式1：GAS（予定が自動で削除される・おすすめ）</h3>
+   <div class="row" style="margin-top:8px;flex-wrap:wrap;gap:8px"><button class="btn pri big" data-ex="gas">${ic('send',18)}カレンダー用GASをコピーする</button><button class="btn ghost" data-ex="show">コードを見る</button><button class="btn" data-ex="gasdl">${ic('down',17)}ファイルで保存</button></div>
+   <div id="calCode"></div>
+   <ol class="steps"><li><a href="https://script.new" target="_blank" rel="noopener">script.new</a> を開く（Googleにログインした状態で）<br><b>または</b> <a href="https://script.google.com" target="_blank" rel="noopener">Google Apps Script</a> を開いて「新しいプロジェクト」を作る<span class="tiny muted">（セキュリティ設定でリンクから開けないときは、Googleにログインしたブラウザで「Google Apps Script」を検索して開いてください）</span>。</li><li>最初からあるコードを<b>すべて消して</b>、コピーしたGASを貼り付ける。</li><li>上の「実行」で <b>registerCalendar</b> を実行する（初回は権限の承認が出ます。<b>表示される権限は、すべて許可</b>してください。一部だけだと失敗します。「Googleで確認されていません」と出たら「詳細」→「（安全ではないページ）に移動」→「許可」を押します。自分で貼り付けたコードなので問題ありません）。</li><li>画面下の「実行ログ」に、作ったカレンダーの名前と予定の件数、<b>自動で削除される日時</b>が出ます。Googleカレンダーの左の一覧に、専用のカレンダーができています。</li><li>Googleカレンダーで、予定の題名・日時（住所を入れたときは場所も）が合っているか、<b>数件を確かめる</b>。</li><li><b>${esc(jpDate(dl.del))}の1時ごろ</b>（懇談の最終日の翌日）に、専用のカレンダーが予定ごと自動で削除されます。いますぐ消したいときは <b>deleteCalendarNow</b> を実行します。<b>個人情報の扱いには十分注意し、削除できたことを、カレンダーの一覧で必ず確認してください。</b></li></ol>
+   <h3 style="margin:18px 0 0;font-size:15px">方式2：ICSファイル（自動では削除されません）</h3>
+   <div class="row" style="margin-top:8px"><button class="btn" data-ex="ics">${ic('down',17)}ICSファイルを書き出す</button></div>
+   <p class="tiny muted" style="margin-top:6px">どのカレンダーアプリにも取り込めますが、予定は自動で消えません。取り込み先で専用のカレンダーを作り、終わったらカレンダーごと削除してください（書き出したあとに、手順が出ます）。</p>
+   <div class="acts"><button class="btn pri" data-close>閉じる</button></div>`,{wide:true});
+  let showCode=false;
+  const read=()=>{const n={...o0};el.querySelectorAll('[data-cal]').forEach(i=>{const k=i.dataset.cal;n[k]=i.type==='checkbox'?i.checked:(k==='min'?+i.value:i.value)});return n};
+  const refresh=()=>{const o=read(),ev=calEvents(keys,o);el.querySelector('[data-cal="min"]').disabled=!o.alarm;
+    $('#calEx',el).innerHTML=(ev.length?`題名の例：<b>${esc(ev[0].title)}</b>（予定は${ev.length}件）`:'配置が決まっている児童生徒がいないため、予定は作れません')+(o.fmt==='tight'?'<br>「詰める」書き方は、10組以上や「A組」があると読み違えやすいので、「1-1-23」がおすすめです。':'');
+    $('#calCode',el).innerHTML=showCode&&ev.length?`<textarea class="paste" readonly style="min-height:200px;margin-top:10px;width:100%;box-sizing:border-box" onfocus="this.select()">${esc(buildCalGas(ev,o))}</textarea>`:'';
+    el.querySelector('[data-ex="show"]').textContent=showCode?'コードを隠す':'コードを見る'};
+  refresh();
+  el.addEventListener('change',refresh);el.addEventListener('input',refresh);
+  el.addEventListener('click',async e=>{
+    if(e.target.closest('[data-close]')){el._close();return}
+    const b=e.target.closest('[data-ex]');if(!b)return;
+    const k=b.dataset.ex;
+    if(k==='xlsx'){exportXlsx(keys);return}
+    if(k==='csvt'){exportCsv(keys,'t');return}
+    if(k==='csvl'){exportCsv(keys,'l');return}
+    if(k==='show'){showCode=!showCode;refresh();return}
+    const o=read();calSave(o);
+    const ev=calEvents(keys,o);
+    if(!ev.length){toast('配置が決まっている児童生徒がいないため、予定を作れません',{kind:'warn'});return}
+    const warn=`<div class="warnbox" style="margin:10px 0"><b>⚠ ${CAL_NOTE}</b></div>`;
+    if(k==='ics'){
+      dlText(buildIcs(ev,o),`かこピタ_カレンダー_${todayISO()}.ics`,'text/calendar;charset=utf-8');
+      await ask({title:'ICSファイルを書き出しました',body:`<p>${ev.length}件の予定が入っています。</p>${warn}<ol style="margin:6px 0 0 18px;line-height:1.8"><li>Googleカレンダーをパソコンのブラウザで開き、左の「他のカレンダー」の「＋」→「新しいカレンダーを作成」で、専用のカレンダーを作ります。</li><li>右上の歯車→「設定」→「インポート／エクスポート」で、このファイルを、その専用のカレンダーに取り込みます。</li><li>終わったら、その専用のカレンダーを削除し、一覧から消えたことを確認します。</li></ol><p class="tiny muted" style="margin-top:8px">ICSで取り込んだ予定は、自動では削除されません。自動で削除したいときは、「方式1：GAS」を使ってください。</p>`,buttons:[{id:1,label:'確認しました',kind:'pri'}]});
+    }else{
+      const code=buildCalGas(ev,o);let ok=true;
+      if(k==='gas')ok=await copyText(code);
+      else{const bl=new Blob([code],{type:'text/plain;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(bl);a.download=`かこピタ_カレンダー登録GAS_${todayISO()}.gs.txt`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+      await ask({title:ok?(k==='gas'?'カレンダー用GASをコピーしました':'カレンダー用GASを保存しました'):'コピーできませんでした',body:ok?`<p>${ev.length}件の予定を、専用のカレンダーに作るGASです。貼り付けて実行する手順は、書き出しの画面の「方式1」に出ています。</p>${warn}<p>この専用カレンダーは、<b>${esc(jpDate(calDates().del))}の1時ごろ</b>（懇談の最終日の翌日）に、予定ごと自動で削除されます。削除されたかどうかは、カレンダーの一覧で、必ず確認してください。</p>`:'<p>お使いのブラウザでは、自動でコピーできませんでした。「コードを見る」を押して、表示された内容を選んでコピーするか、「ファイルで保存」をお使いください。</p>',buttons:[{id:1,label:'確認しました',kind:'pri'}]});
+    }
+  });
+}
+A['g-export']=()=>{const k=curCls();if(!k)return;const c=classList().find(x=>x.key===k)||{};exportDlg([k],`${clsLabel(c.g,c.c)}（いま開いている学級）`)};
+A['p-export']=()=>{const cs=docClassList();if(!cs.length){toast('学級が選ばれていません',{kind:'warn'});return}exportDlg(cs.map(c=>c.key),`選んだ${cs.length}学級`)};
 A['g-print']=()=>{const k=curCls();if(!k)return;const U=UI.print;U.mode='table';U.sel=new Set([k]);A['p-print']()};
 A['g-lockall']=()=>{
   const cl=plist(),sel=new Set(cl.filter(c=>P.classes[c.key].locked).map(c=>c.key));
