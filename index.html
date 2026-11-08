@@ -337,7 +337,7 @@ textarea.paste{width:100%;min-height:90px;font-family:ui-monospace,Consolas,mono
 @keyframes pl{50%{box-shadow:0 0 0 7px rgba(217,72,15,.35)}}
 .toast{pointer-events:auto;background:#1E3350;color:#fff;border-left:6px solid var(--snap);border-radius:14px;padding:11px 18px;box-shadow:0 12px 32px rgba(10,30,60,.38);display:flex;gap:14px;align-items:center;font-weight:700;animation:tin .25s ease both}
 .toast.warn{background:#D9480F;border-left-color:#FFE066;font-size:14.5px;padding:13px 20px;box-shadow:0 14px 36px rgba(160,50,0,.45)}
-.alertpin{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#D9480F;color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;margin-bottom:10px;animation:shk2 .5s ease 1}
+.alertpin{position:sticky;top:6px;z-index:40;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#D9480F;color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;margin-bottom:10px;animation:shk2 .5s ease 1}
 .alertpin .btn{background:#fff;color:#B03A0B;border-color:#fff}
 .btn.pulse{animation:pl 1s ease 3}
 .toast button{border:0;background:rgba(255,255,255,.18);color:#fff;font-weight:800;padding:4px 11px;border-radius:8px}
@@ -612,7 +612,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.989';const SLOT_LENS=[5,10,15,20,25,30,35,40,45,50,55,60];const OLD_SECURE_TXT='入力された情報は、この日時調整の目的以外には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が管理するスプレッドシートにのみ保存され、校内で適切に管理します。第三者に提供することはありません。';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.991';const SLOT_LENS=[5,10,15,20,25,30,35,40,45,50,55,60];const OLD_SECURE_TXT2='入力された情報は、この{行事}の日程調整以外の目的には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が適切に管理します。第三者に提供することはありません。';const OLD_SECURE_TXT='入力された情報は、この日時調整の目的以外には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が管理するスプレッドシートにのみ保存され、校内で適切に管理します。第三者に提供することはありません。';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -745,7 +745,7 @@ function migrate(o){
   if(o&&o.form&&!(parseFloat(o.kpv)>=0.52)&&p.form.addr==='none')p.form.addr=null;   // v0.52: 住所の既定を「家庭訪問のときだけリスト」に（未設定に戻す）
   if(!p.term)p.term=p.id;   // 世代ID：古いデータはプロジェクトIDと同じ扱い（どのPCで読んでも同じ値になる）
   if(o&&o.form&&!(parseFloat(o.kpv)>=0.55)&&p.form.addr){const kd=p.meta.kind==='custom'?(p.meta.kindCustom||''):(p.meta.kind||'');if(!/家庭訪問/.test(kd))p.form.addr=null}   // v0.55: 家庭訪問以外では「聞かない」を既定に戻す
-  if(p.ftxt&&typeof p.ftxt==='object'&&p.ftxt.secure===OLD_SECURE_TXT)delete p.ftxt.secure;
+  if(p.ftxt&&typeof p.ftxt==='object'&&(p.ftxt.secure===OLD_SECURE_TXT||p.ftxt.secure===OLD_SECURE_TXT2))delete p.ftxt.secure;
   p.kpv='0.95';
   if(!Array.isArray(p.vari))p.vari=D.vari;
   p.students=(Array.isArray(p.students)?p.students:[]).filter(s=>s&&typeof s==='object').map(s=>{const t=Object.assign({sib:[],cond:{},cf:{},slots:1,ok:false,memo:'',kana:'',sex:'',addr:'',addrR:''},s);
@@ -810,13 +810,22 @@ async function confirmLoss(fn,lead,okLabel='変更する'){
   const r=await ask({title:'配置が外れます',body:`<p>${lead}</p>${lossHtml(L)}`,buttons:[{id:0,label:'やめる'},{id:1,label:okLabel,kind:'danger pri'}]});
   return r===1}
 function act(fn){const own=begin();try{return fn()}finally{if(own)commit()}}
-function rec(u,r){if(tx)tx.ops.push({undo:u,redo:r});else touch()}
-function setProp(o,k,v){const had=Object.prototype.hasOwnProperty.call(o,k),old=o[k];if(had&&old===v)return;o[k]=v;VER++;rec(()=>{had?o[k]=old:delete o[k]},()=>{o[k]=v})}
-function delProp(o,k){if(!(k in o))return;const old=o[k];delete o[k];VER++;rec(()=>{o[k]=old},()=>{delete o[k]})}
+function rec(u,r,o){if(tx)tx.ops.push({undo:u,redo:r,o});else touch()}
+function setProp(o,k,v){const had=Object.prototype.hasOwnProperty.call(o,k),old=o[k];if(had&&old===v)return;o[k]=v;VER++;rec(()=>{had?o[k]=old:delete o[k]},()=>{o[k]=v},o)}
+function delProp(o,k){if(!(k in o))return;const old=o[k];delete o[k];VER++;rec(()=>{o[k]=old},()=>{delete o[k]},o)}
 function touch(){VER++;P.updatedAt=Date.now();scheduleSave();render()}
 function doUndo(){if(tx)commit();const t=undoS.pop();if(!t){toast('取り消せる操作はありません');return}for(let i=t.ops.length-1;i>=0;i--)t.ops[i].undo();redoS.push(t);touch()}
 function doRedo(){if(tx)commit();const t=redoS.pop();if(!t){toast('やり直せる操作はありません');return}for(const o of t.ops)o.redo();undoS.push(t);touch()}
 function resetHistory(){undoS=[];redoS=[];tx=null}
+// 共有フォルダで、ほかの人が更新した学級を取り込むとき：その学級（配置・都合）にさわる記録だけを消し、ほかの学級の「元に戻す」は残す
+function histPrune(part){
+  if(tx)commit();
+  if(!/^class:/.test(part)){resetHistory();return}
+  const key=part.slice(6),c=P.classes[key];if(!c)return;
+  const S=new Set(),add=o=>{if(o&&typeof o==='object'&&!S.has(o)){S.add(o);for(const k in o){const v=o[k];if(v&&typeof v==='object'&&S.size<400000)add(v)}}};
+  add(c);for(const s of P.students)if(s.g+'|'+s.c===key)add(s);
+  const keep=e=>e.ops.every(op=>op.o&&!S.has(op.o));
+  undoS=undoS.filter(keep);redoS=redoS.filter(keep)}
 
 /* ---------- derived ---------- */
 let SC={k:'',slots:[],V:new Set()};
@@ -917,7 +926,12 @@ function okCell(cls,k){   // その配置が、いまの日程（日付・枠）
   const i=k.indexOf('|'),d=k.slice(0,i),t=k.slice(i+1);if(!P.sched.dates.includes(d))return false;
   const sl=gslots(ckOf(cls));let st=_GK.get(sl);if(!st){st=new Set(sl.map(x=>x.key));_GK.set(sl,st)}return st.has(t);
 }
-function headKey(cls,sid){for(const k in cls.grid){const c=cls.grid[k];if(c.sid===sid&&c.head&&okCell(cls,k))return k}return null}
+let HK={ver:-1,wm:new WeakMap()};
+function headKey(cls,sid){   // 学級の配置表を、データが変わるまで「人→先頭の枠」の索引にして覚える
+  if(HK.ver!==VER){HK={ver:VER,wm:new WeakMap()}}
+  let idx=HK.wm.get(cls.grid);
+  if(!idx){idx=new Map();for(const k in cls.grid){const c=cls.grid[k];if(c.head&&c.sid!=null){let a=idx.get(c.sid);if(!a)idx.set(c.sid,a=[]);a.push(k)}}HK.wm.set(cls.grid,idx)}
+  const a=idx.get(sid);if(!a)return null;for(const k of a)if(okCell(cls,k))return k;return null}
 function spanKeys(k,n,ck){
   const [d,t]=k.split('|');const sl=gslots(ck);const i=sl.findIndex(x=>x.key===t);if(i<0||i+n>sl.length)return null;
   const out=[];for(let j=0;j<n;j++)out.push(d+'|'+sl[i+j].key);return out;
@@ -932,7 +946,12 @@ function putPlace(cls,st,k,exc){
 function cellNG(cls,k){ // head cell ng status
   const c=cls.grid[k];if(!c||!c.head||c.exc)return false;const st=stById(c.sid);if(!st)return false;return isNG(st,spanKeys(k,c.n,ckOf(cls))||[k],ckOf(cls));
 }
-function sibFind(sb){if(!sb||typeof sb!=='object')return null;   // 学年・組・ふりがな → (同じ人が複数なら)漢字 → (それでも複数なら)出席番号 の順に探す
+let SF={ver:-1,m:new Map()};
+function sibFind(sb){if(!sb||typeof sb!=='object')return null;
+  if(SF.ver!==VER){SF={ver:VER,m:new Map()}}
+  const ck=[sb.g,sb.c,sb.n,sb.kana,sb.name].join('\u0001');if(SF.m.has(ck))return SF.m.get(ck);
+  const r=sibFind0(sb);SF.m.set(ck,r);return r}
+function sibFind0(sb){   // 学年・組・ふりがな → (同じ人が複数なら)漢字 → (それでも複数なら)出席番号 の順に探す
   const arr=P.students,kk=sb.kana?norm(sb.kana):'',nn=sb.name?norm(sb.name):'';
   const gOK=s=>!sb.g||s.g==sb.g,cOK=s=>!sb.c||String(s.c)==String(sb.c);
   const narrow=m=>{
@@ -947,12 +966,16 @@ function sibFind(sb){if(!sb||typeof sb!=='object')return null;   // 学年・組
   return null;
 }
 const areaKey=(s,n)=>String(s.addr||'').normalize('NFKC').replace(/[\s\u3000]/g,'').slice(0,Math.max(1,+n||5));   // フォーム用（先頭n文字）
-function norm(s){
-  s=String(s??'');
+let NORM_C={ver:-1,m:new Map()};
+function norm(s0){
+  s0=String(s0??'');
+  if(NORM_C.ver!==VER){NORM_C={ver:VER,m:new Map()}}   // データが変わったら、覚えた結果を捨てる（異体字表の変更も、VERが変わる）
+  const hit=NORM_C.m.get(s0);if(hit!==undefined)return hit;
+  let s=s0;
   for(const v of P.vari){if(v&&v[0])s=s.split(v[0]).join(v[1]||'')}
   s=s.normalize('NFKC').replace(/[ぁ-ゖ]/g,c=>String.fromCharCode(c.charCodeAt(0)+0x60)).toLowerCase();
   s=s.replace(/[\s\u3000・.．,，?？!！()（）「」『』、。]/g,'').replace(/[-－―‐ｰ−ー]/g,'ー');
-  return s.trim();
+  s=s.trim();if(NORM_C.m.size>300000)NORM_C.m.clear();NORM_C.m.set(s0,s);return s;
 }
 function progress(key){
   const mem=members(key),cls=P.classes[key];let ent=0,una=0,placed=0,ng=0;
@@ -1004,8 +1027,8 @@ async function dbSaveGuard(k,v,expect,force){   // 読む→比べる→書く �
 async function saveConflict(cur){
   if(SAVE.asking)return;SAVE.asking=true;SAVE.hold=true;SAVE.cur=cur||SAVE.cur;paintSave();
   try{for(;;){
-    const r=await ask({title:'別の画面で、先に保存されています',body:`<p>この画面を開いたあとに、<b>別のタブ（またはウィンドウ）で保存</b>されました${SAVE.cur&&SAVE.cur.at?`（${hhmm(SAVE.cur.at)}）`:''}。このまま保存すると、<b>どちらかの内容が消えます</b>。</p><p class="tiny muted">かこピタを2つの画面で開いていませんか？ 同時に編集しないでください。どれを選んでも、選ぶ前の内容は、「以前の状態に戻す」から復元できます。</p>`,
-      buttons:[{id:'dl',label:'この画面の内容を、ファイルに書き出す'},{id:'load',label:'最新の内容を読み込み直す（この画面の変更は破棄）'},{id:'over',label:'この画面の内容で上書きする',kind:'danger pri'}]});
+    const r=await ask({title:'別の画面で、先に保存されています',body:`<p>この画面を開いたあとに、<b>別のタブ（またはウィンドウ）で保存</b>されました${SAVE.cur&&SAVE.cur.at?`（${hhmm(SAVE.cur.at)}）`:''}。このまま保存すると、<b>どちらかの内容が消えます</b>。</p><p class="tiny muted">かこピタを2つの画面で開いていませんか？ 同時に編集しないでください。「読み込み直す」を選ぶと、この画面の変更は破棄しますが、破棄する前の内容を、「以前の状態に戻す」に残します。</p>`,
+      buttons:[{id:'load',label:'最新の内容を読み込み直す（おすすめ）',kind:'pri'},{id:'dl',label:'この画面の内容を、ファイルに書き出す'},{id:'over',label:'この画面の内容で上書きする',kind:'danger'}]});
     if(r==='dl'){downloadJSON();continue}
     if(r==='over'){await makeBackup('別画面と衝突（上書き前）');const x=await dbSaveGuard(KEY_P,serialize(),null,true);SAVE.stamp=x.stamp;SAVE.hold=false;SAVE.state='ok';SAVE.at=Date.now();SAVE.err='';toast('この画面の内容で、上書きしました');break}
     if(r==='load'){await makeBackup('別画面と衝突（読み込み前）');
@@ -1029,10 +1052,14 @@ async function saveNow(){
   paintSave();
 }
 async function makeBackup(label){
-  try{const at=Date.now();await dbSet('bk:'+at,{at,label,n:P.students.length,title:P.title,json:serialize()});SAVE.lastBk=at;SAVE.dirtyBk=false;
-    const ks=(await dbKeys()).filter(k=>String(k).startsWith('bk:')).sort();while(ks.length>12)await dbDel(ks.shift());}catch(e){}
+  try{const at=Date.now(),pin=label!=='自動';   // 「自動」以外（読み込み前・取り込み前・消去前・配置前など）は、「節目」として別枠で残す
+    await dbSet((pin?'bp:':'bk:')+at,{at,label,pin,n:P.students.length,title:P.title,json:serialize()});SAVE.lastBk=at;SAVE.dirtyBk=false;
+    const all=await dbKeys(),bk=all.filter(k=>String(k).startsWith('bk:')).sort();while(bk.length>12)await dbDel(bk.shift());
+    const bp=all.filter(k=>String(k).startsWith('bp:')).sort();while(bp.length>20)await dbDel(bp.shift());}catch(e){}
 }
-async function listBackups(){const ks=(await dbKeys()).filter(k=>String(k).startsWith('bk:')).sort().reverse();const out=[];for(const k of ks){const v=await dbGet(k);if(v)out.push({k,...v})}return out}
+const PIN_AT={};
+function pinOnce(label){if(!P.students.length)return;const now=Date.now();if(now-(PIN_AT[label]||0)<10*60*1000)return;PIN_AT[label]=now;makeBackup(label)}   // 節目の自動バックアップ（同じ種類は10分に1回まで。失敗しても何も表示しない）
+async function listBackups(){const ks=(await dbKeys()).filter(k=>/^b[kp]:/.test(String(k))).sort((a,b)=>+String(b).slice(3)-+String(a).slice(3));const out=[];for(const k of ks){const v=await dbGet(k);if(v)out.push({k,...v})}return out}
 async function writeFile(){
   if(!fileHandle)return;
   if(FILE_TERM===null){FILE_TERM=curTerm();dbSet(KEY_H+':term',FILE_TERM)}else if(FILE_TERM!==curTerm()){await unlinkFile();return}   // ちがう行事のデータを、前の行事のファイルに上書きしない
@@ -1122,6 +1149,13 @@ const STEPS=[
  {id:'cond',label:'条件',icon:'clock',n:3},
  {id:'grid',label:'かこピタ',sub:'(配置)',icon:'grid',n:4},
  {id:'print',label:'印刷',icon:'print',n:5}];
+let _T5=null;
+function timeOpts(v){   // 5分刻みの時刻リスト（05:00〜23:55）
+  if(!_T5){_T5=[];for(let m=300;m<1440;m+=5)_T5.push(keyT(m))}
+  const p=v?parseT(v):null,nv=p!=null?keyT(p):'';
+  const list=(nv&&!_T5.includes(nv))?_T5.concat([nv]).sort():_T5;
+  return (nv?'':'<option value="" disabled selected>選んでください</option>')+list.map(x=>`<option value="${x}" ${x===nv?'selected':''}>${x}</option>`).join('')}
+const kindNameG=g=>P.meta.kind==='三者懇談会・進路懇談会'?(+g===3?'進路懇談会':'三者懇談会'):kindName();   // 印刷物などの行事名：「三者懇談会・進路懇談会」のときは、1・2年は三者懇談会、3年は進路懇談会
 const kindName=()=>P.meta.kind==='custom'?(P.meta.kindCustom||'懇談会'):(P.meta.kind||'懇談会');   // 未設定のときの表示用
 const formTitleDefault=()=>{   // 例：261019～三者懇談会日時希望調査(みらい中学校 26/10/10 17:00〆切)　※フォームの題名もGoogleドライブのファイル名もこれ
   const ds=[...(P.sched.dates||[])].sort(),m=ds.length&&/^\d{2}(\d{2})-(\d{2})-(\d{2})/.exec(ds[0]),F=formOpt(),parts=[];
@@ -1245,13 +1279,13 @@ function toast(msg,o={}){if(DRY)return;
   el.innerHTML=`<span>${warn?'⚠ ':''}${esc(msg)}</span>${o.undo?'<button data-act="undo">元に戻す</button>':''}`;box.appendChild(el);
   setTimeout(()=>el.remove(),o.ms||(warn?7000:4600));while(box.children.length>3)box.firstChild.remove();
 }
-function ask({title,body='',buttons}){
+function ask({title,body='',buttons,sticky=false}){
   return new Promise(res=>{
     const root=$('#modal-root'),el=document.createElement('div');el.className='scrim';
     el.innerHTML=`<div class="dlg" role="dialog" aria-modal="true"><h2>${esc(title)}</h2><div>${body}</div><div class="acts">${buttons.map((b,i)=>`<button class="btn ${b.kind||''}" data-i="${i}">${esc(b.label)}</button>`).join('')}</div></div>`;
     const done=v=>{document.removeEventListener('keydown',kd,true);el.remove();res(v)};
-    const kd=e=>{if(e.key==='Escape'){if(root.lastElementChild!==el)return;e.stopImmediatePropagation();done(null)}};document.addEventListener('keydown',kd,true);
-    el.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)done(buttons[+b.dataset.i].id);else if(e.target===el)done(null)});
+    const kd=e=>{if(e.key==='Escape'){if(root.lastElementChild!==el)return;e.stopImmediatePropagation();if(!sticky)done(null)}};document.addEventListener('keydown',kd,true);
+    el.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(b)done(buttons[+b.dataset.i].id);else if(e.target===el&&!sticky)done(null)});
     root.appendChild(el);const p=el.querySelector('.btn.pri')||el.querySelector('.btn');p&&p.focus();
   });
 }
@@ -1573,10 +1607,9 @@ function vScheduleBody(){
     <div class="row" style="margin-top:12px;align-items:flex-end"><label class="f">期間でまとめて追加<span class="row"><input type="date" id="dFrom" value="${S2.from}"><span>〜</span><input type="date" id="dTo" value="${S2.to}"></span></label>
      <label class="tog"><input type="checkbox" id="dWe" ${S2.skipWE?'checked':''}>土日を除く</label><span class="tiny muted" style="flex-basis:100%">祝日は自動では除かれません。追加したあと、一覧から不要な日を消してください。</span><button class="btn sm" data-act="d-range">${ic('plus',15)}追加</button>${S.dates.length?`<button class="btn ghost sm" data-act="d-clear">すべて消す</button>`:''}</div></section>
    <section class="panel"><h2>1日の時間割</h2><div class="fgrid">
-    <label class="f">開始時刻<input type="time" step="300" data-bind="sched.start" value="${S.start}"></label>
-    <label class="f">1枠の長さ（分）<input type="number" min="5" max="60" step="5" data-bind="sched.slotMin" data-int value="${S.slotMin}"></label>
-    <label class="f">最後の枠の終わり<input type="time" data-bind="sched.endT" value="${S.endT||''}"></label></div>
-    <div class="qpick" style="margin-top:10px">${SLOT_LENS.map(m=>`<button class="${S.slotMin===m?'on':''}" data-act="slotmin" data-m="${m}">${m}分</button>`).join('')}</div>
+    <label class="f">開始時刻<select data-bind="sched.start">${timeOpts(S.start)}</select></label>
+    <label class="f">最後の枠の終わり<select data-bind="sched.endT">${timeOpts(S.endT)}</select></label></div>
+    <div class="f" style="margin-top:12px"><span>1枠の長さ（分）</span><div class="qpick" style="margin-top:6px;gap:6px 14px">${[SLOT_LENS.filter(m=>m<=30),SLOT_LENS.filter(m=>m>30)].map(g=>`<div class="qpick" style="margin:0">${g.map(m=>`<button class="${S.slotMin===m?'on':''}" data-act="slotmin" data-m="${m}">${m}分</button>`).join('')}</div>`).join('')}</div></div>
     ${((+S.slotMin||0)%5||(parseT(S.start)!=null&&parseT(S.start)%5))?`<div class="warnbox" style="margin-top:10px">1枠の長さ・開始時刻が<b>5分単位ではありません</b>。かこピタは条件を5分単位で記録するため、このままだと条件ページの表示がずれることがあります。<button class="btn sm" style="margin-left:8px" data-act="fix5">5分単位にそろえる</button></div>`:''}
     <p class="muted tiny" style="margin-top:8px">${last!=null?`最後の枠は ${fmtT(last-S.slotMin)}〜${fmtT(last)}（1日 ${S.slotCount}枠）です。${parseT(S.endT)!=null&&parseT(S.endT)-last>=5?`終了時刻 ${fmtT(parseT(S.endT))} までに収まる枠数にしています。`:''}${parseT(S.endT)!=null&&parseT(S.endT)<parseT(S.start)+S.slotMin?'<b style="color:var(--ng)">終了時刻が早すぎます（1枠にしています）。</b>':''}`:'開始時刻を入力してください。'}</p></section>
   </div><div>
@@ -1617,9 +1650,10 @@ A['d-range']=async()=>{const f=$('#dFrom').value,t=$('#dTo').value,we=$('#dWe').
   if(!add.length){toast('追加できる日がありません（土日を除く設定の可能性があります）');return}
   if(await newEventGuard(add))return;
   act(()=>setProp(P.sched,'dates',sortDates(P.sched.dates.concat(add))));UI.sched.from=UI.sched.to='';toast(cut?`最初の366日分（${add.length}日）だけを追加しました。期間を分けて追加してください`:`${add.length}日を追加しました`,{undo:true,kind:cut?'warn':undefined})};
-A['d-del']=async el=>{const d=el.dataset.d,f=()=>act(()=>setProp(P.sched,'dates',P.sched.dates.filter(x=>x!==d)));
+const rememberDates=()=>{const ds=P.sched.dates;if(ds.length)setProp(P.sched,'prev',{f:ds[0],l:ds[ds.length-1]})};   // 日付を全部消す前の範囲を覚える（あとで日付を足すとき、前の行事かどうかを確認するため）
+A['d-del']=async el=>{const d=el.dataset.d,f=()=>act(()=>{const nd=P.sched.dates.filter(x=>x!==d);if(!nd.length)rememberDates();setProp(P.sched,'dates',nd)});
   if(!(await confirmLoss(f,`${esc(fmtD(d))} を、実施日から消します。この日に入っていた配置は、外れます（入力済みの都合は残ります）。`,'日付を消す')))return;f()};
-A['d-clear']=async()=>{const L=dryLoss(()=>act(()=>setProp(P.sched,'dates',[])));const r=await ask({title:'日付をすべて消しますか？',body:'<p class="muted">日付だけを消します。入力済みの都合（×・○）は残り、日付を入れ直すと元に戻ります。<b>ただし、配置（一覧表の配置と休憩）は外れます。日付を入れ直しても、配置は戻りません。</b></p>'+lossHtml(L)+'<p class="tiny" style="margin-top:8px">新しい行事の日程を入れ直すつもりなら、<b>「データを消す…」→「次の行事の準備」</b>を使ってください。条件・配置も一緒に消えて、前の行事と混ざりません。</p><div class="ngbox" style="margin-top:10px;font-size:13.5px">'+NE_RISK+'</div><p class="tiny" style="margin-top:8px">'+NE_FIX+'</p>',buttons:[{id:0,label:'やめる'},{id:1,label:'日付だけ消す'},{id:2,label:'次の行事の準備へ',kind:'pri'}]});if(r===2){A.newevent();return}if(r===1)act(()=>setProp(P.sched,'dates',[]))};
+A['d-clear']=async()=>{const L=dryLoss(()=>act(()=>{rememberDates();setProp(P.sched,'dates',[])}));const r=await ask({title:'日付をすべて消しますか？',body:'<p class="muted">日付だけを消します。入力済みの都合（×・○）は残り、日付を入れ直すと元に戻ります。<b>ただし、配置（一覧表の配置と休憩）は外れます。日付を入れ直しても、配置は戻りません。</b></p>'+lossHtml(L)+'<p class="tiny" style="margin-top:8px">新しい行事の日程を入れ直すつもりなら、<b>「データを消す…」→「次の行事の準備」</b>を使ってください。条件・配置も一緒に消えて、前の行事と混ざりません。</p><div class="ngbox" style="margin-top:10px;font-size:13.5px">'+NE_RISK+'</div><p class="tiny" style="margin-top:8px">'+NE_FIX+'</p>',buttons:[{id:0,label:'やめる'},{id:1,label:'日付だけ消す'},{id:2,label:'次の行事の準備へ',kind:'pri'}]});if(r===2){A.newevent();return}if(r===1)act(()=>{rememberDates();setProp(P.sched,'dates',[])})};
 function hasConds(){const ds=new Set(P.sched.dates);return P.students.some(st=>Object.keys(st.cond).some(k=>ds.has(k.split('|')[0]))||(st.cf&&Object.keys(st.cf).some(k=>ds.has(k.split('|')[0]))))}
 function convertConds(old){   // 日程の枠の長さ・開始時刻を変えたとき：○×の時間は変えずに、新しい枠の入れ物に入れ直す（広がらない）
   const dates=P.sched.dates;let n=0;
@@ -1761,7 +1795,7 @@ function buildProblem(clsKey,o,limit17,exclude,relax){
       if(ok)own.push([di,si]);
     }
     const an=links[s].anchors;
-    if(an.length){const f=own.filter(([di,si])=>!an.some(a=>a.di===di&&si<a.si+a.n&&a.si<si+n));if(f.length)own=f}
+    if(an.length&&!o.sibLoose){const f=own.filter(([di,si])=>!an.some(a=>a.di===di&&si<a.si+a.n&&a.si<si+n));if(f.length)own=f}
     for(const [di,si] of own){const id=cs.length;cs.push(s);cst.push(di*L+si);clen.push(n);cdi.push(di);csi.push(si);sc[s].push(id)}
   });
   return{cls,clsKey,dates,SL,L,D,list,una,fixed,occ,nC:cs.length,cs:Int32Array.from(cs),cst:Int32Array.from(cst),clen:Int32Array.from(clen),cdi:Int32Array.from(cdi),csi:Int32Array.from(csi),sc:sc.map(a=>Int32Array.from(a)),links,areaGroups,areaOf,areaId,areaNum:(o.areaAuto&&o.areaMode==='digitIncl')?areaNum:null,limit17,o};
@@ -1905,6 +1939,10 @@ async function solveClass(clsKey,o,hooks={}){
     ctl=newCtl(t0+total);const r=await runGen(searchGen(full,{...base,rand:mulberry(seed)},ctl),ctl,tick);nodes+=ctl.nodes;
     if(r){sol=ctl.solution;pb=full}
     else{
+      if(!ctl.abort&&!o.sibLoose&&o.sibAuto&&full.links.some(l=>l.anchors.length)){   // 別の学級のきょうだいを避けたせいで入らないとき：避けるのをやめて、もう一度探す（全員が入る配置を優先）
+        hooks.stage&&hooks.stage('きょうだいの時刻を避けずに、もう一度探しています');
+        const r2=await solveClass(clsKey,{...o,sibLoose:true},hooks);if(r2.status==='ok'){r2.loose=true;return r2}
+      }
       const g=greedyPartial(full),gc=g.filter(x=>x>=0).length,bc=ctl.bestAssign?ctl.bestAssign.filter(x=>x>=0).length:0;
       const partial=gc>=bc?g:ctl.bestAssign;
       return{status:ctl.abort?'abort':'fail',pb:full,partial,bestDepth:Math.max(gc,bc),timedOut:ctl.timedOut,diag:diagnose(full)};
@@ -2004,13 +2042,43 @@ function sibCrossCount(){   // 学級ごとの、「別の学級にきょうだ�
   const rel=new Map(),add=(a,b)=>{if(!rel.has(a.id))rel.set(a.id,new Set());rel.get(a.id).add(b.id)};
   for(const s2 of P.students)for(const b of s2.sib||[]){const m=sibFind(b);if(m&&m!==s2){add(s2,m);add(m,s2)}}
   const out={};for(const s of P.students){const r=rel.get(s.id);if(!r)continue;const k=s.g+'|'+s.c;for(const id of r){const m=stById(id);if(m&&(m.g+'|'+m.c)!==k)out[k]=(out[k]||0)+1}}return out}
+/* ---- 複数の学級：先に決めた学級は、あとの学級のきょうだいの位置を知らない。そろったあとで、1学級ずつ「ほかの学級がすべて決まった状態」で組み直し、きょうだいの点数が良くなるときだけ採用する ---- */
+function sibPairs(){const seen=new Set(),out=[];for(const s2 of P.students)for(const b of s2.sib||[]){const m=sibFind(b);if(!m||m===s2)continue;const a=s2.id<m.id?s2:m,c=s2.id<m.id?m:s2,k=a.id+'|'+c.id;if(seen.has(k))continue;seen.add(k);out.push([a,c])}return out}
+function posOfSt(s){const k=s.g+'|'+s.c,cl=P.classes[k],hk=cl&&headKey(cl,s.id);if(!hk)return null;const [d,t0]=hk.split('|'),st=parseT(t0);if(st==null)return null;return{d,st,en:st+(cl.grid[hk].n||1)*gridOf(k).len}}
+function sibMetric(pairs){   // 2人とも配置済みのきょうだいの組を点数に（重なり500・日がちがう60・間隔のずれ×5）。小さいほどよい
+  let cost=0;const ov=[],per=new Map(),sm=+P.sched.slotMin||20;
+  for(const [a,b] of pairs){const pa=posOfSt(a),pb=posOfSt(b);if(!pa||!pb)continue;
+    let c;if(pa.d!==pb.d)c=60;else if(pa.st<pb.en&&pb.st<pa.en){c=500;ov.push([a,b])}else{const sg=+clsAuto(a.g+'|'+a.c).sibGap||0;c=Math.abs(Math.max(pa.st-pb.en,pb.st-pa.en,0)/sm-sg)*5}
+    cost+=c;for(const s of [a,b]){const k=s.g+'|'+s.c;per.set(k,(per.get(k)||0)+c)}}
+  return{cost,ov,per}}
+function lateTotal(keys){let n=0;for(const k of keys){const o=clsAuto(k);if(o.cutMode!=='effort')continue;const cl=P.classes[k],SL=gslots(k);for(const q in cl.grid){const c=cl.grid[q];if(!c.head||!okCell(cl,q))continue;const x=SL.find(y=>y.key===q.split('|')[1]);if(x&&isLateO(x,o))n++}}return n}
+async function repairSiblings(out,dlg){
+  const pairs=sibPairs();if(!pairs.length)return 0;
+  const t0=performance.now(),budget=30000,keys=out.map(x=>x.k);let improved=0;
+  for(let round=0;round<2;round++){
+    const M0=sibMetric(pairs);if(M0.cost<=0)break;
+    const cand=out.filter(x=>x.res.status==='ok'&&!clsAuto(x.k).keep&&clsAuto(x.k).sibAuto&&(M0.per.get(x.k)||0)>0).sort((a,b)=>(M0.per.get(b.k)||0)-(M0.per.get(a.k)||0));
+    let any=false;
+    for(const x of cand){
+      if(AUTO.abort||performance.now()-t0>budget)return improved;
+      const k=x.k,cl=P.classes[k];dlg.set('きょうだいの時刻を調整しています',clsLabel(cl.g,cl.c));
+      const before=sibMetric(pairs).cost,lateB=lateTotal(keys),ca=clsAuto(k);
+      const res2=await solveClass(k,{...ca,keep:false,exclude:null,refine:Math.min(2,+ca.refine||0),maxSec:Math.min(8,+ca.maxSec||20)},{stage:()=>{},tick:(c,n)=>dlg.tick(c,n)});
+      if(res2.status!=='ok')continue;
+      const mark=tx?tx.ops.length:0;applyResult(res2,false);
+      if(sibMetric(pairs).cost<before-1&&lateTotal(keys)<=lateB&&(res2.placed||0)>=(x.res.placed||0)){x.res=res2;x.repaired=true;improved++;any=true}
+      else if(tx){for(let i=tx.ops.length-1;i>=mark;i--)tx.ops[i].undo();tx.ops.length=mark;VER++}
+    }
+    if(!any)break;
+  }
+  return improved}
 async function runAuto(mode){
   if(!P.sched.dates.length||!getSlots().length){toast('先に日程を設定してください');return}
   const all=classList().map(c=>c.key);
   const keys=mode==='all'?all:mode==='sel'?all.filter(k=>UI.auto.sel.has(k)):[curCls()];
   const todo=keys.filter(k=>!P.classes[k].locked&&!(typeof shBlocked==='function'&&shBlocked(k)));
   if(todo.length>1&&autoOpt().order!=='class'){const sc=sibCrossCount();todo.sort((a,b)=>(sc[b]||0)-(sc[a]||0))}   // きょうだいが別の学級に多い学級から先に決める（同じ数なら、学年・組の順のまま）
-  if(keys.length===1&&!todo.length){if(P.classes[keys[0]].locked){UI.grid.lockMsg=Date.now();toast('かこピタロック中のため実行できません。ロックを解除してから、もう一度かこピタしてください',{kind:'warn',ms:7000});render();setTimeout(render,9200)}else toast('この学級は、ほかの人が編集中です',{kind:'warn'});return}
+  if(keys.length===1&&!todo.length){if(P.classes[keys[0]].locked){UI.grid.lockMsg=Date.now();render();setTimeout(render,9200)}else toast('この学級は、ほかの人が編集中です',{kind:'warn'});return}
   if(!todo.length){toast('選んだ学級はすべてかこピタロック中です');return}
   let forceKeep=false;   // 「全学級」「指定した学級」で、うっかり配置を消さないように、配置済みの学級があるときは確認する
   if(mode!=='one'){
@@ -2020,6 +2088,7 @@ async function runAuto(mode){
       if(!r)return;forceKeep=r===2;
     }
   }
+  pinOnce('かこピタ（自動配置）の前');
   const visKey=UI.view==='grid'?curCls():null;
   AUTO.abort=false;const dlg=progressDlg(todo.length>1?'学級を順にかこピタしています':'かこピタしています');
   const out=[],own=begin();let exclude=null,an=null;
@@ -2039,6 +2108,10 @@ async function runAuto(mode){
       if(res.status==='ok')applyResult(res);
       if(res.status==='abort')break;
       exclude=null;
+    }
+    if(out.length>1&&!AUTO.abort&&out.every(x=>x.res.status!=='abort'&&x.res.status!=='cancel')){
+      out.repaired=await repairSiblings(out,dlg);
+      const pr=sibPairs();out.sibOv=sibMetric(pr).ov;
     }
     const vis=out.find(x=>x.k===visKey&&x.res.status==='ok'&&x.res.placedSids&&x.res.placedSids.length);
     if(vis)an=startAnim(visKey,vis.res.placedSids);
@@ -2088,7 +2161,7 @@ async function showAutoSummary(out,mode,o,skippedKeys=[]){
   const btns=[{id:0,label:'閉じる',kind:ok&&!partialBtn?'pri':''}];
   if(failAt&&failAt.res.pb&&failAt.res.pb.list&&failAt.res.pb.list.length)btns.push({id:2,label:'緩めると解ける候補を調べる'});
   if(partialBtn)btns.push({id:1,label:`ここまでの最善案をかこピタ（${failAt.res.bestDepth}名）`,kind:'pri'});
-  const r=await ask({title:ok&&!failAt?'ピタッ！ 配置が完了しました':failAt?'最適な解が見つかりませんでした':'結果',body:(out.length>1&&autoOpt().order!=='class'?'<p class="tiny muted" style="margin-bottom:8px">学級は、別の学級にきょうだいがいる人の多い学級から順に配置しました。</p>':'')+body,buttons:btns});
+  const r=await ask({title:ok&&!failAt?'ピタッ！ 配置が完了しました':failAt?'最適な解が見つかりませんでした':'結果',body:(out.length>1&&autoOpt().order!=='class'?'<p class="tiny muted" style="margin-bottom:8px">学級は、別の学級にきょうだいがいる人の多い学級から順に配置しました。'+(out.repaired?`そろったあとに、${out.repaired}学級を組み直して、きょうだいの時刻を調整しました。`:'')+'</p>':'')+(out.sibOv&&out.sibOv.length?`<div class="warnbox" style="margin-bottom:8px">きょうだいの時刻が重なっている組が ${out.sibOv.length} 組あります（${out.sibOv.slice(0,4).map(([a,b])=>esc(a.name)+'・'+esc(b.name)).join('、')}${out.sibOv.length>4?' ほか':''}）。保護者の都合や枠の数の関係で、避けきれませんでした。</div>`:'')+body,buttons:btns});
   if(r===2){await relaxHintsDlg(failAt);return showAutoSummary(out,mode,o,skippedKeys)}
   if(r===1){applyResult({...failAt.res,status:'partial'},false);toast(`${failAt.res.bestDepth}名を配置しました。残りは手で調整できます`,{undo:true})}
   else if(ok)toast('かこピタしました',{undo:true});
@@ -2259,7 +2332,7 @@ const FORM_TXT_DEF={
   dayHead:'【日時について】',free:'いつでも大丈夫です。都合のつかない日時はありません。',
   ng:'次のページで都合の【 つ か な い 】日時を選択します。',ngLabel:'都合の【 つ か な い 】日時を選択します。',
   ngTitle:'都合のつかない日時',ngPage:'都合の【 つ か な い 】日時の詳細',ngHelpForm:'都合の【 つ か な い 】日時にチェックを付けてください。',ngHelp:'都合の【 つ か な い 】日時を選んでください。',ngSubmit:'■ 最後に下部の「送信」ボタンを必ず押してください。',
-  secure:'入力された情報は、この{行事}の日程調整以外の目的には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が適切に管理します。第三者に提供することはありません。'
+  secure:'入力された情報は、この{行事}以外の目的には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が適切に管理します。'
 };
 function gasEsc(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r?\n/g,'\\n')}
 // 画面（2. フォーム →「フォームの文言を編集する」）で書き換えられる文言。回答表の見出し（学年・組・出席番号・名前 など）は、回答の取り込みと合わせてあるので、書き換えられません
@@ -2277,7 +2350,7 @@ const FTX=[
 const ftxtDef=k=>{const v=FORM_TXT_DEF[k];return k==='confirm'?v.join('\n'):k==='closedAuto'?v('{日時}'):String(v)};
 const formTxt=()=>{const o=Object.assign({},FORM_TXT_DEF),u=P.ftxt||{};
   for(const f of FTX){const v=u[f.k];if(v==null||String(v).trim()==='')continue;
-    if(f.k==='secure'&&String(v)===OLD_SECURE_TXT)continue;   // 以前の既定文のまま保存されていたものは、新しい既定文にする
+    if(f.k==='secure'&&(String(v)===OLD_SECURE_TXT||String(v)===OLD_SECURE_TXT2))continue;   // 以前の既定文のまま保存されていたものは、新しい既定文にする
     if(f.k==='confirm')o.confirm=String(v).split('\n').map(s=>s.replace(/\s+$/,'')).filter(s=>s.trim());
     else if(f.k==='closedAuto')o.closedAuto=d=>String(v).replace(/\{日時\}/g,d);
     else o[f.k]=String(v)}
@@ -2750,9 +2823,14 @@ function cnt(){var n=Object.keys(ng).length,e=$('cnt');e.style.display=n?'block'
 function tg(e){var k=e.getAttribute('data-k');if(ng[k]){delete ng[k];e.className='chip'}else{ng[k]=1;e.className='chip x'}cnt()}
 function v(i){return $(i).value.trim()}
 var KANA=/^[ぁ-んァ-ヶーa-zA-Z0-9ａ-ｚＡ-Ｚ０-９ 　・－‐―-]+$/;
+var SENDING=false;
+function kgo(){var bad=false,ids=['kana'];for(var i=0;i<C.sib;i++)ids.push('sk'+i);
+  ids.forEach(function(id){var e=$(id),s=e?e.value.trim():'';if(s!==''&&!KANA.test(s))bad=true});
+  $('go').disabled=SENDING||bad;$('go').title=bad?'ふりがなに、漢字などが入っています。ひらがな等に直してください。':'';
+  var m=$('msg'),T='ふりがなを、ひらがな等に直してください（漢字は入れられません）。';if(bad)m.textContent=T;else if(m.textContent===T)m.textContent=''}
 function kcheck(id){   // ふりがな欄：漢字などが入っていたら、その場で赤くして案内する（空欄は、必須かどうかを送信時に確かめる）
   var el=$(id),m=$('e_'+id),s=el.value.trim(),bad=s!==''&&!KANA.test(s);
-  el.style.borderColor=bad?'#EE5A68':'';el.style.background=bad?'#FFF5F6':'';m.textContent=bad?C.tx.kanaNg:'';return !bad}
+  el.style.borderColor=bad?'#EE5A68':'';el.style.background=bad?'#FFF5F6':'';m.textContent=bad?C.tx.kanaNg:'';kgo();return !bad}
 function bindKana(){
   var ids=['kana'];for(var i=0;i<C.sib;i++)ids.push('sk'+i);
   ids.forEach(function(id){var el=$(id);if(!el)return;
@@ -2768,12 +2846,12 @@ function send(){
   if(mode==1&&!list.length){$('msg').textContent='×にする日時を1つ以上選ぶか、「'+C.tx.free+'」を選んでください。';return}
   var o={gc:v('gc'),n:v('n'),name:v('name'),kana:v('kana'),addr:C.addr?v('addr'):'',ng:list,sibs:[]};
   for(var i=0;i<C.sib;i++)o.sibs.push({name:v('sn'+i),kana:v('sk'+i),gc:v('sg'+i),n:v('sx'+i)});
-  $('go').disabled=true;$('msg').textContent='送信中…';
+  SENDING=true;$('go').disabled=true;$('msg').textContent='送信中…';
   google.script.run.withSuccessHandler(function(){
     var L=C.tx.confirm;
     $('app').innerHTML='<div class="fin"><div class="ck">✓</div><h2>'+esc(L[0])+'</h2>'+L.slice(1).map(function(x){return '<p>'+esc(x)+'</p>'}).join('')+'</div><div class="ft">このページは、閉じて大丈夫です。</div>';
     window.scrollTo(0,0);
-  }).withFailureHandler(function(e){$('go').disabled=false;$('msg').textContent='送信できませんでした：'+(e.message||e)}).submitAnswer(o);
+  }).withFailureHandler(function(e){SENDING=false;kgo();$('msg').textContent='送信できませんでした：'+(e.message||e)}).submitAnswer(o);
 }
 init();bindKana();
 <\/script></body></html>§;
@@ -3231,7 +3309,7 @@ function vForm(){
   h+=`<div class="fgrid" style="grid-template-columns:1fr 1fr"><label class="f" style="grid-column:1/-1">フォームの名前<input type="text" data-ch="fopt" data-k="title" value="${esc(F.title)}" placeholder="${esc(kindDefault)}"><span class="tiny muted">空欄のときは「${esc(kindDefault)}」になります（フォームの題名も、Googleドライブのファイル名も同じです）</span></label>
    <label class="f">きょうだいの欄の数<span class="row"><span class="stepper"><button data-act="f-sib" data-d="-1" aria-label="減らす">−</button><input type="number" data-ch="fopt" data-k="sib" min="0" max="8" value="${F.sib}"><button data-act="f-sib" data-d="1" aria-label="増やす">＋</button></span><span class="tiny muted">名前・学年組・番号</span></span></label>
    <div class="f" style="justify-content:flex-end"><label class="tog"><input type="checkbox" data-ch="fopt" data-k="autoClose" ${F.autoClose?'checked':''}>回答を設定した日時で締め切る</label></div>
-   ${F.autoClose?`<label class="f" style="grid-column:2;grid-row:3">締め切りの日<input type="date" data-ch="fopt" data-k="closeDate" value="${F.closeDate}"></label><label class="f" style="grid-column:2;grid-row:4">締め切りの時刻<input type="time" data-ch="fopt" data-k="closeTime" value="${F.closeTime}"></label>`:''}
+   ${F.autoClose?`<label class="f" style="grid-column:2;grid-row:3">締め切りの日<input type="date" data-ch="fopt" data-k="closeDate" value="${F.closeDate}"></label><label class="f" style="grid-column:2;grid-row:4">締め切りの時刻<select data-ch="fopt" data-k="closeTime">${timeOpts(F.closeTime)}</select></label>`:''}
     <label class="f" style="grid-column:1;grid-row:3 / span 2">通知メール<span class="row"><label class="tog"><input type="checkbox" data-ch="fopt" data-k="mail" ${F.mail!==false?'checked':''}>メールで知らせる</label></span><span class="tiny muted">オン：締め切り時にあなた宛にメールが届きます（Webアプリは、作成時に保存先URLのメールも届きます）。オフ：メールは送られません。<b>オンだと、GASを初めて実行するときの権限の承認に「メールの送信」が1項目増えます</b>（Webアプリは、時刻で自動実行する許可も加わります）。「すべて許可」を押す手間は変わりません</span></label></div>`;
   h+=`<div style="margin-top:14px"><div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:6px">住所を聞くか（家庭訪問で近い家を続けたいとき）</div><div class="seg">${[['none','聞かない'],['text','入力してもらう'],['list','リストから選ぶ']].map(([v,l])=>`<button data-act="f-addr" data-v="${v}" class="${F.addr===v?'on':''}">${l}</button>`).join('')}</div>
    ${(()=>{const nR=P.students.filter(s=>rosterAddr(s)).length;return nR?`<p class="tiny muted" style="margin-top:6px">名簿に住所が入っている人が${nR}名います。保護者には、聞かなくても大丈夫です（カレンダーの「場所」にも、名簿の住所を使えます）。</p>`:`<p class="tiny muted" style="margin-top:6px">名簿に住所が入っていないときは、「入力してもらう」がおすすめです。<b>都道府県名から番地まで</b>入力してもらうと、カレンダーやGoogleマップに、正しく表示できます。</p>`})()}
@@ -3378,7 +3456,7 @@ function fill(tpl,v){return String(tpl).replace(/\{([^}]+)\}/g,(m,k)=>v[k]!==und
 const nl=s=>esc(s).replace(/\n/g,'<br>');
 function slipVars(st,extra={}){
   const cls=P.classes[st.g+'|'+st.c]||{},now=new Date();
-  const v={行事:kindName(),学年:st.g,組:st.c,番:st.n,名前:'\uE000'+st.name+'\uE001',氏名:'\uE000'+st.name+'\uE001',学校:(P.meta.school||'').trim(),電話:(P.meta.tel||'').trim(),担任:(cls.teacher||'').trim(),今:`${now.getMonth()+1}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`,日付:'',時刻:''};
+  const v={行事:kindNameG(st.g),学年:st.g,組:st.c,番:st.n,名前:'\uE000'+st.name+'\uE001',氏名:'\uE000'+st.name+'\uE001',学校:(P.meta.school||'').trim(),電話:(P.meta.tel||'').trim(),担任:(cls.teacher||'').trim(),今:`${now.getMonth()+1}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`,日付:'',時刻:''};
   const hk=cls.grid?headKey(cls,st.id):null;
   if(hk){const [d,t]=hk.split('|'),p=dp(d),m=parseT(t);v.日付=`${p.m}月${p.d}日(${WD[p.wd]})`;v.時刻=`${Math.floor(m/60)}時${pad(m%60)}分`}
   return Object.assign(v,extra);
@@ -3431,7 +3509,11 @@ function sheetsHtml(list,fn,max,W0=210,H0=297){
 }
 function printIssues(mode){
   const out=[],cl=plist();
+  const ngp=[];for(const c of cl){const cls=P.classes[c.key],ck=ckOf(cls);for(const st of members(c.key)){   // 条件が×（または未回答）の時間に、配置されている人
+    const hk=headKey(cls,st.id);if(!hk)continue;const sp=spanKeys(hk,Math.max(1,+cls.grid[hk].n||1),ck);if(!sp)continue;
+    const bad=sp.find(q=>!slotOKg(st,q,c.key));if(bad)ngp.push({st,key:bad,cls:c.key})}}
   const unpl=[],unans=[];for(const c of cl){const cls=P.classes[c.key];for(const st of members(c.key)){const t=stStatus(st);if(t==='unans')unans.push(st);else if(!headKey(cls,st.id))unpl.push(st)}}
+  if(ngp.length)out.push({lv:'ng',t:`条件が×（または未回答）の時間に配置されている児童生徒：${ngp.length}名`,names:ngp.map(x=>x.st),ngp,go:'ngreview',m:['notice','table']});
   if(unpl.length)out.push({lv:'ng',t:`日時が決まっていない児童生徒：${unpl.length}名（お知らせに日時が入りません）`,names:unpl,go:'grid',m:['notice']});
   if(unans.length)out.push({lv:'warn',t:`未回答の児童生徒：${unans.length}名（お知らせの対象外。「催促状」で印刷できます）`,names:unans,go:'cond',m:['notice']});
   const noT=cl.filter(c=>!c.teacher);if(noT.length)out.push({lv:'warn',t:`担任名が空の学級：${noT.map(c=>clsLabel(c.g,c.c)).join('、')}`,go:'roster',m:['notice','remind','table','blocks']});
@@ -3471,7 +3553,7 @@ function vPrint(){
     ${U.mode==='blocks'?blocksWarnHtml():''}
     <div class="row" style="margin-top:12px"><button class="btn" data-act="p-tpl">${ic('gear',16)}文面を編集する</button><button class="btn" data-act="p-test" ${(DOC?DP.pages.length:T.out.length)?'':'disabled'}>${ic('print',16)}1枚だけ試し印刷</button></div>
     <p class="tiny muted" style="margin-top:8px">印刷の画面で「PDFに保存」を選ぶと、PDFファイルにもできます。</p></section>
-   <section class="panel"><h2>印刷前の点検<small>${iss.length?iss.length+'件':'問題なし'}</small></h2>${iss.length?iss.map(i=>`<div class="${i.lv==='ng'?'ngbox':'warnbox'}" style="margin-bottom:8px">${esc(i.t)}${i.names?`<div class="tiny" style="margin-top:4px">${i.names.slice(0,6).map(s=>esc(clsLabel(s.g,s.c)+' '+s.n+'番 '+s.name)).join('、')}${i.names.length>6?' ほか':''}</div>`:''}<div style="margin-top:6px"><button class="btn sm" data-act="${i.go==='namefont'?'namefont':'go'}" data-v="${i.go}">${{grid:'かこピタ(配置)を開く',cond:'条件を開く',roster:'名簿を開く',schedule:'日程を開く',namefont:'名前のフォントを選ぶ'}[i.go]}</button></div></div>`).join(''):'<div class="okbox">日時の抜けや空欄はありません。</div>'}</section></div>
+   <section class="panel"><h2>印刷前の点検<small>${iss.length?iss.length+'件':'問題なし'}</small></h2>${iss.length?iss.map(i=>`<div class="${i.lv==='ng'?'ngbox':'warnbox'}" style="margin-bottom:8px">${esc(i.t)}${i.names?`<div class="tiny" style="margin-top:4px">${i.names.slice(0,6).map(s=>esc(clsLabel(s.g,s.c)+' '+s.n+'番 '+s.name)).join('、')}${i.names.length>6?' ほか':''}</div>`:''}<div style="margin-top:6px"><button class="btn sm" data-act="${i.go==='namefont'?'namefont':i.go==='ngreview'?'ng-review':'go'}" data-v="${i.go}">${{ngreview:'配置を見直す',grid:'かこピタ(配置)を開く',cond:'条件を開く',roster:'名簿を開く',schedule:'日程を開く',namefont:'名前のフォントを選ぶ'}[i.go]}</button></div></div>`).join(''):'<div class="okbox">日時の抜けや空欄はありません。</div>'}</section></div>
   <section class="panel"><h2>プレビュー<small>${pages?`最初の${Math.min(2,pages)}枚を表示（全${pages}枚）`:'対象がいません'}</small></h2>${pv?`<div class="pvlist" data-keep="pv2">${first.length?pvl.map(s=>{const sc=Math.min(.52,560/(DP.w*3.7795));return `<div class="pvbox" style="width:${(DP.w*sc).toFixed(1)}mm;height:${(DP.h*sc).toFixed(1)}mm"><div class="pvin" style="width:${DP.w}mm;height:${DP.h}mm;transform:scale(${sc.toFixed(3)})">${s}</div></div>`}).join(''):''}</div>`:'<div class="empty"><h3>印刷する人がいません</h3><p>対象の学級を選ぶか、配置を進めてください。</p></div>'}</section></div></div>`;
   return h;
 }
@@ -3504,8 +3586,14 @@ async function printGuide(){
 }
 const printSig=()=>{const m=UI.print.mode;return m+'|'+(UI.print.pp[m]||{}).s+'|'+paperWH(m)[2]};
 async function doPrint(test){
+  if(!test)pinOnce('印刷の前');
   const n=buildPrint();if(!n){toast('印刷する人がいません');return}
-  {const iss=printIssues(UI.print.mode),isig=iss.map(i=>i.t).join('|');
+  {const all=printIssues(UI.print.mode),ngi=all.find(i=>i.go==='ngreview'),iss=all.filter(i=>i.go!=='ngreview'),isig=iss.map(i=>i.t).join('|');
+    if(!test&&ngi){const nsig=ngi.ngp.map(x=>x.st.id+'@'+x.key).join('|');
+      if(UI.print.ackNg!==nsig){
+        const r=await ask({title:'条件が×の時間に、配置されている人がいます',body:`<div class="ngbox" style="font-size:14px"><b>${ngi.ngp.length}名</b>が、「3. 条件」で×（または未回答）の時間に配置されています。</div><div class="tiny" style="margin:8px 0;line-height:1.7">${ngi.ngp.slice(0,8).map(x=>{const [d,tm]=x.key.split('|'),c=P.classes[x.cls];return esc(clsLabel(c.g,c.c)+' '+x.st.n+'番 '+x.st.name)+'：'+esc(fmtD(d)+' '+tm)}).join('<br>')}${ngi.ngp.length>8?'<br>ほか '+(ngi.ngp.length-8)+'名':''}</div><p class="muted tiny">「配置を見直す」を選ぶと、「4. かこピタ(配置)」で、最初の人を選んだ状態で開きます。このまま印刷するときは、同じ内容では、もう聞きません。</p>`,buttons:[{id:1,label:'配置を見直す',kind:'pri'},{id:2,label:'このまま印刷する'}]});
+        if(r!==2){printRoot().innerHTML='';if(r===1)reviewPlacement(ngi.ngp[0]);return}
+        UI.print.ackNg=nsig}}
     if(!test&&iss.length&&UI.print.ack!==isig){
       const ok=await ask({title:'印刷の前に、確認してください',body:`<div class="warnbox" style="font-size:14px">${iss.map(i=>`<div style="margin-bottom:6px"><span style="color:${i.lv==='ng'?'#D9480F':'#E8890C'}">●</span> ${esc(i.t)}</div>`).join('')}</div><p class="muted tiny" style="margin-top:8px">「印刷前の点検」の欄でも確認できます。このまま印刷するときは、同じ内容では、もう聞きません。</p>`,buttons:[{id:0,label:'戻って確認する'},{id:1,label:'このまま印刷する',kind:'pri'}]});
       if(!ok){printRoot().innerHTML='';return}UI.print.ack=isig}}
@@ -3519,6 +3607,9 @@ async function doPrint(test){
   const clean=()=>{printRoot().innerHTML='';window.removeEventListener('afterprint',clean)};window.addEventListener('afterprint',clean);
   setTimeout(()=>window.print(),80);
 }
+function reviewPlacement(x){   // 「4. かこピタ(配置)」の、その学級・その児童生徒を選んだ状態で開く
+  UI.cls=x.cls;UI.grid.sel=x.st.id;UI.grid.mode='place';go('grid')}
+A['ng-review']=()=>{const i=printIssues(UI.print.mode).find(z=>z.go==='ngreview');if(i)reviewPlacement(i.ngp[0])};
 A['p-print']=()=>doPrint(false);
 A['p-test']=()=>doPrint(true);
 A['p-tpl']=()=>{
@@ -3593,9 +3684,10 @@ const hsBase=(W,H)=>clamp(Math.sqrt(W*H/(297*210)),.8,1.6);
 function measureEl(html,W=297){
   const m=document.createElement('div');m.style.cssText=`position:absolute;left:-9999px;top:0;width:${W}mm;visibility:hidden`;m.innerHTML=html;document.body.appendChild(m);
   const t=m.querySelector('.ttab'),l=m.querySelector('.sbl'),mm=3.7795,th=t?t.offsetHeight/mm:0,lh=l?l.offsetHeight/mm+1.8:0;
+  let hdR=0;m.querySelectorAll('.ttab thead th:not(.tm)').forEach(n=>{const cs=getComputedStyle(n),pl=parseFloat(cs.paddingLeft)||0,pad=pl+(parseFloat(cs.paddingRight)||0),av=n.clientWidth-pad;if(av>2&&n.scrollWidth>n.clientWidth+.5){const r=(n.scrollWidth-pl)/av;if(r>hdR)hdR=r}});   // はみ出しているときだけ、その割合を求める（少し大きめに見積もる＝小さめに直す）   // 日付の見出しが、枠より広い割合
   let over=false,overTm=false,tmDef=0;m.querySelectorAll('.ttab .nm').forEach(n=>{if(n.scrollWidth>n.clientWidth+1)over=true});
   m.querySelectorAll('.ttab th.tm').forEach(n=>{const d=n.scrollWidth-n.clientWidth;if(d>.5){over=true;overTm=true}if(d>tmDef)tmDef=d});   // 時刻の数字がはみ出すサイズも不可   // 児童生徒名が折り返す/はみ出すサイズは不可
-  m.remove();return{h:th+lh,lh,over,overTm,tmDef:tmDef/mm};
+  m.remove();return{h:th+lh,lh,over,overTm,tmDef:tmDef/mm,hdR};
 }
 function tableSheet(c,W0=297,H0=210){
   const W=W0-SLK_W,H=H0-SLK_H;
@@ -3609,7 +3701,7 @@ function tableSheet(c,W0=297,H0=210){
   rows.forEach(x=>{for(const d of dates){const k=d+'|'+x.key,cc=cls.grid[k];if(!cc||!cc.head)continue;const st=stById(cc.sid);if(st)heads.set(k,{n:cc.n||1,st,sib:sibLines(st)})}});
   const unpl=mem.filter(s=>!headKey(cls,s.id));
   const range=dates.length?`${mdw(dates[0])}${dates.length>1?' 〜 '+mdw(dates[dates.length-1]):''}`:'';
-  const hdrHtml=hs=>`<div class="dh" style="--hs:${hs}"><div class="dcr"><img src="${LOGO_URL}" alt="" style="width:2.8mm;height:2.8mm;vertical-align:-.6mm;margin-right:1mm">かこピタ v.${APP_VER}　Created by ${esc(APP_AUTHOR)}</div><div class="dh1"><b>${esc(clsLabel(c.g,c.c))}</b>　${esc(kindName())} 日程表<span class="dh2">${c.teacher?esc(c.teacher)+' 先生':''}　${esc(range)}　${esc(P.meta.school||'')}</span></div></div>`;
+  const hdrHtml=hs=>`<div class="dh" style="--hs:${hs}"><div class="dcr"><img src="${LOGO_URL}" alt="" style="width:2.8mm;height:2.8mm;vertical-align:-.6mm;margin-right:1mm">かこピタ v.${APP_VER}　Created by ${esc(APP_AUTHOR)}</div><div class="dh1"><b>${esc(clsLabel(c.g,c.c))}</b>　${esc(kindNameG(c.g))} 日程表<span class="dh2">${c.teacher?esc(c.teacher)+' 先生':''}　${esc(range)}　${esc(P.meta.school||'')}</span></div></div>`;
   const HF=fitHeader(hdrHtml(1),'.dh1',W-20,hsBase(W,H));
   const availH=H-16-(HF.hh+3.2)-9.5;   // table (+ sibling list) must fit in this many mm
   const tmLen=Math.max(4,...SL.map(x=>x.label.length));
@@ -3619,7 +3711,8 @@ function tableSheet(c,W0=297,H0=210){
     if(m&&m.g+'|'+m.c===c.key){const kx=[st.id,m.id].sort().join('~');if(seen.has(kx))continue;seen.add(kx)}
     const lab=m?`${clsLabel(m.g,m.c)} ${m.name}　${placeText(m)||'日時未定'}`:((b.name||b.g)?`${b.g?b.g+'年'+b.c+'組 ':''}${b.name||''}（名簿になし）`:'');
     if(lab)pairs.push(`<b>${esc(st.name)}</b>（${esc(placeText(st)||'日時未定')}）⇄ ${esc(lab)}`)}}
-  let tmExtra=0;   // 端末のフォントで時刻が入りきらないとき、実測して足す幅(mm)
+  let tmExtra=0,hf=11;   // 端末のフォントで時刻が入りきらないとき、実測して足す幅(mm)／hf＝日付の見出しの文字の大きさ(pt。枠に収まるよう実測して小さくする)
+  const nmHtml=nm=>{const parts=String(nm).split(/[\s\u3000]+/).filter(Boolean);return (parts.join('').length>=9&&parts.length>=2)?esc(parts[0])+'<br>'+esc(parts.slice(1).join(' ')):esc(nm)};   // 名前：8文字までは1行、9文字以上は氏と名の間で改行
   const build=(fn,fs,wa,sn,tabH)=>{
     const skip=new Set();let body='';
     const tmFs=clamp(fn*.62,5.6,10*kk_),tmW=(Math.max(11,((.62*(tmLen-1)+.35)*1.12*tmFs*MMPT)+3.8)+tmExtra).toFixed(2);   // 時刻列の幅は文字サイズから決める
@@ -3631,26 +3724,27 @@ function tableSheet(c,W0=297,H0=210){
         const h=heads.get(k);if(!h){body+='<td class="e"></td>';continue}
         for(let j=1;j<h.n;j++){const s2=SL[first+ri+j];if(s2)skip.add(d+'|'+s2.key)}
         const st=h.st,hs=h.sib.length>0;
-        body+=`<td class="h${hs?' sbc':''}" rowspan="${h.n}"><div class="nm nmfont" style="font-size:${fn}pt"><span class="t">${esc(st.name)}</span><span class="no">${st.n}</span>${hs?'<span class="star">★</span>':''}</div>${wa&&st.addr?`<div class="ad" style="font-size:${fs}pt">${esc(st.addr)}</div>`:''}${inCell?h.sib.slice(0,sn).map(l=>`<div class="sb sbr" style="font-size:${fs}pt">★きょうだい ${esc(l)}</div>`).join(''):''}${h.n>1?`<div class="sb" style="font-size:${fs}pt">${h.n}枠</div>`:''}</td>`;
+        body+=`<td class="h${hs?' sbc':''}" rowspan="${h.n}"><div class="nm nmfont" style="font-size:${fn}pt"><span class="t">${nmHtml(st.name)}</span><span class="no">${st.n}</span>${hs?'<span class="star">★</span>':''}</div>${wa&&st.addr?`<div class="ad" style="font-size:${fs}pt">${esc(st.addr)}</div>`:''}${inCell?h.sib.slice(0,sn).map(l=>`<div class="sb sbr" style="font-size:${fs}pt">★きょうだい ${esc(l)}</div>`).join(''):''}${h.n>1?`<div class="sb" style="font-size:${fs}pt">${h.n}枠</div>`:''}</td>`;
       }
       body+='</tr>';
     });
     const list=outList&&pairs.length?`<div class="sbl" style="font-size:${clamp(fs*1.05,6,10*kk_)}pt"><div class="sh">★ きょうだい（赤字の児童生徒）</div>${pairs.map(x=>`<div class="sl1">${x}</div>`).join('')}</div>`:'';
     return `<section class="dsheet land" style="width:${W}mm;height:${H}mm">${hdrHtml(HF.hs)}
-     <table class="ttab" style="${tabH?`height:${tabH}mm`:'height:auto'}"><thead><tr><th class="tm" style="width:${tmW}mm"></th>${dates.map(d=>`<th>${mdw(d)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${list}
+     <table class="ttab" style="${tabH?`height:${tabH}mm`:'height:auto'}"><thead><tr><th class="tm" style="width:${tmW}mm"></th>${dates.map(d=>`<th style="font-size:${hf}pt;white-space:nowrap;overflow:hidden">${mdw(d)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${list}
      <div class="dfoot">${unpl.length?`日時が決まっていない児童生徒：${unpl.slice(0,12).map(s=>esc(s.name)).join('、')}${unpl.length>12?` ほか${unpl.length-12}名`:''}`:'全員の日時が決まっています'}　／　${mem.length}名${wa!==AD?'　（紙面に収めるため住所を省略しました）':''}</div></section>`;
   };
   let out=null,soft=null;
   outer:for(const [wa,sn] of [[AD,9],[AD,2],[false,2],[false,1]]){
-    for(let f=17*kk_;f>=6.5;f-=(f>17?1:.5)){const fs=clamp(f*.58,5.6,9.5*kk_);
-      tmExtra=0;let m=measureEl(build(f,fs,wa,sn,0),W);
+    for(let f=28*kk_;f>=6.5;f-=(f>24?2:f>17?1:.5)){const fs=clamp(f*.58,5.6,9.5*kk_);   // 名前の文字は、はみ出さない範囲で大きく（その他の文字は、従来の大きさが上限）
+      tmExtra=0;hf=11;let m=measureEl(build(f,fs,wa,sn,0),W);
       if(m.overTm){tmExtra=m.tmDef+.8;m=measureEl(build(f,fs,wa,sn,0),W)}   // 時刻の列が狭すぎたら、広げてもう一度測る
+      for(let q=0;q<3&&m.hdR>1.005;q++){hf=Math.max(4.5,hf/m.hdR*.97);m=measureEl(build(f,fs,wa,sn,0),W)}   // 日付の見出しが枠からはみ出すときは、文字を小さくして収める
       if(m.h<=availH){
         if(!m.over){out=build(f,fs,wa,sn,Math.max(10,availH-m.lh));break outer}
-        soft={f,fs,wa,sn,m,tx:tmExtra}}}   // 高さには収まるが、名前が少しはみ出す組み合わせ（最後＝いちばん小さい文字のものを使う）
+        soft={f,fs,wa,sn,m,tx:tmExtra,hf}}}   // 高さには収まるが、名前が少しはみ出す組み合わせ（最後＝いちばん小さい文字のものを使う）
   }
-  if(!out&&soft){tmExtra=soft.tx;out=build(soft.f,soft.fs,soft.wa,soft.sn,Math.max(10,availH-soft.m.lh))}   // 見つからなくても、表を小さく縮めず、用紙いっぱいに広げる
-  if(!out){tmExtra=0;const m=measureEl(build(6.5,5.6,false,1,0),W);out=build(6.5,5.6,false,1,Math.max(10,availH-m.lh))}
+  if(!out&&soft){tmExtra=soft.tx;hf=soft.hf;out=build(soft.f,soft.fs,soft.wa,soft.sn,Math.max(10,availH-soft.m.lh))}   // 見つからなくても、表を小さく縮めず、用紙いっぱいに広げる
+  if(!out){tmExtra=0;hf=11;let m=measureEl(build(6.5,5.6,false,1,0),W);for(let q=0;q<3&&m.hdR>1.005;q++){hf=Math.max(4.5,hf/m.hdR*.97);m=measureEl(build(6.5,5.6,false,1,0),W)}out=build(6.5,5.6,false,1,Math.max(10,availH-m.lh))}
   if(TCACHE.size>40)TCACHE.clear();TCACHE.set(ck,out);return out;
 }
 
@@ -3729,7 +3823,7 @@ function blocksSheets(c){
       return `<div class="cb" style="${colorExact}"><div class="cbh" style="height:${g.hh.toFixed(2)}mm"><div class="cbh1" style="height:${g.nh.toFixed(2)}mm;line-height:${g.nh.toFixed(2)}mm"><b class="nmfont" style="font-size:${nfit.toFixed(2)}pt"><span class="no">${st.n}</span> ${esc(st.name)}</b>${bd.map(b=>`<span class="cbs ${b[0]}" style="font-size:${bs.toFixed(2)}pt">${b[1]}</span>`).join('')}</div>${h2}</div>
        <table class="cbt" style="height:${(g.thH+L*g.ch).toFixed(2)}mm"><colgroup><col style="width:${g.tw.toFixed(2)}mm">${dates.map(()=>'<col>').join('')}</colgroup><thead><tr style="height:${g.thH.toFixed(2)}mm"><th></th>${dth}</tr></thead><tbody>${rows}</tbody></table>
        ${o.fl?`<div class="cbf" style="font-size:${g.ff.toFixed(2)}pt;height:${g.fh.toFixed(2)}mm">${foot.join('')}</div>`:''}</div>`}).join('');
-    const bh=hs=>`<div class="bh" style="--hs:${hs}"><b>${esc(clsLabel(c.g,c.c))}　条件ブロック</b>　<span>×＝不可　○＝この時間のみ可　未＝未回答</span><span class="bpg">${p+1}/${P_}　${esc(kindName())}</span></div>`;
+    const bh=hs=>`<div class="bh" style="--hs:${hs}"><b>${esc(clsLabel(c.g,c.c))}　条件ブロック</b>　<span>×＝不可　○＝この時間のみ可　未＝未回答</span><span class="bpg">${p+1}/${P_}　${esc(kindNameG(c.g))}</span></div>`;
     const HF=fitHeader(`<div class="dh">${bh(1)}</div>`,'.bh',pw,hsBase(W,H));
     pages.push(`<section class="dsheet blk" style="width:${W}mm;height:${H}mm">${bh(HF.hs)}<div class="bgrid" style="grid-template-columns:repeat(${g.C},${g.bw.toFixed(3)}mm);grid-template-rows:repeat(${g.R},${g.bh.toFixed(3)}mm);width:${pw}mm;height:${ph}mm">${blocks}</div></section>`);
   }
@@ -3793,7 +3887,7 @@ async function shWrite(part){
   SH.base[part]=env.rev;SH.last[part]=cur;SH.meta[part]={rev:env.rev,by:env.by,at:env.savedAt};SH.mtime[part]=back.mtime;delete SH.conflicts[part];return true;
 }
 function shAcceptRemote(part,env,mtime){
-  applyPart(part,env.data);SH.base[part]=env.rev;SH.meta[part]={rev:env.rev,by:env.by,at:env.savedAt};SH.mtime[part]=mtime;
+  histPrune(part);applyPart(part,env.data);SH.base[part]=env.rev;SH.meta[part]={rev:env.rev,by:env.by,at:env.savedAt};SH.mtime[part]=mtime;
 }
 
 /* ---- the sync pass ---- */
@@ -3824,7 +3918,7 @@ async function shSync(opt={}){
       }else if(dirty){if(await shWrite(part))wrote++}
     }
     await shReadLocks();
-    if(remoteApplied){VER++;resetHistory();UI.cond.sid=UI.cond.sid&&stById(UI.cond.sid)?UI.cond.sid:null;
+    if(remoteApplied){VER++;UI.cond.sid=UI.cond.sid&&stById(UI.cond.sid)?UI.cond.sid:null;
       const names=changed.filter(x=>x.startsWith('class:')).map(x=>{const c=P.classes[x.slice(6)];return c?clsLabel(c.g,c.c):''}).filter(Boolean);
       if(opt.quiet!==true)toast(`共有フォルダの更新を読み込みました${names.length?`（${names.slice(0,3).join('、')}${names.length>3?' ほか':''}）`:changed.includes('roster')?'（名簿）':changed.includes('project')?'（設定）':''}`,{ms:5200});
       saveNow();render()}
@@ -3886,7 +3980,7 @@ async function hasProjectFile(dir){try{await dir.getFileHandle('project.json');r
 // 学級用HTMLのファイル名：「1年1組_1017〜三者懇談会.html」（最初の日の月日4桁＋〜＋行事名。日程が未入力なら日付なし）
 function classFileName(k){
   const c=P.classes[k]||{g:'',c:''},ds=[...(P.sched.dates||[])].sort(),m=ds.length&&/^\d{4}-(\d{2})-(\d{2})/.exec(ds[0]),md=m?m[1]+m[2]:'';
-  const base=`${clsLabel(c.g,c.c)}_${md?md+'〜':''}${kindName()}`.replace(/[\\/:*?"<>|\r\n\t]/g,'').replace(/\s+/g,'');
+  const base=`${clsLabel(c.g,c.c)}_${md?md+'〜':''}${kindNameG(c.g)}`.replace(/[\\/:*?"<>|\r\n\t]/g,'').replace(/\s+/g,'');
   return base.slice(0,80)+'.html';
 }
 // 同じ学級の古い名前のHTMLを「旧版」フォルダへ移す（消さない）。移した数を返す
@@ -3907,9 +4001,8 @@ async function ensureClassHtmls(dir,onlyMissing){
 }
 async function shConnectPicker(){
   if(!shSupported()){toast('このブラウザでは共有フォルダを使えません。Chrome または Edge で開いてください');return}
-  if(!SRV)copyHostPath();
   if(!await shEnsureUser())return;
-  let dir;if(SRV){dir=makeSrvDir()}else{try{dir=await pickDir()}catch(e){return}}
+  let dir;if(SRV){dir=makeSrvDir()}else{if(!SRV&&!await explainHostPath())return;try{dir=await pickDir()}catch(e){return}}
   if(CM){   // 学級専用HTML：このHTMLと同じプロジェクトのフォルダにつなぐ
     const readEnv=async d=>{try{const fh=await d.getFileHandle('project.json');return JSON.parse(await (await fh.getFile()).text())}catch(e){return null}};
     let env=await readEnv(dir);
@@ -4029,11 +4122,12 @@ A['ne-go']=()=>A.newevent();
 A['ne-later']=()=>{try{localStorage.setItem('kp_ne_x:'+(P.term||P.id),todayIso())}catch(e){}render()};
 const dayN=s=>Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10))/864e5;
 async function newEventGuard(nd){   // いまの日程から離れた日付を足すとき（＝別の行事かもしれないとき）に確認
-  const ds=P.sched.dates;if(CM||!ds.length||!nd.length||UI.sched.ackEnded)return false;
+  const cur=P.sched.dates,pv=P.sched.prev,wasCleared=!cur.length&&pv&&pv.f&&pv.l;   // 日付を全部消したあとは、消す前の日程を覚えておき、それと比べる
+  const ds=cur.length?cur:(wasCleared?[pv.f,pv.l]:[]);if(CM||!ds.length||!nd.length||UI.sched.ackEnded)return false;
   const f=ds[0],l=ds[ds.length-1],n=sortDates(nd),n0=n[0],n1=n[n.length-1];
   const gap=Math.max(dayN(n0)-dayN(l),dayN(f)-dayN(n1)),ended=l<todayIso();
   if(!(gap>7||(ended&&n0>l)))return false;   // 同じ行事の日程（近い日付）なら、何も聞かない
-  const r=await ask({title:'新しい行事の日程ですか？',body:`<div class="ngbox"><b>いまの日程は ${esc(fmtD(f))}〜${esc(fmtD(l))} です。追加する日付は、それとは離れています。</b></div><p style="margin-top:10px">新しい家庭訪問や懇談の日程なら、先に<b>「データを消す…」→「次の行事の準備」</b>をしてください。そのまま足すと、前の行事の条件・配置が残って混ざります。</p><div class="ngbox" style="margin-top:10px;font-size:13.5px">${NE_RISK}</div><p class="tiny" style="margin-top:8px">${NE_FIX}</p>${ended?'':`<p class="tiny" style="margin-top:8px">前の行事は、まだ終わっていません（最終日 ${esc(fmtD(l))}）。前の行事の作業が終わってから始めるのがおすすめです。先に始めるときは、<b>共有フォルダは別のフォルダ</b>を使うと、前の行事の資料を残せます（前のデータは、自動バックアップから戻せます）。</p>`}<p class="muted tiny" style="margin-top:6px">同じ行事の日程を、あとから足しているだけなら「同じ行事に追加」を選んでください。</p>`,buttons:[{id:0,label:'やめる'},{id:2,label:'同じ行事に追加'},{id:1,label:'次の行事の準備へ',kind:'pri'}]});
+  const r=await ask({title:'新しい行事の日程ですか？',body:`<div class="ngbox"><b>${wasCleared?'前の日程は':'いまの日程は'} ${esc(fmtD(f))}〜${esc(fmtD(l))} ${wasCleared?'でした（日付はすべて消してあります）':'です'}。追加する日付は、それとは離れています。</b></div><p style="margin-top:10px">新しい家庭訪問や懇談の日程なら、先に<b>「データを消す…」→「次の行事の準備」</b>をしてください。そのまま足すと、前の行事の条件・配置が残って混ざります。</p><div class="ngbox" style="margin-top:10px;font-size:13.5px">${NE_RISK}</div><p class="tiny" style="margin-top:8px">${NE_FIX}</p>${ended?'':`<p class="tiny" style="margin-top:8px">前の行事は、まだ終わっていません（最終日 ${esc(fmtD(l))}）。前の行事の作業が終わってから始めるのがおすすめです。先に始めるときは、<b>共有フォルダは別のフォルダ</b>を使うと、前の行事の資料を残せます（前のデータは、自動バックアップから戻せます）。</p>`}<p class="muted tiny" style="margin-top:6px">同じ行事の日程を、あとから足しているだけなら「同じ行事に追加」を選んでください。</p>`,buttons:[{id:0,label:'やめる'},{id:2,label:'同じ行事に追加'},{id:1,label:'次の行事の準備へ',kind:'pri'}]});
   if(r===1){A.newevent();return true}
   if(r===2){UI.sched.ackEnded=true;return false}
   return true;
@@ -4091,15 +4185,19 @@ function hostFolderPath(){   // このHTMLが入っているフォルダのフ�
     return p;
   }catch(e){return ''}
 }
-function copyHostPath(){
-  const t=Date.now();if(UI._cpAt&&t-UI._cpAt<4000)return;const p=hostFolderPath();if(!p)return;UI._cpAt=t;
-  copyText(p).then(ok=>{if(ok)toast(`このHTMLがあるフォルダの場所をコピーしました。フォルダ選択の画面で、上の欄に貼り付け（Ctrl+V）て Enter を押すと、すぐ移動できます：${p}`,{ms:12000})}).catch(()=>{});
+async function explainHostPath(){   // フォルダ選択の前に：このHTMLがあるフォルダの場所をコピーし、使い方を真ん中に出す（「理解した」を押すまで閉じない）。やめたら false
+  const p=hostFolderPath();if(!p)return true;
+  const ok=await copyText(p);
+  const r=await ask({sticky:true,title:'フォルダの場所をコピーしました',body:`<p>このHTMLがあるフォルダの場所（パス）を、<b>クリップボードにコピー${ok?'しました':'しようとしましたが、できませんでした。下の文字を、選んでコピーしてください'}</b>。</p><div class="okbox" style="word-break:break-all;font-weight:700;user-select:all;margin:8px 0">${esc(p)}</div><div class="warnbox" style="line-height:1.7"><b>このあと開く、フォルダ選択の画面で：</b><br>現在のフォルダ（このHTMLがあるフォルダ）に書き出す・つなぐときは、<b>いまクリップボードにコピーしているパスを、画面の下の欄に「貼り付け」て（Ctrl+V）、「フォルダーの選択」をクリック</b>してください。<br><span class="tiny muted">別のフォルダを使うときは、貼り付けずに、そのフォルダを選んでください。</span></div>`,buttons:[{id:0,label:'やめる'},{id:1,label:'理解した（フォルダ選択を開く）',kind:'pri'}]});
+  if(r!==1)return false;
+  await copyText(p);   // 念のため、もう一度コピーしておく（別のものをコピーしていても、この場所に戻る）
+  return true;
 }
 async function writeTo(dir,name,text){const fh=await dir.getFileHandle(name,{create:true}),w=await fh.createWritable();await w.write(text);await w.close()}
 function relaySection(){
-  return `<h3 style="font-size:15px;margin:6px 0 6px"><span class="badge ok">A</span> バッチで起動する<small class="muted" style="font-weight:500">　おすすめ（フォルダ選択が不要。Chrome・Edge以外でも使えます）</small></h3>
+  return `<h3 style="font-size:15px;margin:6px 0 6px"><span class="badge ok">共有方法１</span> バッチで起動する<small class="muted" style="font-weight:500">　おすすめ（フォルダ選択が不要。Chrome・Edge以外でも使えます）</small></h3>
    <p class="tiny muted" style="margin-bottom:8px"><b>設定担当者</b>：下のボタンで、共有フォルダに3つのファイル（かこピタ本体の .html／「かこピタ起動_…」.bat／kakopita-server_….ps1）を書き出します。<br>
-   <b>担任</b>：「かこピタ起動_…」.bat を<b>ダブルクリックするだけ</b>。デスクトップにショートカットができ（前の行事のショートカットは、その行事の初日から14日たつと自動で消えます）、次回からはそれで開けます。${SRV?'<b>　いまはこの方式で接続中です。</b>':''}</p>
+   <b>担任</b>：「かこピタ起動_…」.bat を<b>ダブルクリックするだけ</b>。デスクトップにショートカットができ、次回からはそれで開けます。前の行事のショートカットは、<b>新しい行事の「かこピタ起動_…」.bat（またはそのショートカット）を起動したとき</b>に、その行事（前の行事）の<b>初日から14日たっていれば</b>、自動で消えます（起動のたびに、デスクトップのほかのショートカットを点検します。いま起動したもののショートカットは消えません）。${SRV?'<b>　いまはこの方式で接続中です。</b>':''}</p>
    <div class="row"><button class="btn pri" data-sh="relay-all">${ic('down',16)}3つを共有フォルダに書き出す</button></div>
    <details class="det" style="margin-top:8px"><summary>ほかの書き出し・うまくいかないとき</summary><div class="detb"><div class="row"><button class="btn ghost sm" data-sh="relay-bat">バッチだけ</button><button class="btn ghost sm" data-sh="relay-ps">中継プログラムだけ</button><button class="btn ghost sm" data-sh="relay-html">HTMLだけ</button><button class="btn ghost sm" data-sh="relay-bat2" title="ふだんは不要です。バッチでブラウザがうまく開かないときだけ使う予備です。コマンドプロンプトの画面に出るアドレスを、自分で貼り付けて開きます">予備：手動用バッチ</button></div>
    <p class="tiny muted" style="margin-top:6px">書き出せないとき（ブラウザの安全のため、バッチなどは書き込めないことがあります）は、ダウンロードされるので、共有フォルダに入れてください。「危険なファイル」と出たら「保存」を選びます。<b>バッチや中継プログラムを更新したときは、書き出し直してください。</b>起動中の画面は出ず、かこピタを閉じると自動で終了します。中継プログラムは担任のPCの中だけで動き、外部には出ません。</p></div></details>`;
@@ -4164,7 +4262,7 @@ A['share']=async()=>{
     const locks=Object.entries(SH.locks).filter(([k,l])=>Date.now()-l.at<SH_FRESH);
 box.innerHTML=`<h2>${LOGO_SM}共有（プロジェクトフォルダ）</h2>
      <p class="muted tiny" style="margin-bottom:12px">共有フォルダに学級ごとのファイルを置いて、みんなで同じ日程づくりを進めます。<b>データはフォルダの中だけにあり、インターネットへは送信されません。</b></p>
-     ${!sup?`<div class="warnbox" style="margin-bottom:12px">このブラウザには、フォルダを直接読み書きする機能がありません。<b>Chrome または Edge</b> で開くと使えます。Windowsなら下のA（バッチ）を、ほかはC（学級ファイルの書き出し・取り込み）をお使いください。</div>`:''}
+     ${!sup?`<div class="warnbox" style="margin-bottom:12px">このブラウザには、フォルダを直接読み書きする機能がありません。<b>Chrome または Edge</b> で開くと使えます。Windowsなら下の共有方法１（バッチ）を、ほかは共有方法３（学級ファイルの書き出し・取り込み）をお使いください。</div>`:''}
      ${SH.on?`<div style="margin-bottom:16px"><dl class="kv" style="margin-bottom:12px"><dt>共有フォルダ</dt><dd>${SRV&&SRV.path?`<a href="#" data-sh="openfolder" title="クリックするとエクスプローラーで開きます" style="font-weight:800;word-break:break-all">${esc(SRV.path)}</a>`:`<b>${esc(SH.name)}</b><span class="tiny muted">　（ブラウザの仕様で、フォルダ名だけ表示できます）</span>`}　<span class="badge ok">接続中</span></dd><dt>あなた</dt><dd>${esc(shUser())}　<button class="btn ghost sm" data-sh="rename">名前を変える</button></dd><dt>最後の同期</dt><dd>${SH.lastSync?hhmm(SH.lastSync)+'（30秒ごとに自動で確認します）':'まだ'}</dd>${SH.err?`<dt>エラー</dt><dd style="color:var(--ng)">${esc(SH.err)}</dd>`:''}</dl>
        <h3 style="font-size:14px;margin:12px 0 6px">いま編集している人</h3>${locks.length?`<div style="display:flex;flex-direction:column;gap:4px">${locks.map(([k,l])=>{const c=P.classes[k];return `<div class="bk"><span class="dot x"></span><b>${esc(c?clsLabel(c.g,c.c):k)}</b><span class="grow"></span><span class="muted tiny">${esc(l.by)}${l.sid===SESSION?'（あなた）':''}　${hhmm(l.at)}</span></div>`}).join('')}</div>`:'<p class="muted tiny">いま編集中の人はいません。</p>'}
        <div class="row" style="margin-top:14px"><button class="btn pri" data-sh="sync">${ic('swap',16)}いますぐ同期</button><button class="btn" data-sh="disc">共有をやめる</button></div></div>`:''}
@@ -4173,10 +4271,10 @@ box.innerHTML=`<h2>${LOGO_SM}共有（プロジェクトフォルダ）</h2>
        <div class="row"><button class="btn pri big" data-sh="start" ${sup?'':'disabled'}>${ic('folder',18)}共有フォルダを選ぶ</button>${SH.needGrant?`<button class="btn big" data-sh="grant">前回のフォルダに再接続</button>`:''}</div>
        <p class="tiny muted">新しいフォルダを選ぶと共有を始められます。すでに共有プロジェクトがあるフォルダを選ぶと、その内容を読み込みます。</p></div></div>`:''}
      <details class="det" style="margin-top:14px"><summary>ほかの方法（バッチが使えないとき）</summary><div class="detb">
-      ${CM||SH.on?'':`<h3 style="font-size:14px;margin:4px 0 6px"><span class="badge u">B</span> 共有フォルダを選ぶ<small class="muted" style="font-weight:500">　Aができない場合（Chrome・Edge）</small></h3><div style="display:flex;flex-direction:column;gap:10px"><label class="f" style="max-width:320px">あなたの名前（編集中の表示に使います）<input type="text" id="shNameIn" value="${esc(shUser())}" placeholder="例：青木"></label>
+      ${CM||SH.on?'':`<h3 style="font-size:14px;margin:4px 0 6px"><span class="badge u">共有方法２</span> 共有フォルダを選ぶ<small class="muted" style="font-weight:500">　共有方法１ができない場合（Chrome・Edge）</small></h3><div style="display:flex;flex-direction:column;gap:10px"><label class="f" style="max-width:320px">あなたの名前（編集中の表示に使います）<input type="text" id="shNameIn" value="${esc(shUser())}" placeholder="例：青木"></label>
        <div class="row"><button class="btn pri big" data-sh="start" ${sup?'':'disabled'}>${ic('folder',18)}共有フォルダを選ぶ</button>${SH.needGrant?`<button class="btn big" data-sh="grant">前回のフォルダに再接続</button>`:''}</div>
        <p class="tiny muted">新しいフォルダを選ぶと共有を始められます。すでに共有プロジェクトがあるフォルダを選ぶと、その内容を読み込みます。</p></div>`}
-      <h3 style="font-size:14px;margin:14px 0 6px"><span class="badge ng">C</span> Bもできない場合：学級ファイルの書き出し・取り込み</h3>
+      <h3 style="font-size:14px;margin:14px 0 6px"><span class="badge ng">共有方法３</span> 共有方法２もできない場合：学級ファイルの書き出し・取り込み</h3>
       <div><p class="tiny muted" style="margin-bottom:8px">フォルダを選べないブラウザなどで、学級ごとのファイルをやりとりする方法です（共有は自動ではなくなります）。持ち出し用にも使えます。</p>
      <div class="row"><select id="shCls">${classList().map(c=>`<option value="${esc(c.key)}" ${c.key===curCls()?'selected':''}>${esc(clsLabel(c.g,c.c))}</option>`).join('')}</select><button class="btn" data-sh="exp">${ic('down',16)}この学級を書き出す</button><button class="btn" data-sh="imp">${ic('up',16)}学級ファイルを取り込む</button></div>
      <p class="tiny muted" style="margin-top:6px">書き出したファイルには、その学級の都合・配置・きょうだい情報が入ります。取り込むときに、どちらが新しいかを確認します。</p></div>
@@ -4214,7 +4312,6 @@ box.innerHTML=`<h2>${LOGO_SM}共有（プロジェクトフォルダ）</h2>
     if(a==='genall'||a==='genone'){
       if(!P.students.length){toast('先に名簿を読み込んでください');return}
       if(needKind())return;
-      if(!SRV)copyHostPath();
       const keys=a==='genall'?classList().map(c=>c.key):[$('#shGenCls',el).value];
       if(!SH.on&&shSupported()){   // 共有フォルダをまだ選んでいなければ、ここで選ぶ（共有も始まる）
         const v=$('#shNameIn',el)?.value.trim();if(v){SH.user=v;localStorage.setItem('kp_user',v)}
@@ -4299,7 +4396,7 @@ function maybeDownloadDialog(){
 A.about=()=>{
   const el=openDlg(`<h2 style="display:flex;align-items:center;gap:10px">${LOGO_HTML}<span class="badge brand">v.${APP_VER}</span></h2>
    <p class="muted" style="margin:4px 0 12px">家庭訪問・懇談を、ピタッと組む日程づくりツール</p>
-   <dl class="kv"><dt>作者</dt><dd>かこピタ v.${APP_VER}　Created by ${APP_AUTHOR}（with Gemini）　／　Special Thanks to ウチムラヨウスケ</dd><dt>この版</dt><dd>Web（HTML）版 v.${APP_VER}　ブラウザだけで動き、インターネットがなくても使えます</dd><dt>データ</dt><dd>${SAFE_SHORT}</dd><dt>保存場所</dt><dd>${esc(location.protocol==='file:'?'ダウンロードしたファイル（file）':location.host)}</dd></dl>
+   <dl class="kv"><dt>作者</dt><dd>かこピタ v.${APP_VER}　Created by ${APP_AUTHOR}（with 生成AI）　／　Special Thanks to ウチムラヨウスケ</dd><dt>この版</dt><dd>Web（HTML）版 v.${APP_VER}　ブラウザだけで動き、インターネットがなくても使えます</dd><dt>データ</dt><dd>${SAFE_SHORT}</dd><dt>保存場所</dt><dd>${esc(location.protocol==='file:'?'ダウンロードしたファイル（file）':location.host)}</dd></dl>
    <div class="row" style="margin-top:16px"><button class="btn" data-ab="help">${ic('send',16)}使い方を見る</button>${isHttp()?`<button class="btn" data-ab="dl">${ic('down',16)}このアプリをダウンロード（オフライン用）</button>`:''}</div>
    <div class="acts"><button class="btn pri" data-close>閉じる</button></div>`);
   el.addEventListener('click',e=>{if(e.target.closest('[data-close]'))el._close();const b=e.target.closest('[data-ab]');if(!b)return;if(b.dataset.ab==='help'){el._close();A.help()}else downloadApp()});
@@ -4325,15 +4422,15 @@ const HELP=[
   <h3>きょうだい・住所への配慮</h3><ul><li><b>きょうだい配慮</b>：きょうだいが別の学級にいても、<b>同じ時刻にならない</b>ようにし、同じ日の近い時刻に寄せます。<b>間隔は「続けて」「1枠あける」「2枠あける」から選べます</b>（既定は続けて）。</li><li><b>住所配慮</b>：同じ地区の児童生徒を、同じ日に続けて配置します。地区の判定は3つから選べます。<b>住所の最初の数字の手前まで</b>（初期設定。「大阪市北区梅田1丁目2-3」→「大阪市北区梅田」）、<b>住所の最初の数字まで</b>（→「大阪市北区梅田1」）、<b>指定した文字数の範囲で</b>（先頭◯文字）。数字のない住所は、先頭◯文字で判定します。余裕があるときは、離れていそうな地区（地区名が違う）どうしが隣り合わないよう、間に1枠あけます。<b>「住所が近い児童生徒を近くに配置する」は、行事が家庭訪問のときだけ最初からオンです</b>（ほかの行事では最初はオフ）。</li></ul>`],
  ['便利な技',()=>`<ul><li><b>Ctrl+Z / Ctrl+Y</b>（Macは⌘）：取り消し／やり直し。Shift+Ctrl+Zでも、やり直せます（配置・条件・名簿の取り込みなど、ほとんどの操作に効きます）</li><li><b>1・2・3・0 キー</b>（3. 条件）：ブラシを ×・○・未・消しゴム に切り替え</li><li><b>↑↓ キー</b>（3. 条件）：前後の児童生徒へ</li><li><b>選んでクリック</b>（4. かこピタ(配置)）：未配置の児童生徒を選び、置きたいマスをクリック。置いてある人を選んで別のマスをクリックすると、入れ替わります</li><li><b>右クリック</b>（4. かこピタ(配置)）：置いた人を外す／空きマスを休憩（×）に</li><li><b>名前で探す</b>：条件・配置の画面の検索欄で、児童生徒を名前ですばやく探せます</li><li><b>Ctrl+S</b>（Macは⌘+S）：今の状態をファイルに書き出す（バックアップ用）</li><li><b>休憩の予約</b>：「休憩（×）を置く」モードで空きマスをクリック、またはなぞって塗る。日付をクリックするとその日の空きマスがすべて×になります。かこピタはそこを避けます</li><li><b>枠数</b>：特別な支援や相談が必要な児童生徒に、連続した時間を確保できます</li></ul>`],
  ['保存・共有・オフライン',()=>`<h3>保存</h3><p>編集のたびに、自動で保存されます。共有フォルダにつないでいないときはこのブラウザの中、つないでいるときは共有フォルダの中です（切り替えは自動です）。最上部には、最後に保存した時刻が出ます。バックアップとして、「設定」→「保存とバックアップ」から、ファイルへの書き出し・読み込みや、「以前の状態に戻す」（自動バックアップ12件）ができます。</p>
-<h3>共有のしかた（まず A。できなければ B、それもできなければ C）</h3>
+<h3>共有のしかた（まず共有方法１。できなければ共有方法２、それもできなければ共有方法３）</h3>
   <p><b>共通の準備</b>：設定担当者が、共有フォルダ（学校のサーバー、クラウドの同期フォルダなど）を決めます。学級ごとにファイルが作られ、<b>30秒ごとに最新を確認</b>します。ほかの人が編集中の学級には「◯◯さんが編集中」と表示され、見るだけの状態になります。同時に編集してしまったときは、どちらを使うか選べます。</p>
-  <p><b>A．バッチで起動する（Windowsなら、まずこれ。いちばん簡単）</b><br>① 設定担当者：「共有する」→「3つを共有フォルダに書き出す」を押す（共有フォルダに、かこピタのHTML・かこピタ起動_….bat・kakopita-server_….ps1ができます。…は「初日の日付6桁～行事名」。共有フォルダに、かこピタのHTMLがすでにあれば、HTMLは書き出しません。書き出せないときはダウンロードされるので、共有フォルダに入れてください）。<br>② 担任：「かこピタ起動_….bat」をダブルクリックするだけ。担任のPCの中だけで動く中継プログラムが起動し、ブラウザでかこピタが開いて、共有フォルダにつながります（フォルダ選択は不要）。起動中の画面（コマンドプロンプトなど）は表示されず、かこピタのページ（タブ）を閉じると自動で終了します（ブラウザごと閉じても、3分以内に終了）。<br>③ デスクトップに「かこピタ_261019～三者懇談会」のようなショートカットができます。次回からは、それで開けます。<br>これで十分です。日程や行事名を変えたときは、書き出し直してください（古い名前のファイルは消してかまいません）。かこピタを新しい版にするときは、共有フォルダのHTMLを入れ替えます。</p>
-  <p><b>Aができない場合 → B．共有フォルダを選ぶ（Chrome／Edge）</b><br>Windows以外のPCや、バッチが使えない場合の方法です。各担任が最初の1回だけ「共有する」→「共有フォルダを選ぶ」で、同じフォルダを選びます。2回目からは「前回のフォルダに再接続」を押すだけです。ネットワークは使わず、パソコンの中だけで動きます。<br><b>職場のネットワークで、インターネットが別のブラウザ（リモートで隔離されたブラウザなど）に切り替わり、Aがうまく開かないとき</b>も、Bをお使いください（Aのバッチは、かこピタを自分のPCの一時フォルダにコピーして、ローカルのファイルとしてEdgeまたはChromeで開きます）。それでもAで開けない場合の予備として、「手動用バッチ」があります。コマンドプロンプトの画面に「file:///…」のアドレスが表示されるので、それを自分のPCで動くブラウザに貼り付けて開きます（ふだんは使いません）。</p>
-  <p><b>Bもできない場合 → C．学級ファイルの書き出し・取り込み</b><br>Chrome／Edge以外のブラウザなどで、フォルダを選べないときの方法です。「学級ファイルの書き出し・取り込み」で、学級ごとのファイルをやりとりします（共有は自動ではなくなります）。</p>
+  <p><b>共有方法１．バッチで起動する（Windowsなら、まずこれ。いちばん簡単）</b><br>① 設定担当者：「共有する」→「3つを共有フォルダに書き出す」を押す（共有フォルダに、かこピタのHTML・かこピタ起動_….bat・kakopita-server_….ps1ができます。…は「初日の日付6桁～行事名」。共有フォルダに、かこピタのHTMLがすでにあれば、HTMLは書き出しません。書き出せないときはダウンロードされるので、共有フォルダに入れてください）。<br>② 担任：「かこピタ起動_….bat」をダブルクリックするだけ。担任のPCの中だけで動く中継プログラムが起動し、ブラウザでかこピタが開いて、共有フォルダにつながります（フォルダ選択は不要）。起動中の画面（コマンドプロンプトなど）は表示されず、かこピタのページ（タブ）を閉じると自動で終了します（ブラウザごと閉じても、3分以内に終了）。<br>③ デスクトップに「かこピタ_261019～三者懇談会」のようなショートカットができます。次回からは、それで開けます。前の行事のショートカットは、新しい行事のバッチ（またはそのショートカット）を起動したときに、前の行事の初日から14日たっていれば自動で消えます。<br>これで十分です。日程や行事名を変えたときは、書き出し直してください（古い名前のファイルは消してかまいません）。かこピタを新しい版にするときは、共有フォルダのHTMLを入れ替えます。</p>
+  <p><b>共有方法１ができない場合 → 共有方法２．共有フォルダを選ぶ（Chrome／Edge）</b><br>Windows以外のPCや、バッチが使えない場合の方法です。各担任が最初の1回だけ「共有する」→「共有フォルダを選ぶ」で、同じフォルダを選びます。2回目からは「前回のフォルダに再接続」を押すだけです。ネットワークは使わず、パソコンの中だけで動きます。<br><b>職場のネットワークで、インターネットが別のブラウザ（リモートで隔離されたブラウザなど）に切り替わり、共有方法１がうまく開かないとき</b>も、共有方法２をお使いください（共有方法１のバッチは、かこピタを自分のPCの一時フォルダにコピーして、ローカルのファイルとしてEdgeまたはChromeで開きます）。それでも共有方法１で開けない場合の予備として、「手動用バッチ」があります。コマンドプロンプトの画面に「file:///…」のアドレスが表示されるので、それを自分のPCで動くブラウザに貼り付けて開きます（ふだんは使いません）。</p>
+  <p><b>共有方法２もできない場合 → 共有方法３．学級ファイルの書き出し・取り込み</b><br>Chrome／Edge以外のブラウザなどで、フォルダを選べないときの方法です。「学級ファイルの書き出し・取り込み」で、学級ごとのファイルをやりとりします（共有は自動ではなくなります）。</p>
   <p class="tiny muted">「学級専用のHTML」（オプション）は、担任に<b>自分の学級の画面だけ</b>を渡したいときに使います（共有する → 学級専用のHTMLを作る）。</p>
   <h3>持ち出して作業するとき</h3><p>学級専用のHTMLには、その学級のデータが入っています。ただし<b>データの本体は共有フォルダの中のデータ（JSONファイル）</b>で、HTMLの中身は持ち出した時点のコピーです。JSONを自分でコピーする必要はありません。<br>① 持ち出す前：共有フォルダにつないだ状態で、自分の学級のHTMLを開き、「共有する」→「（HTMLの名前）.html を保存し直す」で最新のデータを入れ、USBなどでHTMLを持ち出す。<br>② 自宅：そのHTMLを開いて作業する。終わったら、もう一度「（HTMLの名前）.html を保存し直す」（ダウンロードされます）。<br>③ 職場：持ち帰ったHTMLを、共有フォルダの自分の学級のHTMLと入れ替えて開き、フォルダにつなぐと、作業内容が共有フォルダのデータに反映されます。持ち出している間にほかの人が更新して、サーバー側のほうが新しかった場合は、どちらを使うか確認が出ます。<br>※自宅で保存し直さずにHTMLだけ持ち帰っても、自宅での作業は反映されません。</p>
   <h3>オフラインで使う</h3><p>このアプリは<b>1つのHTMLファイル</b>で、インターネットなしでも動きます。${SAFE_TXT}</p><p>${OFFLINE_TXT}</p><p>${SEP_NOTE}</p>${srcBlockHtml()}
-  <h3>データを消す（新しい行事を始めるとき）</h3><p>「設定」→「データを消す…」を押すと、消す内容を選べます。標準の「次の行事の準備」は、<b>名簿・担任名・学校情報・文面・設定は残し</b>、条件・配置・日程・取り込み履歴だけを消します。「名簿・担任名も消す」「すべて消す（初期化）」も、ボタンひとつで選べます。実行前に自動でバックアップを取るので、「元に戻す」で戻せます。</p><p><b>【前の行事のファイルへの誤接続に注意】</b>「次の行事の準備」をしないまま新しい日程づくりを始めると、前の行事の共有フォルダ・学級専用HTML・起動バッチにつながったままになり、前の行事のデータを上書きしたり、新旧のデータが混ざったりするおそれがあります。準備をしたあとは、新しい共有フォルダと、新しく書き出したHTML・バッチ・ショートカットを使い、前の行事のものは使わないでください。</p>`],
+  <h3>まちがえたときの戻し方（バックアップ）</h3><p>まず<b>「元に戻す」（Ctrl+Z）</b>を試します。それで足りないとき（取り込み・消去・自動配置のあと、アプリを閉じたあとなど）は、保存の表示（メニュー）の<b>「以前の状態に戻す…」</b>から、日時とラベルを見て選び、「この状態に戻す」を押します。<b>📌 は、取り込み・消去・自動配置・印刷などの直前の状態</b>で、自動のバックアップに押し出されません（最新20件）。戻す前の状態も新しいバックアップに残るので、やり直せます。戻すと、その時点の全学級・名簿・日程が戻り、そのあとの作業は消えます。共有フォルダで作業中は、ほかの先生の作業が消えることがあるので、先に声をかけてください。バックアップはこのブラウザの中に保存されます。</p><h3>データを消す（新しい行事を始めるとき）</h3><p>「設定」→「データを消す…」を押すと、消す内容を選べます。標準の「次の行事の準備」は、<b>名簿・担任名・学校情報・文面・設定は残し</b>、条件・配置・日程・取り込み履歴だけを消します。「名簿・担任名も消す」「すべて消す（初期化）」も、ボタンひとつで選べます。実行前に自動でバックアップを取るので、「元に戻す」で戻せます。</p><p><b>【前の行事のファイルへの誤接続に注意】</b>「次の行事の準備」をしないまま新しい日程づくりを始めると、前の行事の共有フォルダ・学級専用HTML・起動バッチにつながったままになり、前の行事のデータを上書きしたり、新旧のデータが混ざったりするおそれがあります。準備をしたあとは、新しい共有フォルダと、新しく書き出したHTML・バッチ・ショートカットを使い、前の行事のものは使わないでください。</p>`],
  ['よくある質問',()=>`<h3>名簿との照合のしかたは？</h3><p>回答の<b>学年・組・ふりがな</b>で探します。同じふりがなの児童生徒が同じ学級にいるときだけ、<b>漢字</b>を確認し、漢字も同じ場合だけ<b>出席番号</b>まで確認します。そのため、保護者が出席番号や漢字を間違えても、電話での確認なしで取り込めます。自動で補正した件数と内訳は、取り込み前の確認画面に出ます。</p>
   <h3>保護者の都合を、5分ごとに細かく入力できますか？</h3><p>できます。「3. 条件」の「1人ずつ」で、<b>入力の細かさ</b>を「日程の枠（20分など）」から「5分ごと」に切り替えます。5分ごとに塗ったあと「日程の枠」に戻すと、一部だけ塗った枠は<b>斜線</b>で表示されます（データは5分のままなので、何度切り替えても広がりません）。×は少しでも重なれば×の枠ですが、○は<b>枠の全部が○のときだけ</b>○の枠として使い、○を付けた人は、その○の枠のどこかに配置します（一部だけ○の枠には、置きません）。枠をまとめて塗ると、枠の中の5分ごとの入力は上書きされます。配置のときは、×と少しでも重なる枠がNGになります。<br>条件を元に戻したいときは、<b>「条件を戻す…」</b>（この人／この学級／全員）を使います。戻す先は2つです。<br>・<b>時間割を変える前</b>：学級の「1枠の長さ」「開始時刻」を、取り込みのあと最初に変えた瞬間の条件（学級ごとに自動で記録）に戻します。それまでに手で直した分は残ります。<br>・<b>取り込んだ回答どおり</b>：最後に取り込んだ回答だけの状態にします。手で直した分は、消えます。</p>
   <h3>学級ごとに、1枠の長さ（15分・20分など）や開始時刻を変えられますか？</h3><p>変えられます。「4. かこピタ(配置)」の上の欄で、学級ごとに<b>1枠の長さ・開始時刻・時刻のルール</b>を変えると、下の日程表がすぐに変わります（自動配置のボタンを押す前に確認できます）。自動配置は、その学級の枠にそろえた位置に置きます。保護者の×は、日程の枠（例：20分）のまま保存し、学級の枠（例：15分）と<b>少しでも重なる枠をNG</b>にします。ほかの学級にも同じ設定をコピーできます。枠が変わると、その学級の配置済みの分と休憩（×）は外れます（元に戻せます）。</p>
@@ -4348,7 +4445,7 @@ const HELP=[
  ['かこピタについて',()=>`<h3>【Origin】ツール名「かこピタ」に込めた想い</h3><p>「かこピタ」という名前は、学校現場の二大重労働である「家庭訪問（か）」と「懇談（こ）」から取られています。これらの業務で最も心身を削るのが「日程調整」というパズルです。数十人の保護者の希望を、パズルのピースを埋めるように調整し、かつ重複や漏れが許されない。この緻密な作業を、数学者ピタゴラスの定理のごとく、論理的かつ瞬時に解決したいという願いが込められています。</p><p>本ツールは、単なる効率化ではなく、担任が「児童生徒と向き合う時間」を取り戻すための聖域を作ることを目的として開発されました。「ピタッ！」と決まるその瞬間、パズルを解いた爽快感とともに、校務に新しい風が吹くことを確信しています。まさに、教育現場に数学的な美しさと、ゆとりをもたらすための校務DXの象徴です。</p>
   <h3>【The Solution】従来業務の苦悩 vs 「かこピタ」の革命</h3><p>従来、日程調整は「付箋」と「消しゴム」の戦いでした。保護者から提出された紙の山を前に、担任は深夜まで盤面を睨み、一人の変更があれば全員を並べ直すという、あまりにも非生産的なループを繰り返していました。これは教育者が行うべきクリエイティブな仕事ではありません。</p><p>「かこピタ」はこのプロセスを完全にデジタル化・自動化します。アンケート回答を読み込んだ瞬間、数万通りの組合せを計算し、最適な解を提示します。人がやれば数日かかる作業を数秒へ。この圧倒的な時間短縮こそが、教員の働き方改革の正体です。また、転記ミスやダブルブッキングといったヒューマンエラーをゼロにすることで、保護者との信頼関係維持にも大きく寄与します。精神的なプレッシャーからの解放は、翌日の授業の質を確実に向上させるでしょう。</p>
   <h3>【Compassion】かゆいところに手が届く、現場目線のディテール</h3><p>本ツールには、フジイヨウスケ氏の現場経験に基づく「魂のディテール」が宿っています。例えば、5. 配置で児童生徒を選ぶと、入れない時間帯が濃い斜線で示され、きょうだいの配置も一目でわかります。都合の悪い時間に置こうとすると、置く前に確認してくれます。3. 条件では、日付や時刻の見出しをクリックするだけで、その日・その時刻をまとめて塗れ、45人の名簿でも「名前で探す」ですぐ目的の子にたどり着けます。休憩（×）はなぞって塗れて、17時以降を隠す表示切替や、学級ごとの自動配置の設定もあります。これらは仕様書には現れにくいですが、実際に毎日使うユーザーにとって最も価値のある『配慮』という名の機能です。</p>
-  <h3>【Credit】</h3><p>かこピタ v.${APP_VER}　Created by ${APP_AUTHOR} with Gemini ／ Special Thanks to ウチムラヨウスケ<br>Web（HTML）版は、原作の機能と考え方を引き継いで移設したものです。</p>`]
+  <h3>【Credit】</h3><p>かこピタ v.${APP_VER}　Created by ${APP_AUTHOR} with 生成AI ／ Special Thanks to ウチムラヨウスケ<br>Web（HTML）版は、原作の機能と考え方を引き継いで移設したものです。</p>`]
 ];
 HELP.push(['書き出し',()=>`<h3>Excel・CSV</h3><p>「4. かこピタ(配置)」の「書き出し」では、いま開いている学級を、「5. 印刷」の「学級の一覧表」では、選んだ学級を書き出せます。</p>
   <ul><li><b>Excel（.xlsx）</b>：学級ごとの表のシート（画面と同じ「時間×日付」の形）と、並べ替えできる「一覧データ」シート（1人1行。日付と時刻は、Excelの日付・時刻の値）が入ります。表には罫線と色が付き、A4縦・1ページの幅に収まる印刷設定です。セルの結合は使わず、2枠の人は、下のマスに「（連）」と入ります。</li>
@@ -4449,7 +4546,7 @@ A.newevent=()=>{
           if(st.cond){for(const kk of Object.keys(s.cond))delProp(s.cond,kk);wipeCf(s);setProp(s,'resp',null);setProp(s,'ok',false)}
           if(st.sib)setProp(s,'sib',[]);if(st.slots)setProp(s,'slots',1)}
         for(const k of sel){const c=P.classes[k];if(c&&st.cond&&c.snap)setProp(c,'snap',null);if(c&&st.grid){for(const kk of Object.keys(c.grid))delProp(c.grid,kk);setProp(c,'locked',false);if(c.slotMin)setProp(c,'slotMin',0);if(c.start)setProp(c,'start','')}}
-        if(st.sched)setProp(P.sched,'dates',[]);
+        if(st.sched){setProp(P.sched,'dates',[]);if(P.sched.prev)setProp(P.sched,'prev',null)}
         if(st.kind){setProp(P.meta,'kind','');setProp(P.meta,'kindCustom','')}
         if(st.sched&&st.cond&&st.grid){setProp(P,'term',uid());setProp(P,'form',Object.assign({},formRaw(),{title:'',closeDate:''}))}   // 「次の行事の準備」：世代IDを新しくする（前の行事のフォルダにはつながらなくなる）
         if(st.imp){setProp(P,'imp',null)}
@@ -4633,12 +4730,12 @@ function gridSetHtml(k){
   const lens=[...new Set([bm,len,...SLOT_LENS])].sort((a,b)=>a-b);
   return `<section class="panel gset" style="margin-bottom:14px;padding:12px 16px"><div class="row" style="gap:18px 22px;flex-wrap:wrap;align-items:flex-end">
     <label class="f" style="min-width:150px">この学級の1枠の長さ<select data-gs="slotMin" ${ro}>${lens.map(v=>`<option value="${v}" ${v===len?'selected':''}>${v}分${v===bm?'（日程と同じ）':''}</option>`).join('')}</select></label>
-    <label class="f">開始時刻<input type="time" step="300" data-gs="start" value="${esc(st0)}" ${ro} style="width:130px"></label>
+    <label class="f">開始時刻<select data-gs="start" ${ro} style="width:130px">${timeOpts(st0)}</select></label>
     <div class="f">時刻のルール<span class="seg">${[['effort','できれば'],['strict','厳守'],['none','制限なし']].map(([v,l])=>`<button data-act="gs-cut" data-v="${v}" class="${o.cutMode===v?'on':''}" ${ro}>${l}</button>`).join('')}</span></div>
     <label class="f">区切りの時刻<input type="time" data-gs="cutTime" value="${esc(o.cutTime)}" ${o.cutMode==='none'||ro?'disabled':''} style="width:130px"></label>
     ${G.same?'':`<button class="btn ghost sm" data-act="gs-reset">日程と同じに戻す</button>`}
     <button class="btn sm" data-act="gs-copy">${ic('users',15)}ほかの学級にも反映…</button></div>
-   <p class="tiny muted" style="margin-top:8px">変えると、下の日程表にすぐ反映されます（学級ごとの設定です）。${G.same?'':`<b>この学級の枠は日程（${bm}分）と違います。</b>保護者の×（${bm}分ごと）は、重なる枠をすべてNGにします。○は、枠の全部が○のときだけ使えます。`}${o.cutMode==='strict'?` ${esc(o.cutTime)}以降の枠は、この学級では使いません。`:o.cutMode==='effort'?` ${esc(o.cutTime)}以降の枠は黄色で示し、できるだけ使いません。`:''}</p></section>`;
+   <p class="tiny muted" style="margin-top:8px">変えると、下の日程表にすぐ反映されます（学級ごとの設定です）。${G.same?'':`<b>この学級の枠は日程（${bm}分）と違います。</b>保護者の×（${bm}分ごと）は、重なる枠をすべてNGにします。○は、枠の全部が○のときだけ使えます。`}${o.cutMode==='strict'?` ${esc(o.cutTime)}以降の枠は、この学級では使いません。`:o.cutMode==='effort'?` ${esc(o.cutTime)}以降の枠は、行の上に点線を引き、空いている枠をうすい斜線で示します（できるだけ使いません）。`:''}</p></section>`;
 }
 function takeSnap(k){   // 学級の1枠の長さ・開始時刻を、取り込み後に最初に変える瞬間の条件を、その学級だけ記録する
   const c=P.classes[k];if(!c||c.snap)return;
@@ -4691,9 +4788,9 @@ function vGrid(){
   const selOK=sel?(kk=>slotOKg(sel,kk,k)):null,selO=sel&&info(sel).no>0;
   const lockOn=!!(G.lockMsg&&Date.now()-G.lockMsg<9000&&cls.locked);
   const used=[...pm.values()].reduce((a,kk)=>a+cls.grid[kk].n,0),brks=Object.values(cls.grid).filter(c=>c.brk).length,total=capacity(k);
-  let h=`<div class="page ${shBlocked(k)?'ro':''}">${roBanner(k)}<div class="ph"><div><h1>4. かこピタ(配置)</h1><p>児童生徒をマスにはめていきます。児童生徒を選ぶと、入れない時間帯が濃い斜線になります。</p></div><span class="grow"></span><div class="autogrp fabg"><div class="lkcol"><button class="btn sm" data-act="g-lockall" title="全学級または指定した学級のロックをまとめて解除・設定">${ic('lock',13)}ロック一括…</button><button class="btn sm ${cls.locked?'sel':''} ${lockOn?'pulse':''}" data-act="g-lock" title="ロック中は自動配置で上書きされません。手作業で配置を変えると、自動でロックされます。もう一度押すと解除します">${ic('lock',13)}${cls.locked?'かこピタロック中':'かこピタロック'}</button></div><button class="btn pri big" data-act="auto">${ic('wand',18)}かこピタ（自動配置）する</button></div></div>
+  const lockAlert=lockOn?`<div class="alertpin" role="alert">${ic('lock',17)}<span>この学級は<b>かこピタロック中</b>のため、かこピタできません。</span><button class="btn sm" data-act="g-lock">ロックを解除する</button><span style="font-weight:500">（画面下の「かこピタロック中」ボタンでも解除できます）</span></div>`:'';
+  let h=`<div class="page ${shBlocked(k)?'ro':''}">${roBanner(k)}${lockAlert}<div class="ph"><div><h1>4. かこピタ(配置)</h1><p>児童生徒をマスにはめていきます。児童生徒を選ぶと、入れない時間帯が濃い斜線になります。</p></div><span class="grow"></span><div class="autogrp fabg"><div class="lkcol"><button class="btn sm" data-act="g-lockall" title="全学級または指定した学級のロックをまとめて解除・設定">${ic('lock',13)}ロック一括…</button><button class="btn sm ${cls.locked?'sel':''} ${lockOn?'pulse':''}" data-act="g-lock" title="ロック中は自動配置で上書きされません。手作業で配置を変えると、自動でロックされます。もう一度押すと解除します">${ic('lock',13)}${cls.locked?'かこピタロック中':'かこピタロック'}</button></div><button class="btn pri big" data-act="auto">${ic('wand',18)}かこピタ（自動配置）する</button></div></div>
    ${gridSetHtml(k)}
-   ${lockOn?`<div class="alertpin" role="alert">${ic('lock',17)}<span>この学級は<b>かこピタロック中</b>のため、かこピタできません。</span><button class="btn sm" data-act="g-lock">ロックを解除する</button><span style="font-weight:500">（画面下の「かこピタロック中」ボタンでも解除できます）</span></div>`:''}
    <div class="gt">${classBar(k,'g-cls')}<span class="grow"></span>
     <div class="seg"><button class="${G.mode==='place'?'on':''}" data-act="g-mode" data-m="place">配置する</button><button class="${G.mode==='break'?'on':''}" data-act="g-mode" data-m="break" ${sel?'disabled title="児童生徒を選択中は使えません（Escで選択を解除）"':'title="空きマスをなぞると、まとめて×にできます。日付をクリックすると、その日すべて×になります"'}>休憩（×）を置く</button></div>
     ${P.students.some(s=>s.addr)?`<label class="tog"><input type="checkbox" data-ch="addrshow" ${showAddr()?'checked':''}>住所を表示</label>`:''}
@@ -4737,7 +4834,6 @@ function areaHue(k){const ck=curCls()||'';if(AH.ver!==VER||AH.k!==ck){AH.ver=VER
 function addrHtml(st){if(!showAddr())return '';const ao=clsAuto(curCls());const k=areaKeyM(st,ao.areaN,ao.areaMode);if(!k)return '';return `<span class="ad"><i class="adot" style="background:hsl(${areaHue(k)} 68% 50%)"></i>${esc(k)}</span>`}
 function dayCountV(cls,d,hid){let n=0;for(const k in cls.grid){if(k.startsWith(d+'|')&&cls.grid[k].head&&!(hid&&hid.has(cls.grid[k].sid)))n++}return n}
 /* placement logic */
-const LOCKSUF='（手作業で配置を変えたので、この学級に「かこピタロック」をかけました）';
 function lockAfterManual(cls){   // 手作業で配置を変えたら、その学級をかこピタロックする（「全学級をかこピタ」などで、手作業の配置が消えないように）。配置が0名になったときは、ロックを外す。返り値：新しくロックしたか
   const n=Object.values(cls.grid||{}).filter(c=>c.head).length;
   if(n>0&&!cls.locked){setProp(cls,'locked',true);return true}
@@ -4777,7 +4873,7 @@ async function placeAt(clsKey,sid,target){
     fl=lockAfterManual(cls);
   });
   UI.grid.snap=tk;
-  if(other&&!oldKey)toast(`${other.name} さんを未配置に戻しました${fl?LOCKSUF:''}`,{undo:true});
+  if(other&&!oldKey)toast(`${other.name} さんを未配置に戻しました`,{undo:true});
   else if(fl)toast(`手作業で配置を変えたので、${clsLabel(cls.g,cls.c)}に「かこピタロック」をかけました。「全学級をかこピタ」などで、この配置は動きません（手作業での配置・削除は、これからもできます。外すときは、「かこピタロック中」ボタン）`,{undo:true,ms:7000});
 }
 function closePicker(){const p=$('#picker');if(p)p.remove();UI.grid.picker=null}
@@ -4819,7 +4915,7 @@ function xlBuild(keys){
       const rows=SL.slice(first,last+1),skip=new Set(),merges=[];
       const cnt=dates.map(d=>{let n=0;for(const x of SL){const cc=cls.grid[d+'|'+x.key];if(cc&&cc.head&&stById(cc.sid))n++}return n});
       const sty=[[XS.title],[XS.info],[XS.head,...dates.map(()=>XS.head)],[XS.count,...dates.map(()=>XS.count)]];
-      const aoa=[[`${lab}　${kindName()} 日程表${c.teacher?'　'+c.teacher+' 先生':''}${P.meta.school?'　'+P.meta.school:''}`],
+      const aoa=[[`${lab}　${kindNameG(c.g)} 日程表${c.teacher?'　'+c.teacher+' 先生':''}${P.meta.school?'　'+P.meta.school:''}`],
                  [`実施：${mdw(dates[0])}～${mdw(dates[dates.length-1])}　出力日：${todayISO()}`],['時間',...dates.map(mdw)],['人数',...cnt.map(n=>n+'名')]];
       rows.forEach((x,ri)=>{
         const line=[x.label],sl2=[XS.time];
@@ -4930,6 +5026,7 @@ function xlsxBytes(wb){
 }
 const xlName=(keys,ext)=>{const c=keys.length===1?(classList().find(x=>x.key===keys[0])||{}):null;return `かこピタ_${c?clsLabel(c.g,c.c):'一覧表'}_${todayISO()}.${ext}`};
 function exportXlsx(keys){
+  pinOnce('Excel書き出しの前');
   try{const wb=xlBuild(keys);if(!wb)return;
     let bytes;try{bytes=xlsxBytes(wb)}catch(e){console.warn('罫線つきの書き出しに失敗したため、書式なしで書き出します',e);bytes=XLSX.write(wb,{bookType:'xlsx',type:'array'})}
     dlText(bytes,xlName(keys,'xlsx'),'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
@@ -4948,7 +5045,7 @@ function exportCsv(keys,form){   // form: 't'=表の形（学級ごと、空行�
 
 /* ---- 書き出し：Excel・CSV・カレンダー（ICSファイル／予定を自動で削除するGAS）---- */
 const CAL_NOTE='個人情報の扱いには十分注意してください。予定が終われば、速やかに削除し、削除できたことを確認してください。';
-const CAL_DESC_TXT='【個人情報の取り扱い注意】この予定には、児童生徒の情報が含まれる場合があります。共有したり、他の人に見せたりしないよう、取り扱いには十分注意してください。行事が終わったら、速やかにこの予定（カレンダー）を削除し、削除できたことを確認してください。';
+const CAL_DESC_TXT='【個人情報の取り扱い注意】この予定には、個人の情報が含まれる場合があります。共有したり、他の人に見せたりしないよう、取り扱いには十分注意してください。予定が終わったら、速やかにこの予定（カレンダー）を削除し、削除できたことを確認してください。';
 const calDefaults=()=>({g:true,c:true,n:true,name:false,addr:false,asrc:'roster',route:false,fmt:'dash',kind:false,alarm:false,min:10});
 const calAddr=(s,mode)=>{const r=rosterAddr(s),p=respAddr(s);return mode==='resp'?(p||r):(r||p)};   // 場所の欄に入れる住所（名簿か回答か）
 function calOpt(){let o={};try{o=JSON.parse(localStorage.getItem('kp_cal2')||'{}')}catch(e){}return Object.assign(calDefaults(),o)}
@@ -4961,8 +5058,8 @@ function calIdText(g,c,n,o){
 function calTitle(g,c,s,o){   // 名前が入るときは「名前（学年組番）」、入らないときは学年組番だけ
   const id=calIdText(g,c,s.n,o);
   let t=o.name&&s.name?(id?`${s.name}（${id}）`:s.name):id;
-  if(!t)t=kindName();
-  return (o.kind?`【${kindName()}】`:'')+t;
+  if(!t)t='予定';   // 何も入れないときも、学校のことだとわかる言葉は使わない
+  return (o.kind?`【${kindNameG(g)}】`:'')+t;
 }
 function calDates(){const ds=[...P.sched.dates].sort(),last=ds[ds.length-1]||todayISO(),p=dp(last);return{first:ds[0]||last,last,del:isoOf(new Date(p.y,p.m-1,p.d+1))}}
 const jpDate=iso=>{const p=dp(iso);return `${p.y}年${p.m}月${p.d}日（${'日月火水木金土'[p.wd]}）`};
@@ -4991,13 +5088,13 @@ function calEvents(keys,o){
       const st=+m[1]*60+ +m[2],en=Math.min(st+((cc&&cc.n)||1)*slotMin,24*60-1),f=x=>`${dd}T${String(Math.floor(x/60)).padStart(2,'0')}:${String(x%60).padStart(2,'0')}`;
       out.push({uid:`${P.id||'kp'}-${key}-${s.id}-${dd}-${st}`.replace(/[^0-9A-Za-z_-]/g,'_'),d:dd,s:f(st),e:f(en),
         title:calTitle(c.g,c.c,s,o),ad:(o.addr||o.route)?calAddr(s,o.asrc):'',loc:o.addr?calAddr(s,o.asrc):'',
-        desc:`${kindName()}（かこピタで作成）\n${CAL_DESC_TXT}\n※ この予定は自動では削除されない場合があります。${jpDate(dl.del)}（懇談の最終日の翌日）を目安に、削除してください。`});
+        desc:`${CAL_DESC_TXT}\n※ この予定は自動では削除されない場合があります。${jpDate(dl.del)}（予定の最終日の翌日）を目安に、削除してください。`});
     }
   }
   out.sort((a,b)=>a.s<b.s?-1:a.s>b.s?1:a.title<b.title?-1:1);
   if(o.route){   // 日ごとの経路（Googleマップのリンク）を、その日の「終日の予定」にする
     const by={};out.forEach(e=>{if(e.ad)(by[e.d]=by[e.d]||[]).push(e)});
-    const delNote=`※ この予定は自動では削除されない場合があります。${jpDate(dl.del)}（懇談の最終日の翌日）を目安に、削除してください。`;
+    const delNote=`※ この予定は自動では削除されない場合があります。${jpDate(dl.del)}（予定の最終日の翌日）を目安に、削除してください。`;
     for(const dd of Object.keys(by).sort()){
       const list=by[dd],links=routeLinks(origin,list.map(e=>e.ad));links.forEach((l,i)=>{l.n=i+1});
       const mkDesc=ls=>{const a=ls[0].from,z=ls[ls.length-1].to;
@@ -5018,7 +5115,7 @@ function buildIcs(ev,o){
   const utc=iso=>{const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(iso);return new Date(Date.UTC(+m[1],+m[2]-1,+m[3],+m[4]-9,+m[5])).toISOString().replace(/[-:]/g,'').replace(/\.\d+Z$/,'Z')};
   const fold=ln=>{const enc=new TextEncoder();let out='',cur='',n=0;for(const ch of ln){const b=enc.encode(ch).length;if(n+b>75){out+=cur+'\r\n';cur=' '+ch;n=1+b}else{cur+=ch;n+=b}}return out+cur};
   const now=utc(new Date(Date.now()+9*3600e3).toISOString().slice(0,16));
-  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Kakopita//Calendar//JA','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:'+esc(`かこピタ ${kindName()}`),'X-WR-TIMEZONE:Asia/Tokyo','X-WR-CALDESC:'+esc(CAL_DESC_TXT)];
+  const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Kakopita//Calendar//JA','CALSCALE:GREGORIAN','METHOD:PUBLISH','X-WR-CALNAME:'+esc(`予定表 ${calDates().first.slice(5).replace('-','/')}～${calDates().last.slice(5).replace('-','/')}`),'X-WR-TIMEZONE:Asia/Tokyo','X-WR-CALDESC:'+esc(CAL_DESC_TXT)];
   for(const e of ev){
     if(e.allDay){const nx=new Date(Date.UTC(+e.s.slice(0,4),+e.s.slice(5,7)-1,+e.s.slice(8,10)+1)).toISOString().slice(0,10).replace(/-/g,'');
       L.push('BEGIN:VEVENT','UID:'+e.uid+'@kakopita','DTSTAMP:'+now,'DTSTART;VALUE=DATE:'+e.s.replace(/-/g,''),'DTEND;VALUE=DATE:'+nx,'SUMMARY:'+esc(e.title),'DESCRIPTION:'+esc(e.desc),'TRANSP:TRANSPARENT','END:VEVENT');continue}
@@ -5031,11 +5128,12 @@ function buildIcs(ev,o){
   L.push('END:VCALENDAR');
   return L.map(fold).join('\r\n')+'\r\n';
 }
-const CAL_GAS_T=String.raw`// かこピタ カレンダー登録GAS（__KIND__）
+const CAL_GAS_T=String.raw`// カレンダー登録スクリプト
 // ＜使い方＞
 //  ① 上の「実行」で registerCalendar を1回実行する（初回は、カレンダーと、時刻で動く仕組み（トリガー）の権限の承認が出ます。すべて許可してください）
 //  ② Googleカレンダーの左の一覧に、専用のカレンダーができて、予定が入ります（自分のカレンダーとは別なので、あとで丸ごと消せます）
-//  ③ このカレンダーは、__DELJP__の1時ごろ（懇談の最終日の翌日）に、予定ごと自動で削除されます。いますぐ消したいときは deleteCalendarNow を実行します
+//  ③ このカレンダーは、__DELJP__の1時ごろ（予定の最終日の翌日）に、予定ごと自動で削除されます。いますぐ消したいときは deleteCalendarNow を実行します
+//     （自動削除は、その日時に1回と、念のため毎日1時にも確認します。消えていなければ、もう一度消します。消えたあとは、確認の仕組み（トリガー）も自動で止まります。ようすは、左の「実行数」で見られます）
 //  ※ 個人情報の扱いには十分注意してください。予定が終われば、速やかに削除し、削除できたこと（Googleカレンダーの一覧から消えていること）を確認してください
 //  ※ もう一度 registerCalendar を実行すると、前に作ったカレンダーを消してから、作り直します
 const EVENTS = __EVENTS__;   // [題名, 開始, 終了, 場所, 説明, 通知しない(1)]（日時は日本時間）
@@ -5049,9 +5147,10 @@ function jst_(s) { return new Date(s + ':00+09:00'); }
 function registerCalendar() {
   const p = PropertiesService.getScriptProperties();
   const oldId = p.getProperty('CAL_ID');
-  if (oldId) { try { const o = CalendarApp.getCalendarById(oldId); if (o) o.deleteCalendar(); } catch (e) {} }
+  if (oldId) { try { const o = CalendarApp.getCalendarById(oldId); if (o) o.deleteCalendar(); } catch (e) { Logger.log('前のカレンダーを消せませんでした: ' + e); } }
   const cal = CalendarApp.createCalendar(CAL_NAME, { summary: CAL_DESC, timeZone: 'Asia/Tokyo' });
   p.setProperty('CAL_ID', cal.getId());
+  setTriggers_();   // 先に、自動削除の仕組みを作っておく（予定の登録の途中で止まっても、あとで消えるように）
   EVENTS.forEach(function (e, i) {
     const allDay = e[1].indexOf('T') < 0;   // 日付だけのものは、日ごとの経路の「終日の予定」
     let ev;
@@ -5061,26 +5160,60 @@ function registerCalendar() {
     if (NOTICE_MIN > 0 && !allDay && !e[5]) ev.addPopupReminder(NOTICE_MIN);   // 日ごとの経路の予定（e[5]=1）には、通知を付けない
     if (i % 20 === 19) Utilities.sleep(1000);
   });
-  ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'deleteCalendar_') ScriptApp.deleteTrigger(t); });
-  ScriptApp.newTrigger('deleteCalendar_').timeBased().at(jst_(DELETE_AT)).create();
   Logger.log('カレンダー「' + CAL_NAME + '」を作り、' + EVENTS.length + '件の予定を入れました。\n' + DELETE_AT.replace('T', ' ') + ' ごろ、予定ごと自動で削除されます。\n個人情報の扱いには十分注意し、予定が終われば、速やかに削除できたかを確認してください。');
 }
 
-function deleteCalendar_() {
-  const p = PropertiesService.getScriptProperties(), id = p.getProperty('CAL_ID');
-  if (id) { try { const c = CalendarApp.getCalendarById(id); if (c) c.deleteCalendar(); } catch (e) {} p.deleteProperty('CAL_ID'); }
+function setTriggers_() {
+  clearTriggers_();
+  ScriptApp.newTrigger('deleteCalendar_').timeBased().at(jst_(DELETE_AT)).create();   // ① 予定の日時に1回
+  ScriptApp.newTrigger('deleteCalendar_').timeBased().everyDays(1).atHour(1).inTimezone('Asia/Tokyo').create();   // ② 念のため、毎日1時にも確認（日時の前は何もしない）
+}
+function clearTriggers_() {
   ScriptApp.getProjectTriggers().forEach(function (t) { if (t.getHandlerFunction() === 'deleteCalendar_') ScriptApp.deleteTrigger(t); });
 }
 
+function deleteCalendar_() { doDelete_(false); }   // 時刻で動くときは、こちら（引数は使いません）
+
 function deleteCalendarNow() {
-  deleteCalendar_();
-  Logger.log('カレンダーを削除しました。Googleカレンダーの左の一覧から、なくなっていることを確認してください。');
+  doDelete_(true);
+  Logger.log('Googleカレンダーの左の一覧から、なくなっていることを確認してください。残っているときは、もう一度この関数を実行してください。');
+}
+
+function doDelete_(force) {
+  if (!force && new Date().getTime() < jst_(DELETE_AT).getTime()) return;   // まだ早いときは、何もしない
+  const p = PropertiesService.getScriptProperties(), id = p.getProperty('CAL_ID'), list = [];
+  try { if (id) { const c = CalendarApp.getCalendarById(id); if (c) list.push(c); } } catch (e) { Logger.log('カレンダーを取得できませんでした: ' + e); }
+  try {   // IDで見つからないときは、同じ名前・同じ説明の、自分のカレンダーも探す
+    CalendarApp.getOwnedCalendarsByName(CAL_NAME).forEach(function (c) {
+      if (c.getDescription() === CAL_DESC && !list.some(function (x) { return x.getId() === c.getId(); })) list.push(c);
+    });
+  } catch (e) { Logger.log('名前での検索に失敗しました: ' + e); }
+  list.forEach(function (c) {
+    try { c.deleteCalendar(); }
+    catch (e) {
+      Logger.log('カレンダーを消せませんでした（予定だけ消します）: ' + e);
+      try { c.getEvents(new Date(2000, 0, 1), new Date(2100, 0, 1)).forEach(function (ev) { ev.deleteEvent(); }); } catch (e2) { Logger.log('予定も消せませんでした: ' + e2); }
+    }
+  });
+  let left = 0;   // 消えたか、確かめる
+  try { left = CalendarApp.getOwnedCalendarsByName(CAL_NAME).filter(function (c) { return c.getDescription() === CAL_DESC; }).length; } catch (e) { left = 0; }
+  if (left === 0) {
+    p.deleteProperty('CAL_ID'); clearTriggers_();
+    Logger.log('カレンダーを削除しました。');
+  } else {
+    if (new Date().getTime() > jst_(DELETE_AT).getTime() + 30 * 24 * 3600 * 1000) {   // 30日たっても消せないときは、毎日の確認を終わりにする（動き続けないように）
+      clearTriggers_();
+      Logger.log('削除の予定から30日たっても消せなかったため、毎日の確認を終了しました。Googleカレンダーの左の一覧から、手作業で削除してください。');
+    } else {
+      Logger.log('カレンダーがまだ残っています（' + left + '件）。毎日1時に、もう一度消します。いますぐ消すときは deleteCalendarNow を実行してください。');
+    }
+  }
 }
 `;
 function buildCalGas(ev,o){
   const dl=calDates(),lit=s=>JSON.stringify(s).replace(/\u2028/g,'\\u2028').replace(/\u2029/g,'\\u2029');
-  const name=`かこピタ_${kindName()}_${dl.first.slice(5).replace('-','/')}～${dl.last.slice(5).replace('-','/')}`;
-  return CAL_GAS_T.replace('__KIND__',()=>kindName()).replace('__DELJP__',()=>jpDate(dl.del)).replace('__EVENTS__',()=>lit(ev.map(e=>[e.title,e.s,e.e,e.loc,e.desc,e.route?1:0])))
+  const name=`予定表_${dl.first.slice(5).replace('-','/')}～${dl.last.slice(5).replace('-','/')}`;   // カレンダー名には、学校のことだとわかる言葉を使わない
+  return CAL_GAS_T.replace('__DELJP__',()=>jpDate(dl.del)).replace('__EVENTS__',()=>lit(ev.map(e=>[e.title,e.s,e.e,e.loc,e.desc,e.route?1:0])))
     .replace('__NAME__',()=>lit(name)).replace('__DESC__',()=>lit(CAL_DESC_TXT)).replace('__MIN__',()=>String(o.alarm?(+o.min||10):0)).replace('__DEL__',()=>lit(dl.del+'T01:00'));
 }
 function exportDlg(keys,scope){
@@ -5096,7 +5229,7 @@ function exportDlg(keys,scope){
    <div class="warnbox" style="margin-bottom:10px"><b>⚠ ${CAL_NOTE}</b></div>
    <div class="tiny" style="font-weight:700;margin:0 0 4px">予定の題名に入れるもの</div>
    <div class="row" style="flex-wrap:wrap;gap:6px 16px">${chk('g','学年')}${chk('c','組')}${chk('n','出席番号')}${chk('name','名前')}</div>
-   <div class="row" style="flex-wrap:wrap;gap:6px 16px;margin-top:6px"><label class="tog">学年・組・番号の書き方 <select data-cal="fmt"><option value="dash" ${o0.fmt==='dash'?'selected':''}>1-1-23（推奨）</option><option value="jp" ${o0.fmt==='jp'?'selected':''}>1年1組23番</option><option value="tight" ${o0.fmt==='tight'?'selected':''}>1123（詰める）</option></select></label>${chk('kind','題名の先頭に行事名を付ける')}</div>
+   <div class="row" style="flex-wrap:wrap;gap:6px 16px;margin-top:6px"><label class="tog">学年・組・番号の書き方 <select data-cal="fmt"><option value="dash" ${o0.fmt==='dash'?'selected':''}>1-1-23（推奨）</option><option value="jp" ${o0.fmt==='jp'?'selected':''}>1年1組23番</option><option value="tight" ${o0.fmt==='tight'?'selected':''}>1123（詰める）</option></select></label>${chk('kind','題名の先頭に行事名を付ける（学校の予定だとわかります）')}</div>
    <div class="tiny" style="font-weight:700;margin:12px 0 4px">住所の使いみち</div>
    <div class="row" style="flex-wrap:wrap;gap:6px 16px">${chk('addr','住所を、予定の「場所」の欄に入れる')}</div>
    <div class="row" style="flex-wrap:wrap;gap:6px 16px;margin-top:6px">${chk('route','日ごとの経路（Googleマップのリンク）を、その日の最初の予定から最後の予定までの予定に入れる')}</div>
@@ -5182,7 +5315,7 @@ A['g-lockall']=()=>{
 A['g-lock']=()=>{UI.grid.lockMsg=0;const c=P.classes[curCls()];act(()=>setProp(c,'locked',!c.locked))};
 A['g-pick']=el=>{UI.grid.sel=UI.grid.sel===el.dataset.sid?null:el.dataset.sid;if(UI.grid.sel)UI.grid.mode='place';render()};
 A['g-cond']=el=>{const s=stById(el.dataset.sid);UI.cond.sid=s.id;UI.cond.mode='one';go('cond')};
-A['g-rm']=(el,e)=>{e.stopPropagation();const k=curCls(),cls=P.classes[k],s=stById(el.dataset.sid);let fl=false;act(()=>{clearPlace(cls,s.id);fl=lockAfterManual(cls)});toast(`${s.name} さんを外しました${fl?LOCKSUF:''}`,{undo:true})};
+A['g-rm']=(el,e)=>{e.stopPropagation();const k=curCls(),cls=P.classes[k],s=stById(el.dataset.sid);let fl=false;act(()=>{clearPlace(cls,s.id);fl=lockAfterManual(cls)});toast(`${s.name} さんを外しました`,{undo:true})};
 A['g-tile']=(el,e)=>{const sid=el.dataset.sid,G=UI.grid;
   if(G.mode==='break'){G.mode='place';G.sel=sid;render();return}   // 休憩モードで配置済みの名前を押したら、配置モードに切り替えて選択
   if(G.sel&&G.sel!==sid){placeAt(curCls(),G.sel,el.closest('td').dataset.dk);return}
@@ -5226,8 +5359,20 @@ A['f-open']=()=>{UI.menu=false;paintMenu();openFile()};
 A['f-reconnect']=()=>{UI.menu=false;paintMenu();reconnectFile()};
 A['bk-open']=async()=>{
   UI.menu=false;paintMenu();const bk=await listBackups();
-  const el=openDlg(`<h2>以前の状態に戻す</h2><p class="muted tiny" style="margin-bottom:12px">自動で残しているバックアップです（最新12件）。戻す前の状態も、新しいバックアップとして残します。</p>
-   <div style="display:flex;flex-direction:column;gap:8px">${bk.length?bk.map(b=>`<div class="bk"><div class="grow"><b>${fullTs(b.at)}</b><div class="tiny muted">${esc(b.label)}・${b.n}名${b.title?'・'+esc(b.title):''}</div></div><button class="btn sm" data-restore="${esc(String(b.k))}">この状態に戻す</button></div>`).join(''):'<p class="muted">バックアップはまだありません。</p>'}</div><div class="acts"><button class="btn" data-close>閉じる</button></div>`,{wide:false});
+  const el=openDlg(`<h2>以前の状態に戻す</h2><p class="muted tiny" style="margin-bottom:12px">自動のバックアップ（最新12件）と、📌 読み込み・取り込み・消去・配置・印刷などの前の「節目」のバックアップ（最新20件）です。戻す前の状態も、新しいバックアップとして残します。</p><details class="det" style="margin-bottom:12px"><summary>どんなときに使う？ 戻し方の手順</summary><div class="detb tiny" style="line-height:1.75">
+<b>まず「元に戻す」（Ctrl+Z）</b>を試してください（直前の操作を1つずつ戻せます）。それで足りないとき（取り込みや消去のあと、アプリを閉じたあと など）に、ここから戻します。<br>
+<b>こんなとき → 選ぶバックアップ</b>
+<ul style="margin:4px 0 6px 18px">
+<li>名簿や回答を取り込んだら、おかしくなった → 📌「名簿の取り込み前」「回答の取り込み前」など</li>
+<li>かこピタ（自動配置）の結果をやめたい、配置が崩れた → 📌「かこピタ（自動配置）の前」</li>
+<li>日付や、データを消してしまった → 📌「データを消す前」「すべて消す前」「消去前」</li>
+<li>別の画面で先に保存されていて、読み込み直す・上書きした → 📌「別画面と衝突（…）」</li>
+<li>印刷・Excelの書き出しのあとに、配置を直したが、前の状態がよかった → 📌「印刷の前」「Excel書き出しの前」</li>
+</ul>
+<b>手順</b>：① 上の一覧で、<b>日時とラベル</b>を見て選ぶ（📌は、操作の直前の状態です）→ ② 「この状態に戻す」を押す。<b>戻す前の状態も、新しいバックアップとして残る</b>ので、まちがえても、もう一度戻せます。<br>
+<b>注意</b>：戻すと、その時点の<b>全学級・名簿・日程</b>が戻り、そのあとの作業は消えます。<b>共有フォルダでほかの先生と作業中は、戻した内容が共有にも反映され、ほかの先生の作業が消えることがあります</b>。先に、声をかけてください。バックアップは、<b>このブラウザの中</b>に保存されます（ブラウザのデータを消すと、なくなります）。大切な状態は、「今の状態をファイルに書き出す」でも残してください。
+</div></details>
+   <div style="display:flex;flex-direction:column;gap:8px">${bk.length?bk.map(b=>`<div class="bk"><div class="grow"><b>${fullTs(b.at)}</b><div class="tiny muted">${b.pin?'📌 ':''}${esc(b.label)}・${b.n}名${b.title?'・'+esc(b.title):''}</div></div><button class="btn sm" data-restore="${esc(String(b.k))}">この状態に戻す</button></div>`).join(''):'<p class="muted">バックアップはまだありません。</p>'}</div><div class="acts"><button class="btn" data-close>閉じる</button></div>`,{wide:false});
   el.addEventListener('click',async e=>{
     if(e.target.closest('[data-close]'))el._close();
     const b=e.target.closest('[data-restore]');if(b){const v=await dbGet(b.dataset.restore);if(v&&await loadFromText(v.json)){el._close();toast(`${fullTs(v.at)} の状態に戻しました`)}}});
@@ -5505,7 +5650,7 @@ document.addEventListener('drop',e=>{
     const sid=UI.grid.drag;UI.grid.drag=null;$$('.drop-ok,.drop-ng').forEach(x=>x.classList.remove('drop-ok','drop-ng'));
     const td=e.target.closest('td.cell');
     if(td){e.preventDefault();placeAt(curCls(),sid,td.dataset.dk)}
-    else if(e.target.closest('[data-drop="un"]')){e.preventDefault();const cls=P.classes[curCls()],s=stById(sid);if(s&&headKey(cls,sid)){let fl=false;act(()=>{clearPlace(cls,sid);fl=lockAfterManual(cls)});toast(`${s.name} さんを未配置に戻しました${fl?LOCKSUF:''}`,{undo:true})}}
+    else if(e.target.closest('[data-drop="un"]')){e.preventDefault();const cls=P.classes[curCls()],s=stById(sid);if(s&&headKey(cls,sid)){let fl=false;act(()=>{clearPlace(cls,sid);fl=lockAfterManual(cls)});toast(`${s.name} さんを未配置に戻しました`,{undo:true})}}
   }
 });
 document.addEventListener('dragstart',e=>{
@@ -5518,7 +5663,7 @@ document.addEventListener('contextmenu',e=>{
   const td=e.target.closest&&e.target.closest('td.cell');if(!td||UI.view!=='grid')return;e.preventDefault();
   const cls=P.classes[curCls()],k=td.dataset.dk,c=cls.grid[k];
   if(!c||c.brk)return;   // 空きマス・休憩（×）は、右ボタンのドラッグ塗り（下）で処理する
-  else{const s=stById(c.sid);let fl=false;act(()=>{clearPlace(cls,c.sid);fl=lockAfterManual(cls)});if(s)toast(`${s.name} さんを外しました${fl?LOCKSUF:''}`,{undo:true})}
+  else{const s=stById(c.sid);let fl=false;act(()=>{clearPlace(cls,c.sid);fl=lockAfterManual(cls)});if(s)toast(`${s.name} さんを外しました`,{undo:true})}
 });
 /* painting（Excelのように、ドラッグで囲んだ四角い範囲にまとめて反映する。指を離したときに反映） */
 const rectPick=(cands,a,b)=>{const ra=a.getBoundingClientRect(),rb=b.getBoundingClientRect(),L=Math.min(ra.left,rb.left),T=Math.min(ra.top,rb.top),R=Math.max(ra.right,rb.right),B=Math.max(ra.bottom,rb.bottom);return cands.filter(td=>{const r=td.getBoundingClientRect(),cx=(r.left+r.right)/2,cy=(r.top+r.bottom)/2;return cx>=L&&cx<=R&&cy>=T&&cy<=B})};
@@ -5561,7 +5706,7 @@ document.addEventListener('keydown',e=>{
     const m={'1':'x','2':'o','3':'u','0':'e'};if(m[e.key]){UI.cond.brush=m[e.key];render();return}
     if(UI.cond.mode==='one'&&(e.key==='ArrowDown'||e.key==='ArrowUp')){e.preventDefault();const mem=members(curCls()),i=mem.findIndex(s=>s.id===UI.cond.sid)+(e.key==='ArrowDown'?1:-1);if(mem[i]){UI.cond.sid=mem[i].id;render()}}
   }
-  if(UI.view==='grid'&&(e.key==='Delete'||e.key==='Backspace')&&UI.grid.sel){const cls=P.classes[curCls()],s=stById(UI.grid.sel);if(s&&headKey(cls,s.id)){let fl=false;act(()=>{clearPlace(cls,s.id);fl=lockAfterManual(cls)});toast(`${s.name} さんを外しました${fl?LOCKSUF:''}`,{undo:true})}}
+  if(UI.view==='grid'&&(e.key==='Delete'||e.key==='Backspace')&&UI.grid.sel){const cls=P.classes[curCls()],s=stById(UI.grid.sel);if(s&&headKey(cls,s.id)){let fl=false;act(()=>{clearPlace(cls,s.id);fl=lockAfterManual(cls)});toast(`${s.name} さんを外しました`,{undo:true})}}
 });
 A.go=el=>go(el.dataset.v);
 A['go-class']=el=>{UI.cls=el.dataset.k;UI.grid.sel=null;go('grid')};
