@@ -315,6 +315,15 @@ textarea.paste{width:100%;min-height:90px;font-family:ui-monospace,Consolas,mono
 .selcard{border:1.5px solid var(--brand);background:var(--brand-t);border-radius:14px;padding:12px 14px;margin-top:12px;min-height:214px}
 .selcard.empty{border:1.5px dashed var(--line);background:transparent;color:var(--ink3);display:grid;place-items:center;text-align:center;font-size:13px;line-height:1.7}
 .selcard h3{font-size:16px;font-weight:800}
+.minic{margin-top:8px}.minic .mh{font-size:11px;font-weight:700;color:var(--ink3);margin-bottom:3px}
+.mini{width:100%;border-collapse:separate;border-spacing:1px;table-layout:fixed;pointer-events:none;user-select:none}
+.mini th{font-weight:700;color:var(--ink3);padding:0;line-height:1;overflow:hidden;white-space:nowrap;text-align:center}
+.mini th.mt{width:26px;text-align:right;padding-right:2px;font-weight:600}
+.mini td.mc{background:var(--bg);border-radius:2px;text-align:center;font-weight:800;line-height:1;padding:0;overflow:hidden}
+.mini td.mc.x{background:var(--ng-t);color:var(--ng)}.mini td.mc.o{background:var(--ok-t);color:var(--ok)}.mini td.mc.u{background:var(--u-t);color:var(--u)}
+.mini td.mc.part{background-image:repeating-linear-gradient(135deg,transparent 0 2px,rgba(0,0,0,.2) 2px 3px)}
+.mini td.mc.late:not(.x):not(.o):not(.u){background:repeating-linear-gradient(135deg,var(--bg) 0 3px,var(--line2) 3px 4px)}
+.mini td.mc.here{outline:2px solid var(--brand);outline-offset:-1px}
 .hint{background:var(--snap);color:#3A2E00;border-radius:10px;padding:6px 12px;font-weight:700;font-size:13px}
 .sibl{font-size:12.5px;margin-top:6px;color:var(--ink2)}
 .sibl b{color:var(--ink)}
@@ -473,7 +482,7 @@ details.det.warn{border-color:#F4D58A;background:#FFFCF0}
 .dh1{font-size:calc(17pt*var(--hs,1));line-height:1.2;border-bottom:2px solid #111;padding-bottom:2mm;margin-bottom:3mm;display:flex;flex-wrap:nowrap;white-space:nowrap;align-items:baseline;gap:calc(6mm*var(--hs,1))}
 .dh1 b{font-size:calc(22pt*var(--hs,1))}.dh2{font-size:calc(11pt*var(--hs,1));color:#444;margin-left:auto}
 .ttab{width:100%;border-collapse:collapse;table-layout:fixed}
-.ttab th,.ttab td{border:1px solid #444;padding:.4mm 1.4mm;vertical-align:middle}
+.ttab th,.ttab td{border:1px solid #444;padding:.4mm var(--pd,1.4mm);vertical-align:middle}
 .ttab .ad{display:block;margin:0;max-width:none;white-space:normal;overflow:visible;text-overflow:clip}
 .ttab thead th{background:#e9eef4;font-size:11pt;height:8mm;font-weight:800}
 .ttab th.tm{width:15mm;background:#f2f4f7;font-size:10pt;text-align:right;white-space:nowrap;overflow:hidden}
@@ -612,7 +621,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.991';const SLOT_LENS=[5,10,15,20,25,30,35,40,45,50,55,60];const OLD_SECURE_TXT2='入力された情報は、この{行事}の日程調整以外の目的には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が適切に管理します。第三者に提供することはありません。';const OLD_SECURE_TXT='入力された情報は、この日時調整の目的以外には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が管理するスプレッドシートにのみ保存され、校内で適切に管理します。第三者に提供することはありません。';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.993';const SLOT_LENS=[5,10,15,20,25,30,35,40,45,50,55,60];const OLD_SECURE_TXT2='入力された情報は、この{行事}の日程調整以外の目的には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が適切に管理します。第三者に提供することはありません。';const OLD_SECURE_TXT='入力された情報は、この日時調整の目的以外には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が管理するスプレッドシートにのみ保存され、校内で適切に管理します。第三者に提供することはありません。';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1690,7 +1699,7 @@ A.slotmin=el=>{const m=+el.dataset.m,f=()=>gridEdit(()=>act(()=>{setProp(P.sched
 A.fix5=()=>{const S=P.sched,m=Math.max(5,Math.round((+S.slotMin||20)/5)*5),a=parseT(S.start),a2=a==null?null:Math.min(1435,Math.round(a/5)*5);
   const f=()=>gridEdit(()=>act(()=>{setProp(S,'slotMin',m);if(a2!=null)setProp(S,'start',keyT(a2));schedFit()}));
   confirmLoss(f,`1枠の長さ・開始時刻を5分単位（${m}分${a2!=null?'・'+keyT(a2)+'開始':''}）にそろえます。`,'そろえる').then(ok=>{if(ok)f()})};
-A.cutmode=el=>act(()=>setProp(P.sched,'cutMode',el.dataset.m));
+A.cutmode=el=>act(()=>{setProp(P.sched,'cutMode',el.dataset.m);for(const k of Object.keys(P.classes))dropLateHeads(k)});
 CH.dsingle=el=>{UI.sched.single=el.value};
 
 /* ================= placeholders ================= */
@@ -3511,9 +3520,10 @@ function printIssues(mode){
   const out=[],cl=plist();
   const ngp=[];for(const c of cl){const cls=P.classes[c.key],ck=ckOf(cls);for(const st of members(c.key)){   // 条件が×（または未回答）の時間に、配置されている人
     const hk=headKey(cls,st.id);if(!hk)continue;const sp=spanKeys(hk,Math.max(1,+cls.grid[hk].n||1),ck);if(!sp)continue;
-    const bad=sp.find(q=>!slotOKg(st,q,c.key));if(bad)ngp.push({st,key:bad,cls:c.key})}}
+    const bad=sp.find(q=>!slotOKg(st,q,c.key));if(bad){const [d0,tm0]=bad.split('|'),x0=gslots(c.key).find(y=>y.key===tm0),sv=x0?slotState(st,d0,x0,c.key):'';
+      ngp.push({st,key:bad,cls:c.key,why:sv==='x'?'x':sv==='u'?'u':(info(st).no>0?'o':'x')})}}}   // x＝×の時間／u＝未回答の時間／o＝○を入れた人が、○以外の時間
   const unpl=[],unans=[];for(const c of cl){const cls=P.classes[c.key];for(const st of members(c.key)){const t=stStatus(st);if(t==='unans')unans.push(st);else if(!headKey(cls,st.id))unpl.push(st)}}
-  if(ngp.length)out.push({lv:'ng',t:`条件が×（または未回答）の時間に配置されている児童生徒：${ngp.length}名`,names:ngp.map(x=>x.st),ngp,go:'ngreview',m:['notice','table']});
+  if(ngp.length)out.push({lv:'ng',t:`条件に合わない時間に配置されている児童生徒：${ngp.length}名（×の時間 ${ngp.filter(x=>x.why==='x').length}・○以外の時間 ${ngp.filter(x=>x.why==='o').length}・未回答の時間 ${ngp.filter(x=>x.why==='u').length}）`,names:ngp.map(x=>x.st),ngp,go:'ngreview',m:['notice','table']});
   if(unpl.length)out.push({lv:'ng',t:`日時が決まっていない児童生徒：${unpl.length}名（お知らせに日時が入りません）`,names:unpl,go:'grid',m:['notice']});
   if(unans.length)out.push({lv:'warn',t:`未回答の児童生徒：${unans.length}名（お知らせの対象外。「催促状」で印刷できます）`,names:unans,go:'cond',m:['notice']});
   const noT=cl.filter(c=>!c.teacher);if(noT.length)out.push({lv:'warn',t:`担任名が空の学級：${noT.map(c=>clsLabel(c.g,c.c)).join('、')}`,go:'roster',m:['notice','remind','table','blocks']});
@@ -3591,7 +3601,7 @@ async function doPrint(test){
   {const all=printIssues(UI.print.mode),ngi=all.find(i=>i.go==='ngreview'),iss=all.filter(i=>i.go!=='ngreview'),isig=iss.map(i=>i.t).join('|');
     if(!test&&ngi){const nsig=ngi.ngp.map(x=>x.st.id+'@'+x.key).join('|');
       if(UI.print.ackNg!==nsig){
-        const r=await ask({title:'条件が×の時間に、配置されている人がいます',body:`<div class="ngbox" style="font-size:14px"><b>${ngi.ngp.length}名</b>が、「3. 条件」で×（または未回答）の時間に配置されています。</div><div class="tiny" style="margin:8px 0;line-height:1.7">${ngi.ngp.slice(0,8).map(x=>{const [d,tm]=x.key.split('|'),c=P.classes[x.cls];return esc(clsLabel(c.g,c.c)+' '+x.st.n+'番 '+x.st.name)+'：'+esc(fmtD(d)+' '+tm)}).join('<br>')}${ngi.ngp.length>8?'<br>ほか '+(ngi.ngp.length-8)+'名':''}</div><p class="muted tiny">「配置を見直す」を選ぶと、「4. かこピタ(配置)」で、最初の人を選んだ状態で開きます。このまま印刷するときは、同じ内容では、もう聞きません。</p>`,buttons:[{id:1,label:'配置を見直す',kind:'pri'},{id:2,label:'このまま印刷する'}]});
+        const r=await ask({title:'条件に合わない時間に、配置されている人がいます',body:`<div class="ngbox" style="font-size:14px"><b>${ngi.ngp.length}名</b>が、「3. 条件」の条件に合わない時間に配置されています。<br><span class="tiny">×の時間 ${ngi.ngp.filter(x=>x.why==='x').length}名／○を入れた人の、○以外の時間 ${ngi.ngp.filter(x=>x.why==='o').length}名／未回答の時間 ${ngi.ngp.filter(x=>x.why==='u').length}名</span></div><div class="tiny" style="margin:8px 0;line-height:1.7">${ngi.ngp.slice(0,8).map(x=>{const [d,tm]=x.key.split('|'),c=P.classes[x.cls];return esc(clsLabel(c.g,c.c)+' '+x.st.n+'番 '+x.st.name)+'：'+esc(fmtD(d)+' '+tm)+'（'+({x:'×の時間',o:'○のない時間',u:'未回答の時間'}[x.why])+'）'}).join('<br>')}${ngi.ngp.length>8?'<br>ほか '+(ngi.ngp.length-8)+'名':''}</div><p class="muted tiny">「配置を見直す」を選ぶと、「4. かこピタ(配置)」で、最初の人を選んだ状態で開きます。このまま印刷するときは、同じ内容では、もう聞きません。</p>`,buttons:[{id:1,label:'配置を見直す',kind:'pri'},{id:2,label:'このまま印刷する'}]});
         if(r!==2){printRoot().innerHTML='';if(r===1)reviewPlacement(ngi.ngp[0]);return}
         UI.print.ackNg=nsig}}
     if(!test&&iss.length&&UI.print.ack!==isig){
@@ -3685,15 +3695,15 @@ function measureEl(html,W=297){
   const m=document.createElement('div');m.style.cssText=`position:absolute;left:-9999px;top:0;width:${W}mm;visibility:hidden`;m.innerHTML=html;document.body.appendChild(m);
   const t=m.querySelector('.ttab'),l=m.querySelector('.sbl'),mm=3.7795,th=t?t.offsetHeight/mm:0,lh=l?l.offsetHeight/mm+1.8:0;
   let hdR=0;m.querySelectorAll('.ttab thead th:not(.tm)').forEach(n=>{const cs=getComputedStyle(n),pl=parseFloat(cs.paddingLeft)||0,pad=pl+(parseFloat(cs.paddingRight)||0),av=n.clientWidth-pad;if(av>2&&n.scrollWidth>n.clientWidth+.5){const r=(n.scrollWidth-pl)/av;if(r>hdR)hdR=r}});   // はみ出しているときだけ、その割合を求める（少し大きめに見積もる＝小さめに直す）   // 日付の見出しが、枠より広い割合
-  let over=false,overTm=false,tmDef=0;m.querySelectorAll('.ttab .nm').forEach(n=>{if(n.scrollWidth>n.clientWidth+1)over=true});
+  let over=false,overTm=false,tmDef=0;const overIds=[];m.querySelectorAll('.ttab .nm').forEach(n=>{if(n.scrollWidth>n.clientWidth+1){over=true;overIds.push(n.dataset.sid)}});
   m.querySelectorAll('.ttab th.tm').forEach(n=>{const d=n.scrollWidth-n.clientWidth;if(d>.5){over=true;overTm=true}if(d>tmDef)tmDef=d});   // 時刻の数字がはみ出すサイズも不可   // 児童生徒名が折り返す/はみ出すサイズは不可
-  m.remove();return{h:th+lh,lh,over,overTm,tmDef:tmDef/mm,hdR};
+  m.remove();return{h:th+lh,lh,over,overTm,tmDef:tmDef/mm,hdR,overIds};
 }
-function tableSheet(c,W0=297,H0=210){
+function tableSheet(c,W0=297,H0=210,sub){   // sub：日付の一部だけを表にするとき（日数が多すぎて文字が小さくなりすぎるときの、分割用）
   const W=W0-SLK_W,H=H0-SLK_H;
-  const U=UI.print,AD=pAddrDoc(),SM=U.sibMode||'both',kk_=Math.max(1,Math.min(W/297,H/210)),ck=VER+'|'+AD+'|'+SM+'|'+W+'x'+H+'|'+c.key+'|'+gslots(c.key).length+'/'+gridOf(c.key).len+'/'+((gslots(c.key)[0]||{t:0}).t)+'|'+P.sched.dates.join(',');
+  const U=UI.print,AD=pAddrDoc(),SM=U.sibMode||'both',kk_=Math.max(1,Math.min(W/297,H/210)),ck=VER+'|'+AD+'|'+SM+'|'+W+'x'+H+'|'+c.key+'|'+gslots(c.key).length+'/'+gridOf(c.key).len+'/'+((gslots(c.key)[0]||{t:0}).t)+'|'+(sub||P.sched.dates).join(',');
   if(TCACHE.has(ck))return TCACHE.get(ck);
-  const cls=P.classes[c.key],dates=P.sched.dates,SL=gslots(c.key),mem=members(c.key);
+  const cls=P.classes[c.key],dates=sub||P.sched.dates,SL=gslots(c.key),mem=members(c.key);
   let first=-1,last=-1;SL.forEach((x,i)=>{for(const d of dates){const cc=cls.grid[d+'|'+x.key];if(cc){if(first<0)first=i;last=i}}});
   if(first<0){first=0;last=Math.min(SL.length-1,9)}
   const rows=SL.slice(first,last+1);
@@ -3711,11 +3721,12 @@ function tableSheet(c,W0=297,H0=210){
     if(m&&m.g+'|'+m.c===c.key){const kx=[st.id,m.id].sort().join('~');if(seen.has(kx))continue;seen.add(kx)}
     const lab=m?`${clsLabel(m.g,m.c)} ${m.name}　${placeText(m)||'日時未定'}`:((b.name||b.g)?`${b.g?b.g+'年'+b.c+'組 ':''}${b.name||''}（名簿になし）`:'');
     if(lab)pairs.push(`<b>${esc(st.name)}</b>（${esc(placeText(st)||'日時未定')}）⇄ ${esc(lab)}`)}}
-  let tmExtra=0,hf=11;   // 端末のフォントで時刻が入りきらないとき、実測して足す幅(mm)／hf＝日付の見出しの文字の大きさ(pt。枠に収まるよう実測して小さくする)
-  const nmHtml=nm=>{const parts=String(nm).split(/[\s\u3000]+/).filter(Boolean);return (parts.join('').length>=9&&parts.length>=2)?esc(parts[0])+'<br>'+esc(parts.slice(1).join(' ')):esc(nm)};   // 名前：8文字までは1行、9文字以上は氏と名の間で改行
+  let tmExtra=0,hf=11,wrapSet=new Set(),pdm=1.4;   // 端末のフォントで時刻が入りきらないとき、実測して足す幅(mm)／hf＝日付の見出しの文字の大きさ(pt。枠に収まるよう実測して小さくする)
+  const splitNm=s=>{const m=/^(.+?)([\s\u3000]+|[・･])(.+)$/.exec(s);return m?[m[1]+(/[・･]/.test(m[2])?m[2]:''),m[3].trim()]:null};   // 氏と名の間（空白または「・」）で分ける
+  const nmHtml=(nm,sid)=>{const s=String(nm).trim(),sp=splitNm(s);return (sp&&(s.length>=8||wrapSet.has(sid)))?esc(sp[0])+'<br>'+esc(sp[1]):esc(nm)};   // 空白・「・」を含めて8文字以上、または、1行で枠に収まらない名前だけ、改行する（区切りのない名前は1行のまま）
   const build=(fn,fs,wa,sn,tabH)=>{
     const skip=new Set();let body='';
-    const tmFs=clamp(fn*.62,5.6,10*kk_),tmW=(Math.max(11,((.62*(tmLen-1)+.35)*1.12*tmFs*MMPT)+3.8)+tmExtra).toFixed(2);   // 時刻列の幅は文字サイズから決める
+    const tmFs=clamp(fn*.62,Math.min(5.6,Math.max(3.2,fn)),10*kk_),tmW=(Math.max(6,((.62*(tmLen-1)+.35)*1.12*tmFs*MMPT)+3.8)+tmExtra).toFixed(2);   // 時刻列の幅は文字サイズから決める
     rows.forEach((x,ri)=>{
       body+=`<tr><th class="tm" style="font-size:${tmFs}pt;line-height:1.1">${x.label}</th>`;
       for(const d of dates){const k=d+'|'+x.key;if(skip.has(k))continue;const cc=cls.grid[k];
@@ -3724,27 +3735,42 @@ function tableSheet(c,W0=297,H0=210){
         const h=heads.get(k);if(!h){body+='<td class="e"></td>';continue}
         for(let j=1;j<h.n;j++){const s2=SL[first+ri+j];if(s2)skip.add(d+'|'+s2.key)}
         const st=h.st,hs=h.sib.length>0;
-        body+=`<td class="h${hs?' sbc':''}" rowspan="${h.n}"><div class="nm nmfont" style="font-size:${fn}pt"><span class="t">${nmHtml(st.name)}</span><span class="no">${st.n}</span>${hs?'<span class="star">★</span>':''}</div>${wa&&st.addr?`<div class="ad" style="font-size:${fs}pt">${esc(st.addr)}</div>`:''}${inCell?h.sib.slice(0,sn).map(l=>`<div class="sb sbr" style="font-size:${fs}pt">★きょうだい ${esc(l)}</div>`).join(''):''}${h.n>1?`<div class="sb" style="font-size:${fs}pt">${h.n}枠</div>`:''}</td>`;
+        body+=`<td class="h${hs?' sbc':''}" rowspan="${h.n}"><div class="nm nmfont" data-sid="${st.id}" style="font-size:${fn}pt;gap:${Math.min(2,fn*.2).toFixed(2)}mm"><span class="t">${nmHtml(st.name,st.id)}</span><span class="no">${st.n}</span>${hs?'<span class="star">★</span>':''}</div>${wa&&st.addr?`<div class="ad" style="font-size:${fs}pt">${esc(st.addr)}</div>`:''}${inCell?h.sib.slice(0,sn).map(l=>`<div class="sb sbr" style="font-size:${fs}pt">★きょうだい ${esc(l)}</div>`).join(''):''}${h.n>1?`<div class="sb" style="font-size:${fs}pt">${h.n}枠</div>`:''}</td>`;
       }
       body+='</tr>';
     });
     const list=outList&&pairs.length?`<div class="sbl" style="font-size:${clamp(fs*1.05,6,10*kk_)}pt"><div class="sh">★ きょうだい（赤字の児童生徒）</div>${pairs.map(x=>`<div class="sl1">${x}</div>`).join('')}</div>`:'';
     return `<section class="dsheet land" style="width:${W}mm;height:${H}mm">${hdrHtml(HF.hs)}
-     <table class="ttab" style="${tabH?`height:${tabH}mm`:'height:auto'}"><thead><tr><th class="tm" style="width:${tmW}mm"></th>${dates.map(d=>`<th style="font-size:${hf}pt;white-space:nowrap;overflow:hidden">${mdw(d)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${list}
+     <table class="ttab" style="--pd:${pdm}mm;${tabH?`height:${tabH}mm`:'height:auto'}"><thead><tr><th class="tm" style="width:${tmW}mm"></th>${dates.map(d=>`<th style="font-size:${hf}pt;white-space:nowrap;overflow:hidden">${mdw(d)}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table>${list}
      <div class="dfoot">${unpl.length?`日時が決まっていない児童生徒：${unpl.slice(0,12).map(s=>esc(s.name)).join('、')}${unpl.length>12?` ほか${unpl.length-12}名`:''}`:'全員の日時が決まっています'}　／　${mem.length}名${wa!==AD?'　（紙面に収めるため住所を省略しました）':''}</div></section>`;
   };
-  let out=null,soft=null;
-  outer:for(const [wa,sn] of [[AD,9],[AD,2],[false,2],[false,1]]){
-    for(let f=28*kk_;f>=6.5;f-=(f>24?2:f>17?1:.5)){const fs=clamp(f*.58,5.6,9.5*kk_);   // 名前の文字は、はみ出さない範囲で大きく（その他の文字は、従来の大きさが上限）
-      tmExtra=0;hf=11;let m=measureEl(build(f,fs,wa,sn,0),W);
+  const fitAt=(f,fs,wa,sn,pd)=>{   // この文字の大きさで測る（時刻の列・日付の見出し・名前の改行を、はみ出さないように整えながら）
+    pdm=pd;tmExtra=0;hf=11;wrapSet=new Set();
+    const meas=()=>{let m=measureEl(build(f,fs,wa,sn,0),W);
       if(m.overTm){tmExtra=m.tmDef+.8;m=measureEl(build(f,fs,wa,sn,0),W)}   // 時刻の列が狭すぎたら、広げてもう一度測る
-      for(let q=0;q<3&&m.hdR>1.005;q++){hf=Math.max(4.5,hf/m.hdR*.97);m=measureEl(build(f,fs,wa,sn,0),W)}   // 日付の見出しが枠からはみ出すときは、文字を小さくして収める
-      if(m.h<=availH){
-        if(!m.over){out=build(f,fs,wa,sn,Math.max(10,availH-m.lh));break outer}
-        soft={f,fs,wa,sn,m,tx:tmExtra,hf}}}   // 高さには収まるが、名前が少しはみ出す組み合わせ（最後＝いちばん小さい文字のものを使う）
+      for(let q=0;q<3&&m.hdR>1.005;q++){hf=Math.max(2.8,hf/m.hdR*.97);m=measureEl(build(f,fs,wa,sn,0),W)}   // 日付の見出しが枠からはみ出すときは、文字を小さくして収める
+      return m};
+    let m=meas();
+    for(let q=0;q<3&&m.over&&m.overIds&&m.overIds.length;q++){   // 1行で枠に収まらない名前だけ、氏と名の間で改行して、もう一度測る（収まる名前は、1行のまま・文字の大きさは同じ）
+      let added=0;for(const id of m.overIds){if(wrapSet.has(id))continue;const st=stById(id);if(st&&splitNm(String(st.name).trim())){wrapSet.add(id);added++}}
+      if(!added)break;m=meas()}
+    return m};
+  const fsOf=f=>clamp(f*.58,Math.min(5.6,f*.9),9.5*kk_),pdOf=f=>f>=6.5?1.4:.5;
+  const sizes=(hi,lo,step)=>{const a=[];for(let f=hi;f>=lo-1e-6;f-=step(f))a.push(+f.toFixed(2));return a};
+  const big=sizes(28*kk_,6.5,f=>f>24?2:f>17?1:.5),small=sizes(6.25,2.2,()=>.25);   // 名前の文字の大きさの候補（大きい順）。日数がとても多いときは、小さい候補まで使う
+  const search=(wa,sn,list)=>{   // 収まる最大の大きさを、二分探索で見つける（大きいほど収まりにくい）
+    let lo=0,hi=list.length-1,best=-1;
+    while(lo<=hi){const mid=(lo+hi)>>1,f=list[mid],m=fitAt(f,fsOf(f),wa,sn,pdOf(f));if(m.h<=availH&&!m.over){best=mid;hi=mid-1}else lo=mid+1}
+    return best};
+  let out=null,usedF=99;
+  for(const [wa,sn] of [[AD,9],[AD,2],[false,2],[false,1]]){
+    const bi=search(wa,sn,big);
+    if(bi>=0){const f=big[bi],m=fitAt(f,fsOf(f),wa,sn,pdOf(f));usedF=f;out=build(f,fsOf(f),wa,sn,Math.max(10,availH-m.lh));break}
   }
-  if(!out&&soft){tmExtra=soft.tx;hf=soft.hf;out=build(soft.f,soft.fs,soft.wa,soft.sn,Math.max(10,availH-soft.m.lh))}   // 見つからなくても、表を小さく縮めず、用紙いっぱいに広げる
-  if(!out){tmExtra=0;hf=11;let m=measureEl(build(6.5,5.6,false,1,0),W);for(let q=0;q<3&&m.hdR>1.005;q++){hf=Math.max(4.5,hf/m.hdR*.97);m=measureEl(build(6.5,5.6,false,1,0),W)}out=build(6.5,5.6,false,1,Math.max(10,availH-m.lh))}
+  if(!out){   // 日数がとても多くて、読める大きさでは収まらないとき：文字をさらに小さくし、余白もつめて、はみ出さないようにする
+    const si=search(false,1,small),f=si>=0?small[si]:small[small.length-1],m=fitAt(f,fsOf(f),false,1,pdOf(f));usedF=f;
+    out=build(f,fsOf(f),false,1,Math.max(10,availH-m.lh))}
+  if(usedF<3.5&&dates.length>=8){const h=Math.ceil(dates.length/2);out=tableSheet(c,W0,H0,dates.slice(0,h))+tableSheet(c,W0,H0,dates.slice(h))}   // 日数が多すぎて、名前の文字が読めないほど小さくなるときは、日付を前半・後半の2枚に分ける
   if(TCACHE.size>40)TCACHE.clear();TCACHE.set(ck,out);return out;
 }
 
@@ -4263,7 +4289,7 @@ A['share']=async()=>{
 box.innerHTML=`<h2>${LOGO_SM}共有（プロジェクトフォルダ）</h2>
      <p class="muted tiny" style="margin-bottom:12px">共有フォルダに学級ごとのファイルを置いて、みんなで同じ日程づくりを進めます。<b>データはフォルダの中だけにあり、インターネットへは送信されません。</b></p>
      ${!sup?`<div class="warnbox" style="margin-bottom:12px">このブラウザには、フォルダを直接読み書きする機能がありません。<b>Chrome または Edge</b> で開くと使えます。Windowsなら下の共有方法１（バッチ）を、ほかは共有方法３（学級ファイルの書き出し・取り込み）をお使いください。</div>`:''}
-     ${SH.on?`<div style="margin-bottom:16px"><dl class="kv" style="margin-bottom:12px"><dt>共有フォルダ</dt><dd>${SRV&&SRV.path?`<a href="#" data-sh="openfolder" title="クリックするとエクスプローラーで開きます" style="font-weight:800;word-break:break-all">${esc(SRV.path)}</a>`:`<b>${esc(SH.name)}</b><span class="tiny muted">　（ブラウザの仕様で、フォルダ名だけ表示できます）</span>`}　<span class="badge ok">接続中</span></dd><dt>あなた</dt><dd>${esc(shUser())}　<button class="btn ghost sm" data-sh="rename">名前を変える</button></dd><dt>最後の同期</dt><dd>${SH.lastSync?hhmm(SH.lastSync)+'（30秒ごとに自動で確認します）':'まだ'}</dd>${SH.err?`<dt>エラー</dt><dd style="color:var(--ng)">${esc(SH.err)}</dd>`:''}</dl>
+     ${SH.on?`<div style="margin-bottom:16px"><h3 style="font-size:14px;margin:4px 0 8px"><span class="badge ok">${SRV?'共有方法１':'共有方法２'}</span> ${SRV?'バッチで起動':'フォルダの共有'}（すでに共有済み）</h3><dl class="kv" style="margin-bottom:12px"><dt>共有フォルダ</dt><dd>${SRV&&SRV.path?`<a href="#" data-sh="openfolder" title="クリックするとエクスプローラーで開きます" style="font-weight:800;word-break:break-all">${esc(SRV.path)}</a>`:`<b>${esc(SH.name)}</b><span class="tiny muted">　（ブラウザの仕様で、フォルダ名だけ表示できます）</span>`}　<span class="badge ok">接続中</span></dd><dt>あなた</dt><dd>${esc(shUser())}　<button class="btn ghost sm" data-sh="rename">名前を変える</button></dd><dt>最後の同期</dt><dd>${SH.lastSync?hhmm(SH.lastSync)+'（30秒ごとに自動で確認します）':'まだ'}</dd>${SH.err?`<dt>エラー</dt><dd style="color:var(--ng)">${esc(SH.err)}</dd>`:''}</dl>
        <h3 style="font-size:14px;margin:12px 0 6px">いま編集している人</h3>${locks.length?`<div style="display:flex;flex-direction:column;gap:4px">${locks.map(([k,l])=>{const c=P.classes[k];return `<div class="bk"><span class="dot x"></span><b>${esc(c?clsLabel(c.g,c.c):k)}</b><span class="grow"></span><span class="muted tiny">${esc(l.by)}${l.sid===SESSION?'（あなた）':''}　${hhmm(l.at)}</span></div>`}).join('')}</div>`:'<p class="muted tiny">いま編集中の人はいません。</p>'}
        <div class="row" style="margin-top:14px"><button class="btn pri" data-sh="sync">${ic('swap',16)}いますぐ同期</button><button class="btn" data-sh="disc">共有をやめる</button></div></div>`:''}
      ${CM?'':relaySection()}
@@ -4271,10 +4297,10 @@ box.innerHTML=`<h2>${LOGO_SM}共有（プロジェクトフォルダ）</h2>
        <div class="row"><button class="btn pri big" data-sh="start" ${sup?'':'disabled'}>${ic('folder',18)}共有フォルダを選ぶ</button>${SH.needGrant?`<button class="btn big" data-sh="grant">前回のフォルダに再接続</button>`:''}</div>
        <p class="tiny muted">新しいフォルダを選ぶと共有を始められます。すでに共有プロジェクトがあるフォルダを選ぶと、その内容を読み込みます。</p></div></div>`:''}
      <details class="det" style="margin-top:14px"><summary>ほかの方法（バッチが使えないとき）</summary><div class="detb">
-      ${CM||SH.on?'':`<h3 style="font-size:14px;margin:4px 0 6px"><span class="badge u">共有方法２</span> 共有フォルダを選ぶ<small class="muted" style="font-weight:500">　共有方法１ができない場合（Chrome・Edge）</small></h3><div style="display:flex;flex-direction:column;gap:10px"><label class="f" style="max-width:320px">あなたの名前（編集中の表示に使います）<input type="text" id="shNameIn" value="${esc(shUser())}" placeholder="例：青木"></label>
+      ${CM||SH.on?'':`<h3 style="font-size:14px;margin:4px 0 6px"><span class="badge ok">共有方法２</span> 共有フォルダを選ぶ<small class="muted" style="font-weight:500">　共有方法１ができない場合（Chrome・Edge）</small></h3><div style="display:flex;flex-direction:column;gap:10px"><label class="f" style="max-width:320px">あなたの名前（編集中の表示に使います）<input type="text" id="shNameIn" value="${esc(shUser())}" placeholder="例：青木"></label>
        <div class="row"><button class="btn pri big" data-sh="start" ${sup?'':'disabled'}>${ic('folder',18)}共有フォルダを選ぶ</button>${SH.needGrant?`<button class="btn big" data-sh="grant">前回のフォルダに再接続</button>`:''}</div>
        <p class="tiny muted">新しいフォルダを選ぶと共有を始められます。すでに共有プロジェクトがあるフォルダを選ぶと、その内容を読み込みます。</p></div>`}
-      <h3 style="font-size:14px;margin:14px 0 6px"><span class="badge ng">共有方法３</span> 共有方法２もできない場合：学級ファイルの書き出し・取り込み</h3>
+      <h3 style="font-size:14px;margin:14px 0 6px"><span class="badge ok">共有方法３</span> 共有方法２もできない場合：学級ファイルの書き出し・取り込み</h3>
       <div><p class="tiny muted" style="margin-bottom:8px">フォルダを選べないブラウザなどで、学級ごとのファイルをやりとりする方法です（共有は自動ではなくなります）。持ち出し用にも使えます。</p>
      <div class="row"><select id="shCls">${classList().map(c=>`<option value="${esc(c.key)}" ${c.key===curCls()?'selected':''}>${esc(clsLabel(c.g,c.c))}</option>`).join('')}</select><button class="btn" data-sh="exp">${ic('down',16)}この学級を書き出す</button><button class="btn" data-sh="imp">${ic('up',16)}学級ファイルを取り込む</button></div>
      <p class="tiny muted" style="margin-top:6px">書き出したファイルには、その学級の都合・配置・きょうだい情報が入ります。取り込むときに、どちらが新しいかを確認します。</p></div>
@@ -4754,7 +4780,15 @@ async function gsGrid(k,patch){   // 学級の1枠の長さ・開始時刻を変
   act(()=>{takeSnap(k);setProp(cls,'slotMin',nm===bm?0:nm);setProp(cls,'start',ns===bs?'':fmtT(ns));for(const kk of Object.keys(cls.grid||{}))delProp(cls.grid,kk);if(cls.locked)setProp(cls,'locked',false)});   // 配置を外して空になったので、かこピタロックも外す
   toast(`${clsLabel(cls.g,cls.c)}の時間割を、${nm}分ごと（${fmtT(ns)}から）にしました`,{undo:true});
 }
-function gsCut(k,patch){const cls=P.classes[k];if(!cls)return;act(()=>setProp(cls,'auto',Object.assign({},cls.auto||{},patch)))}
+function dropLateHeads(k){   // 「厳守」の学級：区切りの時刻以降の枠（表に出ない枠）に配置されていた人を外す
+  const cls=P.classes[k];if(!cls)return 0;const o=clsAuto(k);if(o.cutMode!=='strict')return 0;
+  const SL=gslots(k),ck=ckOf(cls);let n=0;
+  const late=kk=>{const x=SL.find(y=>y.key===kk.split('|')[1]);return !!(x&&isLateO(x,o))};
+  for(const q of Object.keys(cls.grid)){const c=cls.grid[q];if(!c||!c.head)continue;
+    const sp=spanKeys(q,Math.max(1,+c.n||1),ck)||[q];if(sp.some(late)){clearPlace(cls,c.sid);n++}}
+  return n}
+function gsCut(k,patch){const cls=P.classes[k];if(!cls)return;let n=0;act(()=>{setProp(cls,'auto',Object.assign({},cls.auto||{},patch));n=dropLateHeads(k)});
+  if(n)toast(`${clsLabel(cls.g,cls.c)}：${clsAuto(k).cutTime}以降に配置されていた ${n}名を外しました（「元に戻す」で戻せます）`,{undo:true})}
 A['gs-cut']=el=>gsCut(curCls(),{cutMode:el.dataset.v});
 A['gs-reset']=()=>{const k=curCls(),cls=P.classes[k];if(!cls)return;const bm=+P.sched.slotMin||20,b0=parseT(P.sched.start),bs=b0==null?840:b0;gsGrid(k,{slotMin:bm,start:fmtT(bs)})};
 document.addEventListener('change',e=>{const t=e.target;if(!t||!t.dataset||!t.dataset.gs)return;const k=curCls();if(!k)return;
@@ -4769,9 +4803,9 @@ A['gs-copy']=()=>{   // この学級の時間割・時刻のルールを、ほ�
     if(q==='-'){sel.clear();paint();return}
     if(q==='*'){classList().forEach(c=>{if(c.key!==k)sel.add(c.key)});paint();return}
     if(q==='go'){const o=clsAuto(k),G=gridOf(k),bm=+P.sched.slotMin||20,b0=parseT(P.sched.start),bs=b0==null?840:b0,t0=G.slots.length?G.slots[0].t:bs;
-      el._close();act(()=>{for(const kk of sel){const c=P.classes[kk];if(!c)continue;const og=gridOf(kk),ch=og.len!==G.len||(og.slots[0]&&og.slots[0].t)!==t0;
+      el._close();let dn=0;act(()=>{for(const kk of sel){const c=P.classes[kk];if(!c)continue;const og=gridOf(kk),ch=og.len!==G.len||(og.slots[0]&&og.slots[0].t)!==t0;
         if(ch)takeSnap(kk);setProp(c,'slotMin',G.len===bm?0:G.len);setProp(c,'start',t0===bs?'':fmtT(t0));if(ch)for(const x of Object.keys(c.grid||{}))delProp(c.grid,x);
-        setProp(c,'auto',Object.assign({},c.auto||{},{cutMode:o.cutMode,cutTime:o.cutTime}))}});toast(`${sel.size}学級に反映しました`,{undo:true});return}
+        setProp(c,'auto',Object.assign({},c.auto||{},{cutMode:o.cutMode,cutTime:o.cutTime}));dn+=dropLateHeads(kk)}});toast(`${sel.size}学級に反映しました${dn?`（区切り以降に配置されていた ${dn}名を外しました）`:''}`,{undo:true});return}
     if(sel.has(q))sel.delete(q);else sel.add(q);paint()});
 };
 function vGrid(){
@@ -4819,6 +4853,14 @@ function vGrid(){
    <div class="legend" style="margin-top:10px"><span><b class="sw" style="background:var(--ng-t);color:var(--ng)">⚠</b>都合の悪い時間に配置</span><span><b class="sw" style="background:var(--line2)">×</b>休憩</span><span>ドラッグでも移動できます。右クリックで外す／休憩。休憩モードでは、空きマスをなぞって×、日付クリックでその日すべて×</span></div></section></div></div>`;
   return h;
 }
+function miniCond(s,k,hk){   // 条件（○×）を、「3. 条件」と同じ並び（日付×時刻）で小さく表示する。見るだけ（クリックしても変わらない）
+  const dates=P.sched.dates,sl=visSlots(k);if(!dates.length||!sl.length)return '';
+  const D=dates.length,R=sl.length,cw=Math.max(6,Math.min(26,Math.floor(250/D))),rh=Math.max(4,Math.min(14,Math.floor(150/R))),glyph=rh>=9&&cw>=12,fz=glyph?Math.min(11,rh-1):Math.max(5,Math.min(8,rh+1)),o=clsAutoC();
+  const every=Math.max(1,Math.ceil(R*(fz+1)/150));
+  const hd=dates.map(d=>`<th title="${esc(fmtD(d))}" style="font-size:${Math.max(5,Math.min(9,cw-1))}px">${D>8?+d.slice(8):(+d.slice(5,7))+'/'+(+d.slice(8))}</th>`).join('');
+  const rows=sl.map((x,i)=>`<tr style="height:${rh}px"><th class="mt" style="font-size:${Math.max(5,Math.min(8,rh))}px">${i%every===0?x.label.replace(/^0/,''):''}</th>${dates.map(d=>{const v=slotState(s,d,x,k),here=hk===d+'|'+x.key,late=o.cutMode==='effort'&&isLate(x);
+    return `<td class="mc ${v} ${late?'late':''} ${here?'here':''}" title="${esc(fmtD(d)+' '+x.label+(v==='x'?'　×':v==='o'?'　○':v==='u'?'　未回答':''))}" style="font-size:${fz}px">${glyph?(v==='x'?'✕':v==='o'?'○':v==='u'?'未':''):''}</td>`}).join('')}</tr>`).join('');
+  return `<div class="minic"><div class="mh">条件（見るだけ）　<span style="font-weight:500">✕ 都合が悪い／○ 希望</span></div><table class="mini"><thead><tr><th class="mt"></th>${hd}</tr></thead><tbody>${rows}</tbody></table></div>`}
 function selCard(s,cls,pm){
   const I=info(s),hk=pm.get(s.id);
   const sibs=s.sib.map(b=>{const m=sibFind(b);if(!m)return `<div>${esc(b.name||'きょうだい')}（名簿に未登録）</div>`;const c2=P.classes[m.g+'|'+m.c],h2=c2&&headKey(c2,m.id);
@@ -4827,7 +4869,7 @@ function selCard(s,cls,pm){
    <div class="row" style="margin:8px 0"><span class="badge ng">✕ ${I.nx}</span><span class="badge ok">○ ${I.no}</span><span class="badge u">未 ${I.nu}</span></div>
    <div class="tiny">${hk?`配置：<b>${fmtD(hk.split('|')[0])} ${hk.split('|')[1].replace(/^0/,'')}</b>`:'まだ配置されていません'}</div>
    ${sibs?`<div class="sibl"><b>きょうだい</b>${sibs}</div>`:''}
-   <div class="row" style="margin-top:10px"><button class="btn sm" data-act="g-cond" data-sid="${s.id}">${ic('clock',14)}条件を見る</button>${hk?`<button class="btn sm" data-act="g-rm" data-sid="${s.id}">${ic('x',14)}外す</button>`:''}</div></div>`;
+   ${miniCond(s,curCls(),hk)}${hk?`<div class="row" style="margin-top:8px"><button class="btn sm" data-act="g-rm" data-sid="${s.id}">${ic('x',14)}外す</button></div>`:''}</div>`;
 }
 let AH={ver:0,map:new Map()};
 function areaHue(k){const ck=curCls()||'';if(AH.ver!==VER||AH.k!==ck){AH.ver=VER;AH.k=ck;AH.map=new Map();const ao=clsAuto(ck);const ks=[...new Set(P.students.map(s=>areaKeyM(s,ao.areaN,ao.areaMode)).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));ks.forEach((x,i)=>AH.map.set(x,(i*137.5)%360))}return AH.map.get(k)??0}
@@ -4874,7 +4916,6 @@ async function placeAt(clsKey,sid,target){
   });
   UI.grid.snap=tk;
   if(other&&!oldKey)toast(`${other.name} さんを未配置に戻しました`,{undo:true});
-  else if(fl)toast(`手作業で配置を変えたので、${clsLabel(cls.g,cls.c)}に「かこピタロック」をかけました。「全学級をかこピタ」などで、この配置は動きません（手作業での配置・削除は、これからもできます。外すときは、「かこピタロック中」ボタン）`,{undo:true,ms:7000});
 }
 function closePicker(){const p=$('#picker');if(p)p.remove();UI.grid.picker=null}
 function openPicker(k,x,y){
@@ -5695,6 +5736,23 @@ document.addEventListener('pointermove',e=>{if(bpaint)rectMove(bpaint,e,'td.cell
 function endBP(){if(!bpaint)return;const p=bpaint;if(p.raf)cancelAnimationFrame(p.raf);rectShow(p,rectPick(p.cands,p.a,p.last));const cells=p.sel.slice();rectShow(p,[]);cells.forEach(td=>bpCell(td));bpaint=null;UI.grid.bpSkip=Date.now();if(p.right)UI.grid.rp=Date.now();if(p.tx)commit();else render()}
 document.addEventListener('pointerup',endBP);document.addEventListener('pointercancel',endBP);
 /* keyboard */
+function gridNav(key){   // 選んでいる児童生徒から、矢印の向きの「となりの児童生徒」へ選択を移す。未配置の欄は表示順、配置済みは日程の表の上で（空欄はとばして）名前のあるマスだけをたどる。配置は動かさない
+  const k=curCls(),cls=P.classes[k],G=UI.grid,sid=G.sel;if(!cls||!sid)return false;
+  const hk=headKey(cls,sid);
+  if(!hk){const ids=[...document.querySelectorAll('.un .uc[data-sid]')].map(b=>b.dataset.sid),i=ids.indexOf(sid);if(i<0)return false;
+    const j=(key==='ArrowUp'||key==='ArrowLeft')?i-1:i+1;if(j>=0&&j<ids.length){G.sel=ids[j];G.mode='place'}return true}
+  const dates=P.sched.dates,rowOf=new Map(visSlots(k).map((x,i)=>[x.key,i])),pts=[];
+  for(const q of Object.keys(cls.grid)){const c=cls.grid[q];if(!c||!c.head||!okCell(cls,q))continue;const [d,tm]=q.split('|'),ci=dates.indexOf(d),ri=rowOf.get(tm);if(ci>=0&&ri!=null)pts.push({sid:c.sid,c:ci,r:ri})}
+  const me=pts.find(p=>p.sid===sid);if(!me)return false;let nx=null;
+  const by=(f,g)=>(a,b)=>f(a)-f(b)||g(a)-g(b);
+  if(key==='ArrowDown'||key==='ArrowUp'){const dn=key==='ArrowDown',s=dn?1:-1;   // 同じ日の中で、名前のあるマスを順に。端まで来たら、となりの日の先頭（または末尾）へ
+    nx=pts.filter(p=>p.c===me.c&&(p.r-me.r)*s>0).sort(by(p=>Math.abs(p.r-me.r),p=>0))[0]
+      ||(dn?pts.filter(p=>p.c>me.c).sort(by(p=>p.c,p=>p.r))[0]:pts.filter(p=>p.c<me.c).sort(by(p=>-p.c,p=>-p.r))[0])}
+  else{const rt=key==='ArrowRight',s=rt?1:-1;   // 同じ時刻の行の中で、名前のあるマスを順に。端まで来たら、次（前）の行の端へ
+    nx=pts.filter(p=>p.r===me.r&&(p.c-me.c)*s>0).sort(by(p=>Math.abs(p.c-me.c),p=>0))[0]
+      ||(rt?pts.filter(p=>p.r>me.r).sort(by(p=>p.r,p=>p.c))[0]:pts.filter(p=>p.r<me.r).sort(by(p=>-p.r,p=>-p.c))[0])}
+  if(nx){G.sel=nx.sid;G.mode='place'}
+  return true}
 document.addEventListener('keydown',e=>{
   const typing=/^(INPUT|TEXTAREA|SELECT)$/.test((document.activeElement||{}).tagName);
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'&&!typing){e.preventDefault();e.shiftKey?doRedo():doUndo();return}
@@ -5702,6 +5760,9 @@ document.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='s'){e.preventDefault();downloadJSON();return}
   if(e.key==='Escape'){if($('#picker')){closePicker();return}if(UI.menu){UI.menu=false;paintMenu();return}if(UI.grid.sel){UI.grid.sel=null;render()}return}
   if(typing)return;
+  if(UI.view==='grid'&&UI.grid.sel&&/^Arrow(Up|Down|Left|Right)$/.test(e.key)&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&!e.shiftKey&&!document.querySelector('.scrim,#picker')){
+    if(gridNav(e.key)){e.preventDefault();render();const b=document.querySelector(`[data-act="g-tile"][data-sid="${UI.grid.sel}"],.un .uc[data-sid="${UI.grid.sel}"]`);if(b&&b.scrollIntoView)b.scrollIntoView({block:'nearest',inline:'nearest'})}
+    return}
   if(UI.view==='cond'){
     const m={'1':'x','2':'o','3':'u','0':'e'};if(m[e.key]){UI.cond.brush=m[e.key];render();return}
     if(UI.cond.mode==='one'&&(e.key==='ArrowDown'||e.key==='ArrowUp')){e.preventDefault();const mem=members(curCls()),i=mem.findIndex(s=>s.id===UI.cond.sid)+(e.key==='ArrowDown'?1:-1);if(mem[i]){UI.cond.sid=mem[i].id;render()}}
