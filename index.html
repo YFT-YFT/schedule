@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -621,7 +622,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.993';const SLOT_LENS=[5,10,15,20,25,30,35,40,45,50,55,60];const OLD_SECURE_TXT2='入力された情報は、この{行事}の日程調整以外の目的には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が適切に管理します。第三者に提供することはありません。';const OLD_SECURE_TXT='入力された情報は、この日時調整の目的以外には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が管理するスプレッドシートにのみ保存され、校内で適切に管理します。第三者に提供することはありません。';const APP_AUTHOR='フジイヨウスケ';
+const APP_VER='0.994';const SLOT_LENS=[5,10,15,20,25,30,35,40,45,50,55,60];const OLD_SECURE_TXT2='入力された情報は、この{行事}の日程調整以外の目的には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が適切に管理します。第三者に提供することはありません。';const OLD_SECURE_TXT='入力された情報は、この日時調整の目的以外には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が管理するスプレッドシートにのみ保存され、校内で適切に管理します。第三者に提供することはありません。';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
 const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -3899,9 +3900,17 @@ function applyPart(part,d){
 /* ---- disk helpers ---- */
 async function shHandle(path,create){let d=SH.dir;for(let i=0;i<path.length-1;i++)d=await d.getDirectoryHandle(path[i],{create});return d.getFileHandle(path[path.length-1],{create})}
 async function shRead(part){
-  try{const fh=await shHandle(partFile(part),false),f=await fh.getFile(),txt=await f.text();return{env:JSON.parse(txt),mtime:f.lastModified}}
+  let txt,mt;
+  try{const fh=await shHandle(partFile(part),false),f=await fh.getFile();txt=await f.text();mt=f.lastModified}
   catch(e){if(e.name==='NotFoundError'||e.name==='TypeMismatchError')return null;throw e}
+  try{const env=JSON.parse(txt);if(!env||typeof env!=='object'||env.data==null)throw new Error('形式が違います');if(SH.bad)delete SH.bad[part];return{env,mtime:mt}}
+  catch(e){SH.bad=SH.bad||{};SH.bad[part]={txt,at:Date.now()};return null}   // 壊れている（途中で切れた、など）ファイル：「ないもの」として扱い、読み込みや同期が止まらないようにする（あとで、手元のデータから作り直し、壊れたファイルは別に残す）
 }
+async function shQuarantine(part){   // 壊れたファイルを、消さずに「壊れたファイル」フォルダへ残す
+  const b=SH.bad&&SH.bad[part];if(!b)return;
+  try{const d=await SH.dir.getDirectoryHandle('壊れたファイル',{create:true}),base=partFile(part).slice(-1)[0].replace(/\.json$/,''),nm=`${base}_${new Date(b.at).toISOString().replace(/[:.]/g,'-')}.json`,fh=await d.getFileHandle(nm,{create:true}),w=await fh.createWritable();await w.write(b.txt);await w.close()}catch(e){}
+  delete SH.bad[part]}
+const shBadLabel=part=>part==='project'?'設定（project.json）':part==='roster'?'名簿（roster.json）':(()=>{const c=P.classes[part.slice(6)];return c?clsLabel(c.g,c.c):part.slice(6)})();
 async function shWriteRaw(part,env){const fh=await shHandle(partFile(part),true),w=await fh.createWritable();await w.write(JSON.stringify(env));await w.close()}
 async function shListClasses(){const out=[];try{const cd=await SH.dir.getDirectoryHandle('classes');for await(const [n] of cd.entries()){const k=fileKey(n);if(k)out.push('class:'+k)}}catch(e){}return out}
 async function shWrite(part){
@@ -3921,14 +3930,14 @@ function shSchedule(){if(!SH.on)return;clearTimeout(SH.syncT);SH.syncT=setTimeou
 async function shSync(opt={}){
   if(!SH.on)return;if(SH.busy){SH.queue=true;return}
   SH.busy=true;SH.status='sync';paintShare();
-  const changed=[];let wrote=0;
+  const changed=[],healed=[];let wrote=0;
   try{
     const parts=['project','roster'];const local=classList().map(c=>'class:'+c.key);const disk=await shListClasses();
     for(const p of new Set([...local,...disk]))parts.push(p);
     let remoteApplied=false;
     for(const part of parts){
       const d=await shRead(part),cur=serPart(part),dirty=cur!==null&&cur!==SH.last[part];
-      if(!d){if(cur!==null&&(dirty||SH.base[part]==null)){if(await shWrite(part))wrote++}continue}
+      if(!d){if(cur!==null&&(dirty||SH.base[part]==null||(SH.bad&&SH.bad[part]))){const bad=SH.bad&&SH.bad[part];if(bad)await shQuarantine(part);if(await shWrite(part)){wrote++;if(bad)healed.push(part)}}continue}
       const rev=d.env.rev|0,base=SH.base[part];
       if(base==null){ // first contact with this part on disk
         // 中身が同じなら競合ではない。学級専用HTMLでは、ほかの学級は読むだけにする（競合にしない）
@@ -3943,6 +3952,7 @@ async function shSync(opt={}){
         else SH.conflicts[part]={remoteRev:rev,by:d.env.by,at:d.env.savedAt,why:'remote'};
       }else if(dirty){if(await shWrite(part))wrote++}
     }
+    if(healed.length)toast(`共有フォルダの壊れたファイルを、手元のデータから作り直しました（${healed.map(shBadLabel).join('、')}）。壊れたファイルは、「壊れたファイル」フォルダに残してあります`,{kind:'warn',ms:12000});
     await shReadLocks();
     if(remoteApplied){VER++;UI.cond.sid=UI.cond.sid&&stById(UI.cond.sid)?UI.cond.sid:null;
       const names=changed.filter(x=>x.startsWith('class:')).map(x=>{const c=P.classes[x.slice(6)];return c?clsLabel(c.g,c.c):''}).filter(Boolean);
@@ -3987,6 +3997,7 @@ async function shConnectHandle(dir,mode){
     P=newProject();P.students=[];P.classes={};
     for(const part of parts){const d=await shRead(part);if(d){applyPart(part,d.env.data);SH.base[part]=d.env.rev;SH.meta[part]={rev:d.env.rev,by:d.env.by,at:d.env.savedAt};SH.mtime[part]=d.mtime}}
     P=migrate(P);VER++;for(const part of parts){SH.last[part]=serPart(part)}
+    const badNow=Object.keys(SH.bad||{}).filter(p=>parts.includes(p));if(badNow.length)toast(`共有フォルダの ${badNow.length}個のファイルが壊れていて、読み込めませんでした（${badNow.map(shBadLabel).join('、')}）。ほかの人のパソコンや、バックアップ（「以前の状態に戻す」）、書き出したファイルに、データが残っていれば、そこから復元できます`,{kind:'warn',ms:15000});
     resetHistory();VER++;UI.cls=null;UI.cond.sid=null;UI.grid.sel=null;saveNow();
   }else{await shSync({quiet:true})}
   try{await dbSet(KEY_D,dir);await dbSet(KEY_D+':info',{name:dir.name||'',at:Date.now()});SH.info={name:dir.name||'',at:Date.now()}}catch(e){}
@@ -4446,7 +4457,7 @@ const HELP=[
   <h3>5. 印刷</h3><p>日程のお知らせ・未回答の催促状・各学級の一覧表・条件ブロックを印刷できます。<b>縦・横を選べます。</b>標準は、お知らせと催促状が縦（上下2段。横にすると左右2段）、学級の一覧表が縦（白黒印刷向き。児童生徒名が折り返さない大きさに自動調整。きょうだいは赤字と★で強調）です。条件ブロックは文字が小さめなので、A3での印刷をおすすめします。1学級2枚に収まり、文字がいちばん大きくなる向きを自動で選びます。住所の印刷は、学級の一覧表と条件ブロックでは、家庭訪問のときだけ最初からオンです（お知らせと催促状の個票は、家庭に配るので、家庭訪問でも最初はオフです）。文面は「文面を編集する」で書き換えられます（{名前}などの言葉が自動で入れ替わります）。「印刷する」ボタンは画面の左下に浮かんでいて、「印刷前の点検」に確認事項があると、オレンジ（重いときは赤）になり、「確認○件」と出ます。名前に、いまのフォントで表示できない字があるときは、「代わりの字」「ひらがな」「そのまま」から選べます。学級の一覧表では、「書き出し」から、選んだ学級の表をExcel・CSV・カレンダー用の予定にできます。</p>`],
  ['かこピタの設定',()=>`<h3>かこピタ（自動配置）のメニュー</h3><p><b>この設定は学級ごとに保存</b>され、ほかの学級には影響しません。「全学級をかこピタ」「指定した学級をかこピタ」では、それぞれの学級の設定でかこピタします。まとめて設定したいときは、メニュー上部の「対象の学級」で学級を選んでから項目を変えると、<b>変えた項目だけ</b>が選んだ学級に反映されます（何も変えなければ、何も変わりません）。</p><ul><li><b>自動配置の方針</b>：「出席番号順優先」または「シャッフル」。シャッフルは実行のたびに別の案になるので、納得いく案を選べます。</li><li><b>日ごとの人数</b>：「均等にする」で、特定の日だけが過密になるのを防ぎます。</li><li><b>詰める時刻</b>：選んだ時刻に近い枠から使い、まとまった空き時間を作ります。</li><li><b>仕上げの探索</b>：区切りの時刻以降の人数や偏りが減る組み合わせを、指定した秒数まで探します。</li><li><b>いまの配置</b>：「消して組み直す」または「残して、足りない分だけ」。「全学級」「指定した学級」では、配置済みの学級があると、実行前に確認します（「この学級」は、確認なしで実行します。いつでも「元に戻す」で戻せます）。</li><li><b>時刻のルール</b>：「できれば」（まず区切りの時刻までで探し、入らなければ以降も使う）、「厳守」（以降は使わない）、「制限なし」。最初は「できれば17:00まで」です。「厳守」にすると、その学級の画面では区切り以降の枠も隠します。</li></ul><p class="tiny muted">4. かこピタ(配置)で児童生徒を選ぶと、入れない時間帯はいつでも濃い斜線で示されます（手動調整のミス防止）。</p>
   <h3>きょうだい・住所への配慮</h3><ul><li><b>きょうだい配慮</b>：きょうだいが別の学級にいても、<b>同じ時刻にならない</b>ようにし、同じ日の近い時刻に寄せます。<b>間隔は「続けて」「1枠あける」「2枠あける」から選べます</b>（既定は続けて）。</li><li><b>住所配慮</b>：同じ地区の児童生徒を、同じ日に続けて配置します。地区の判定は3つから選べます。<b>住所の最初の数字の手前まで</b>（初期設定。「大阪市北区梅田1丁目2-3」→「大阪市北区梅田」）、<b>住所の最初の数字まで</b>（→「大阪市北区梅田1」）、<b>指定した文字数の範囲で</b>（先頭◯文字）。数字のない住所は、先頭◯文字で判定します。余裕があるときは、離れていそうな地区（地区名が違う）どうしが隣り合わないよう、間に1枠あけます。<b>「住所が近い児童生徒を近くに配置する」は、行事が家庭訪問のときだけ最初からオンです</b>（ほかの行事では最初はオフ）。</li></ul>`],
- ['便利な技',()=>`<ul><li><b>Ctrl+Z / Ctrl+Y</b>（Macは⌘）：取り消し／やり直し。Shift+Ctrl+Zでも、やり直せます（配置・条件・名簿の取り込みなど、ほとんどの操作に効きます）</li><li><b>1・2・3・0 キー</b>（3. 条件）：ブラシを ×・○・未・消しゴム に切り替え</li><li><b>↑↓ キー</b>（3. 条件）：前後の児童生徒へ</li><li><b>選んでクリック</b>（4. かこピタ(配置)）：未配置の児童生徒を選び、置きたいマスをクリック。置いてある人を選んで別のマスをクリックすると、入れ替わります</li><li><b>右クリック</b>（4. かこピタ(配置)）：置いた人を外す／空きマスを休憩（×）に</li><li><b>名前で探す</b>：条件・配置の画面の検索欄で、児童生徒を名前ですばやく探せます</li><li><b>Ctrl+S</b>（Macは⌘+S）：今の状態をファイルに書き出す（バックアップ用）</li><li><b>休憩の予約</b>：「休憩（×）を置く」モードで空きマスをクリック、またはなぞって塗る。日付をクリックするとその日の空きマスがすべて×になります。かこピタはそこを避けます</li><li><b>枠数</b>：特別な支援や相談が必要な児童生徒に、連続した時間を確保できます</li></ul>`],
+ ['便利な技',()=>`<ul><li><b>Ctrl+Z / Ctrl+Y</b>（Macは⌘）：取り消し／やり直し。Shift+Ctrl+Zでも、やり直せます（配置・条件・名簿の取り込みなど、ほとんどの操作に効きます）</li><li><b>1・2・3・0 キー</b>（3. 条件）：ブラシを ×・○・未・消しゴム に切り替え</li><li><b>↑↓ キー</b>（3. 条件）：前後の児童生徒へ</li><li><b>選んでクリック</b>（4. かこピタ(配置)）：未配置の児童生徒を選び、置きたいマスをクリック。置いてある人を選んで空いているマスをクリックすると、そこへ移ります。別の人の名前をクリックしても、その人を選ぶだけで、配置は変わりません（情報を見たいだけのとき、まちがって動かさないため）。<b>入れ替えは、ドラッグして、相手のマスへ置いたときだけ</b>です</li><li><b>↑↓←→ キー</b>（4. かこピタ(配置)）：選んでいる児童生徒から、となり（上下左右）の児童生徒へ、選択だけを移します（配置は動きません。空欄はとばします）</li><li><b>右クリック</b>（4. かこピタ(配置)）：置いた人を外す／空きマスを休憩（×）に</li><li><b>名前で探す</b>：条件・配置の画面の検索欄で、児童生徒を名前ですばやく探せます</li><li><b>Ctrl+S</b>（Macは⌘+S）：今の状態をファイルに書き出す（バックアップ用）</li><li><b>休憩の予約</b>：「休憩（×）を置く」モードで空きマスをクリック、またはなぞって塗る。日付をクリックするとその日の空きマスがすべて×になります。かこピタはそこを避けます</li><li><b>枠数</b>：特別な支援や相談が必要な児童生徒に、連続した時間を確保できます</li></ul>`],
  ['保存・共有・オフライン',()=>`<h3>保存</h3><p>編集のたびに、自動で保存されます。共有フォルダにつないでいないときはこのブラウザの中、つないでいるときは共有フォルダの中です（切り替えは自動です）。最上部には、最後に保存した時刻が出ます。バックアップとして、「設定」→「保存とバックアップ」から、ファイルへの書き出し・読み込みや、「以前の状態に戻す」（自動バックアップ12件）ができます。</p>
 <h3>共有のしかた（まず共有方法１。できなければ共有方法２、それもできなければ共有方法３）</h3>
   <p><b>共通の準備</b>：設定担当者が、共有フォルダ（学校のサーバー、クラウドの同期フォルダなど）を決めます。学級ごとにファイルが作られ、<b>30秒ごとに最新を確認</b>します。ほかの人が編集中の学級には「◯◯さんが編集中」と表示され、見るだけの状態になります。同時に編集してしまったときは、どちらを使うか選べます。</p>
@@ -4832,7 +4843,7 @@ function vGrid(){
     <button class="btn sm" data-act="g-print" title="この学級の一覧表をA4などで印刷します">${ic('print',14)}一覧表を印刷</button>
     <button class="btn sm" data-act="g-export" title="この学級の表を、Excel・CSVで保存したり、カレンダー用の予定を作ったりします">${ic('down',14)}書き出し…</button>
     ${used||brks?`<button class="btn sm danger" data-act="g-clear" title="この学級の配置をまとめて外します">${ic('trash',15)}全員を外す</button>`:''}</div>
-   <div style="min-height:44px">${sel?`<div class="hint" style="margin-bottom:12px">${esc(sel.name)} さんを選択中：${pm.has(sel.id)?'移動したいマスをクリックすると、その場所へ移ります（入っている人とは入れ替わります）':'置きたいマスをクリックしてください'}　<span style="opacity:.7">Escで解除</span></div>`:''}</div>
+   <div style="min-height:44px">${sel?`<div class="hint" style="margin-bottom:12px">${esc(sel.name)} さんを選択中：${pm.has(sel.id)?'空いているマスをクリックすると、その場所へ移ります。入れ替えたいときは、ドラッグして、相手のマスへ置いてください':'置きたいマスをクリックしてください'}　<span style="opacity:.7">Escで解除</span></div>`:''}</div>
    <div class="gv"><aside><section class="panel" style="padding:12px" data-drop="un"><h2 style="margin-bottom:8px">未配置<small>${un.length}名 / 使用 ${used}${brks?`＋休憩${brks}`:''} / ${total}枠${(()=>{const hd=Object.values(P.classes[k].grid).filter(c=>c.head).length-pm.size;return hd>0?` ／ <b style="color:var(--ng)">日程の範囲外 ${hd}名</b>`:''})()}</small></h2>
      <label class="tog" style="width:100%;margin-bottom:8px"><input id="gq" type="text" placeholder="名前で探す" value="${esc(G.q)}" style="width:100%"></label>
      <div class="un" data-keep="un">${unShow.map(s=>{const t=stStatus(s);return `<button class="uc ${t==='unans'?'una':''} ${G.sel===s.id?'sel':''}" style="${gStyle(s.g)}" data-act="g-pick" data-sid="${s.id}" draggable="true"><span class="no">${s.n}</span><span>${esc(s.name)}</span>${addrHtml(s)}${s.slots>1?`<span class="badge brand" style="margin-left:auto">${s.slots}枠</span>`:t==='unans'?'<span class="badge u" style="margin-left:auto">未回答</span>':''}</button>`}).join('')||`<p class="muted tiny" style="padding:6px">${un.length?'見つかりません':'全員配置済みです 🎉'}</p>`}</div></section>${sel?selCard(sel,cls,pm):'<div class="selcard empty"><span>児童生徒を選ぶと、ここに<br>都合の内容や、きょうだいの<br>配置が出ます</span></div>'}</aside>
@@ -5359,8 +5370,7 @@ A['g-cond']=el=>{const s=stById(el.dataset.sid);UI.cond.sid=s.id;UI.cond.mode='o
 A['g-rm']=(el,e)=>{e.stopPropagation();const k=curCls(),cls=P.classes[k],s=stById(el.dataset.sid);let fl=false;act(()=>{clearPlace(cls,s.id);fl=lockAfterManual(cls)});toast(`${s.name} さんを外しました`,{undo:true})};
 A['g-tile']=(el,e)=>{const sid=el.dataset.sid,G=UI.grid;
   if(G.mode==='break'){G.mode='place';G.sel=sid;render();return}   // 休憩モードで配置済みの名前を押したら、配置モードに切り替えて選択
-  if(G.sel&&G.sel!==sid){placeAt(curCls(),G.sel,el.closest('td').dataset.dk);return}
-  G.sel=G.sel===sid?null:sid;render()};
+  G.sel=G.sel===sid?null:sid;render()};   // 別の人の名前をクリックしても、その人を選ぶだけ（配置の入れ替えはしない）。入れ替えは、ドラッグして、相手のマスへ置いたときだけ
 A['g-cell']=(el,e)=>{
   const k=curCls(),cls=P.classes[k],G=UI.grid,key=el.dataset.dk,c=cls.grid[key];
   if(G.mode==='break'){if(Date.now()-(G.bpSkip||0)<500)return;if(c&&c.brk)act(()=>delProp(cls.grid,key));else if(!c)act(()=>setProp(cls.grid,key,{brk:1}));else toast('児童生徒が入っているマスは休憩にできません');return}
