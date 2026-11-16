@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>kuromoji.js 辞書データ配布ページ</title>
+  <style>
+    body { font-family: sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; line-height: 1.6; color: #333; }
+    h1 { border-bottom: 2px solid #0969da; padding-bottom: 0.4rem; font-size: 1.5rem; }
+    h2 { margin-top: 1.8rem; font-size: 1.2rem; }
+    .box { background: #f6f8fa; border: 1px solid #d0d7de; border-radius: 6px; padding: 1rem; margin: 1rem 0; }
+    ul { columns: 2; padding-left: 1.2rem; }
+    li { margin-bottom: 0.4rem; }
+    a { color: #0969da; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .note { font-size: 0.9rem; color: #57606a; }
+  </style>
+</head>
+<body>
+  <h1>日本語形態素解析用 辞書データ（kuromoji.js）</h1>
+  <p>形態素解析エンジン <strong>kuromoji.js</strong> で利用される辞書データ（全12ファイル）およびライセンス文書を配布しています。</p>
+
+  <h2>1. ライセンス・説明文書（必ずあわせてご確認ください）</h2>
+  <div class="box">
+    <ul>
+      <li><a href="./README.md" download>README.md</a></li>
+      <li><a href="./LICENSE-2.0.txt" download>LICENSE-2.0.txt</a></li>
+      <li><a href="./NOTICE.md" download>NOTICE.md</a></li>
+    </ul>
+  </div>
+
+  <h2>2. 辞書データ一覧（dict/ フォルダ内・全12ファイル）</h2>
+  <div class="box">
+    <ul>
+      <li><a href="./dict/base.dat.gz" download>base.dat.gz</a></li>
+      <li><a href="./dict/cc.dat.gz" download>cc.dat.gz</a></li>
+      <li><a href="./dict/check.dat.gz" download>check.dat.gz</a></li>
+      <li><a href="./dict/tid.dat.gz" download>tid.dat.gz</a></li>
+      <li><a href="./dict/tid_map.dat.gz" download>tid_map.dat.gz</a></li>
+      <li><a href="./dict/tid_pos.dat.gz" download>tid_pos.dat.gz</a></li>
+      <li><a href="./dict/unk.dat.gz" download>unk.dat.gz</a></li>
+      <li><a href="./dict/unk_char.dat.gz" download>unk_char.dat.gz</a></li>
+      <li><a href="./dict/unk_compat.dat.gz" download>unk_compat.dat.gz</a></li>
+      <li><a href="./dict/unk_invoke.dat.gz" download>unk_invoke.dat.gz</a></li>
+      <li><a href="./dict/unk_map.dat.gz" download>unk_map.dat.gz</a></li>
+      <li><a href="./dict/unk_pos.dat.gz" download>unk_pos.dat.gz</a></li>
+    </ul>
+  </div>
+
+  <h2>ライセンス・著作権表示</h2>
+  <p class="note">
+    本データは <a href="https://github.com/takuyaa/kuromoji.js" target="_blank" rel="noopener">kuromoji.js</a> に含まれる辞書ファイルを無改変で再配布しているものです。<br>
+    Copyright (c) 2014 Takuya Asano / Licensed under the Apache License, Version 2.0.<br>
+    元辞書（MeCab / IPAdic）の権利表記は NOTICE.md をご確認ください。現状有姿（AS IS）での提供となり、動作の保証は行いません。
+  </p>
+</body>
+</html>
