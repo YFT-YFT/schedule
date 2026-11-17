@@ -401,10 +401,12 @@ details.det.warn{border-color:#F4D58A;background:#FFFCF0}
 .cols2>.panel+.panel{margin-top:0}
 
 /* ---- print ---- */
-.pgrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:16px;align-items:start}
-.pvpanel{position:sticky;top:8px}
-@media (max-width:1100px){.pgrid{grid-template-columns:1fr}.pvpanel{position:static}}
-.pvlist{display:flex;justify-content:center;padding:4px}
+.pgrid{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:16px;align-items:start}
+.pvpanel{position:static}
+.hl{margin:6px 0 12px 1.3em;padding:0}.hl li{margin:4px 0;line-height:1.75}.helpbody li{line-height:1.75}
+@media (max-width:1100px){.pgrid{grid-template-columns:1fr}}
+.pvlist{display:flex;flex-direction:column;align-items:stretch;gap:14px;padding:4px;overflow-x:auto}
+.pvlist .pvbox{margin:0 auto;flex:none}
 .pvbox{width:calc(210mm * .52);height:calc(297mm * .52);box-shadow:0 4px 18px rgba(30,80,130,.22);background:#fff;flex:none;overflow:hidden}
 .pvin{transform:scale(.52);transform-origin:0 0;width:210mm;height:297mm}
 .sheet{width:210mm;height:297mm;position:relative;background:#fff;color:#111;overflow:hidden;page-break-after:always;break-after:page;font-family:"BIZ UDPGothic","Hiragino Sans","Yu Gothic","Meiryo",sans-serif}
@@ -416,8 +418,13 @@ details.det.warn{border-color:#F4D58A;background:#FFFCF0}
 .slip .s-who{font-size:14pt;text-align:center;margin-bottom:4mm}
 .slip .s-when{font-size:21pt;font-weight:800;text-align:center;border:2px solid #111;border-radius:3mm;padding:3mm 0;margin-bottom:6mm}
 .slip .s-body{font-size:12pt;line-height:1.95;flex:1}
-.slip .s-body.r{font-size:13pt;line-height:2.1;margin-top:2mm}
+.slip .s-body.r{font-size:11.5pt;line-height:1.75;margin-top:1mm}
 .slip .s-foot{text-align:right;font-size:12pt;line-height:1.7}
+.slip .s-reply{display:flex;gap:4mm;align-items:center;border:1.5px solid #111;border-radius:2mm;padding:2.5mm 3mm;margin:3mm 0;font-size:11pt;line-height:1.7}.slip .s-reply>div:first-child{flex:1;min-width:0}.slip .s-qr{width:27mm;flex:none;background:#fff}.slip .s-qr svg{width:100%;height:auto;display:block}.slip .s-url{word-break:break-all;font-size:9pt}
+.slip.rm .s-title{font-size:17pt;padding-bottom:2mm;margin-bottom:3mm}.slip.rm .s-to{font-size:12pt;line-height:1.55;margin-bottom:3mm}
+.slip.rb .s-body.r{font-size:11pt;line-height:1.7}.slip.ra .s-body.r{font-size:13pt;line-height:1.9}
+.slip.rm .s-foot{font-size:11pt;line-height:1.55;flex:none}
+.slip.rm .s-reply{padding:2mm 3mm;margin:2mm 0;gap:3mm;font-size:10.5pt;line-height:1.6;flex:none}.slip.rm .s-qr{width:23mm}
 #printRoot{display:none}
 @media print{
   html,body{background:#fff !important;height:auto}
@@ -622,7 +629,7 @@ break;case"<bookViews":;case"<bookViews>":;case"</bookViews>":break;case"<workbo
 </script>
 <script id="kp-boot">window.KP_BOOT=/*KPB*/null/*KPE*/;</script>
 <script>(()=>{'use strict';
-const APP_VER='0.9966';const sgOf=v=>(v===0||v==='0'||+v>0)?+v:1;const gapCost=(g,sg)=>g<=sg?sg-g:(g-sg)*2;   // sgOf：きょうだいの間隔（既定は1枠）／gapCost：間隔のずれの点数（あけすぎより、あけられない（続けて）のほうを軽くする）
+const APP_VER='0.9974';const sgOf=v=>(v===0||v==='0'||+v>0)?+v:1;const gapCost=(g,sg)=>g<=sg?sg-g:(g-sg)*2;   // sgOf：きょうだいの間隔（既定は1枠）／gapCost：間隔のずれの点数（あけすぎより、あけられない（続けて）のほうを軽くする）
 const SLOT_LENS=[5,10,15,20,25,30,35,40,45,50,55,60];const NEWV_TXT='新しい版のかこピタで作られたファイルのときは、新しい版のかこピタで開いてください';const DATA_V=1;   // DATA_V：この版が読める、データの形の世代。これより新しいデータは、新しい版で開くよう案内する
 const OLD_SECURE_TXT2='入力された情報は、この{行事}の日程調整以外の目的には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が適切に管理します。第三者に提供することはありません。';const OLD_SECURE_TXT='入力された情報は、この日時調整の目的以外には使用しません。通信はGoogleの暗号化（HTTPS）で保護されます。回答は学校の教職員が管理するスプレッドシートにのみ保存され、校内で適切に管理します。第三者に提供することはありません。';const APP_AUTHOR='フジイヨウスケ';
 const $=(s,r=document)=>r.querySelector(s);
@@ -965,6 +972,10 @@ function sibFind(sb){if(!sb||typeof sb!=='object')return null;
   if(SF.ver!==VER){SF={ver:VER,m:new Map()}}
   const ck=[sb.g,sb.c,sb.n,sb.kana,sb.name].join('\u0001');if(SF.m.has(ck))return SF.m.get(ck);
   const r=sibFind0(sb);SF.m.set(ck,r);return r}
+let SR={ver:-1,m:null};
+function sibRev(st){   // この人を「きょうだい」として書いた人（逆向き）。片方（兄・姉の側）だけが書いてあっても、もう片方にも出す
+  if(SR.ver!==VER){const m=new Map();for(const s2 of P.students)for(const b of s2.sib||[]){const f=sibFind(b);if(f&&f!==s2){if(!m.has(f.id))m.set(f.id,[]);const a=m.get(f.id);if(!a.includes(s2))a.push(s2)}}SR={ver:VER,m}}
+  return SR.m.get(st.id)||[]}
 function sibFind0(sb){   // 学年・組・ふりがな → (同じ人が複数なら)漢字 → (それでも複数なら)出席番号 の順に探す
   const arr=P.students,kk=sb.kana?norm(sb.kana):'',nn=sb.name?norm(sb.name):'';
   const gOK=s=>!sb.g||s.g==sb.g,cOK=s=>!sb.c||String(s.c)==String(sb.c);
@@ -1774,11 +1785,13 @@ function buildProblem(clsKey,o,limit17,exclude,relax){
   const diOf=new Map(dates.map((d,i)=>[d,i])),siOf=new Map(SL.map((x,i)=>[x.key,i]));
   const occ=new Uint8Array(D*L);
   for(const k in cls.grid){const c=cls.grid[k],[d,t]=k.split('|'),di=diOf.get(d),si=siOf.get(t);if(di==null||si==null)continue;if(c.brk||(o.keep&&c.sid&&!(o.release&&o.release.has(c.sid))))occ[di*L+si]=1}
+  if(o.pinned)for(const [id,k] of o.pinned){const st0=stById(id),[d,t]=k.split('|'),di=diOf.get(d),si=siOf.get(t);if(di==null||si==null)continue;const n0=Math.max(1,+(st0&&st0.slots)||1);for(let j=0;j<n0&&si+j<L;j++)occ[di*L+si+j]=1}   // 組み直しの探索で、いまの場所に固定する人
   const list=[],una=[],fixed=[];
   for(const st of members(clsKey)){
     if(st.skip)continue;   // 「今回は希望しません」は、配置しない
     if(stStatus(st)==='unans'){una.push(st);continue}
     if(exclude&&exclude.has(st.id))continue;
+    if(o.pinned&&o.pinned.has(st.id)){fixed.push(st);continue}
     if(o.keep&&headKey(cls,st.id)&&!(o.release&&o.release.has(st.id))){fixed.push(st);continue}
     list.push(st);
   }
@@ -1791,6 +1804,7 @@ function buildProblem(clsKey,o,limit17,exclude,relax){
     list.forEach((st,s)=>{const r=rel.get(st.id);if(!r)return;
       for(const m of r.values()){
         if(idxOf.has(m.id)){links[s].peers.add(idxOf.get(m.id));continue}
+        const pk=o.pinned&&o.pinned.get(m.id);if(pk){const [d,t]=pk.split('|'),di=diOf.get(d),si=siOf.get(t);if(di!=null&&si!=null)links[s].anchors.push({di,si,n:Math.max(1,+m.slots||1)});continue}
         const c2=P.classes[m.g+'|'+m.c],hk=c2&&headKey(c2,m.id);if(!hk)continue;
         if(m.g+'|'+m.c===clsKey&&!o.keep)continue;
         const [d,t]=hk.split('|'),di=diOf.get(d),tm=parseT(t);if(di==null||tm==null)continue;
@@ -1960,6 +1974,75 @@ async function releaseSearch(clsKey,o,full,base,seed,tick,hooks,t0){
       return{status:'ok',pb:pbR,assign:asg,limit17:false,score:sc,firstScore:sc,nodes:ctl.nodes,ms:performance.now()-t0,moved}}
   }
   return null}
+/* ---- 賢い探索：①入れない人の事前診断　②入れ替えの連鎖　③組み直し（一部をはがして、探しなおす）　④仕上げ ----
+   どれも、ふつうの探索と同じ「枠の候補」の中だけで動かす。使える枠・きょうだい・住所のルールは変わらない（点数が良くなるときだけ採用する） */
+function matchSingles(pb){   // 1枠だけの人を、二部マッチングで、できるだけ多く入れる（連続枠の人は無視する＝ゆるい条件なので、「入れない」と出たら、本当に入れない）
+  const{list,sc,cst,L,D}=pb,nS=list.length,nCell=D*L,own=new Int32Array(nCell).fill(-1),mc=new Int32Array(nS).fill(-1),seen=new Int32Array(nCell);
+  const singles=[];for(let s=0;s<nS;s++)if(Math.max(1,+list[s].slots||1)===1)singles.push(s);
+  singles.sort((a,b)=>sc[a].length-sc[b].length);let stamp=0,m=0;
+  const aug=s=>{for(const c of sc[s]){const cell=cst[c];if(seen[cell]===stamp)continue;seen[cell]=stamp;if(own[cell]<0||aug(own[cell])){own[cell]=s;mc[s]=c;return true}}return false};
+  for(const s of singles){stamp++;if(aug(s))m++}
+  const deficit=singles.length-m;let hall=null;
+  if(deficit>0){const u=singles.find(s=>mc[s]<0),S=new Set([u]),C=new Set(),q=[u];
+    while(q.length){const s=q.pop();for(const c of sc[s]){const cell=cst[c];C.add(cell);const o=own[cell];if(o>=0&&!S.has(o)){S.add(o);q.push(o)}}}
+    hall={names:[...S].map(s=>list[s].name),cells:C.size,need:S.size}}
+  return{deficit,mc,hall}}
+function ejectFill(pb,asg0,deadline,rand){   // 入れない人を、先に入っている人をどけて入れ、どけた人を別の枠に入れなおす（連鎖）
+  const{list,sc,cst,clen,L,D}=pb,nS=list.length,nCell=D*L,asg=Int32Array.from(asg0),owner=new Int32Array(nCell).fill(-1),seen=new Uint8Array(nS);
+  const put=(s,c)=>{asg[s]=c;for(let j=0;j<clen[c];j++)owner[cst[c]+j]=s},rem=s=>{const c=asg[s];if(c<0)return;for(let j=0;j<clen[c];j++)owner[cst[c]+j]=-1;asg[s]=-1};
+  for(let s=0;s<nS;s++)if(asg[s]>=0)put(s,asg[s]);
+  const conf=(c,s)=>{const r=[];for(let j=0;j<clen[c];j++){const o=owner[cst[c]+j];if(o>=0&&o!==s&&!r.includes(o))r.push(o)}return r};
+  let budget=0;const MAXD=10;
+  const place=(s,depth)=>{if(--budget<0)return false;
+    const ord=Array.from(sc[s]).map(c=>[c,conf(c,s).length+rand()*.9]).sort((a,b)=>a[1]-b[1]);
+    for(const[c]of ord){const cf=conf(c,s);if(cf.some(o=>seen[o]))continue;if(cf.length&&depth>=MAXD)continue;
+      const sA=asg.slice(),sO=owner.slice();
+      for(const o of cf){rem(o);seen[o]=1}
+      put(s,c);let ok=true;for(const o of cf){if(!place(o,depth+1)){ok=false;break}}
+      if(ok)return true;
+      asg.set(sA);owner.set(sO)}
+    return false};
+  const un=[];for(let s=0;s<nS;s++)if(asg[s]<0)un.push(s);un.sort((a,b)=>sc[a].length-sc[b].length);
+  for(const u of un){for(let a=0;a<3&&asg[u]<0&&performance.now()<deadline;a++){seen.fill(0);seen[u]=1;budget=5000;place(u,0)}}
+  return asg}
+async function lnsImprove(clsKey,pb,asg0,opt){   // 一部の人だけをはがして、探しなおす（ほかの人は、いまの場所に固定）。入れない人が減る／点数が良くなるときだけ採用する
+  const o0=pb.o,nS=pb.list.length,DL=pb.D*pb.L,idxById=new Map(pb.list.map((st,i)=>[st.id,i])),key2c=new Map();
+  for(let c=0;c<pb.nC;c++)key2c.set(pb.cs[c]*DL+pb.cst[c],c);
+  const cnt=a=>{let u=0;for(let s=0;s<nS;s++)if(a[s]<0)u++;return u},rand=mulberry(opt.seed||7);
+  let cur=Int32Array.from(asg0),cu=cnt(cur),cs_=scoreOf(pb,cur),nodes=0,stale=0,it=0;
+  while(performance.now()<opt.deadline&&stale<(opt.maxStale||100)&&!AUTO.abort&&!(cu===0&&cs_===0)){
+    it++;const F=new Set(),placed=[];
+    for(let s=0;s<nS;s++){if(cur[s]<0)F.add(s);else placed.push(s)}
+    const addRand=n=>{for(let i=0;i<n&&placed.length;i++)F.add(placed[Math.floor(rand()*placed.length)])};
+    const mode=Math.floor(rand()*5),kmax=Math.max(3,Math.round(nS*(opt.mode==='repair'?.55:.4)));
+    if(mode===0&&cu>0){const own=new Int32Array(DL).fill(-1);for(const s of placed){const c=cur[s];for(let j=0;j<pb.clen[c];j++)own[pb.cst[c]+j]=s}
+      for(const u of [...F])for(const c of pb.sc[u])if(rand()<.4)for(let j=0;j<pb.clen[c];j++){const o=own[pb.cst[c]+j];if(o>=0)F.add(o)}
+      addRand(2)}
+    else if(mode===1){const d1=Math.floor(rand()*pb.D),d2=rand()<.5?Math.floor(rand()*pb.D):d1;for(const s of placed){const dd=pb.cdi[cur[s]];if(dd===d1||dd===d2)F.add(s)}}
+    else if(mode===2)addRand(Math.max(2,Math.round(kmax*(.3+rand()*.7))));
+    else if(mode===4){const r1=Math.floor(rand()*pb.L),r2=Math.min(pb.L-1,r1+Math.floor(rand()*3));for(const s of placed){const rr=pb.csi[cur[s]];if(rr>=r1&&rr<=r2)F.add(s)}addRand(1)}   // 同じ時刻帯の人
+    else{const s0=placed.length?placed[Math.floor(rand()*placed.length)]:0;F.add(s0);for(const p of pb.links[s0].peers)F.add(p);if(pb.areaOf[s0]>=0)for(const m of pb.areaGroups[pb.areaOf[s0]])F.add(m);addRand(3)}
+    if(!F.size){stale++;continue}
+    const pinned=new Map();for(const s of placed)if(!F.has(s)){const c=cur[s];pinned.set(pb.list[s].id,pb.dates[pb.cdi[c]]+'|'+pb.SL[pb.csi[c]].key)}
+    const sub=buildProblem(clsKey,{...o0,pinned},pb.limit17,o0.exclude);
+    if(sub.list.some((_,i)=>sub.sc[i].length===0)){stale++;continue}
+    const ctl=newCtl(Math.min(opt.deadline,performance.now()+(opt.perMs||800)),30000);
+    const ok=await runGen(searchGen(sub,{...opt.base,shuffle:it%3===0?1:0,rand:mulberry((opt.seed||7)*131+it)},ctl),ctl,opt.tick);
+    nodes+=ctl.nodes;if(ctl.abort)break;
+    if(!ok){stale++;continue}
+    const nxt=Int32Array.from(cur);let bad=false;
+    sub.list.forEach((st,i)=>{const s=idxById.get(st.id),c=ctl.solution[i],c2=s==null?undefined:key2c.get(s*DL+sub.cst[c]);if(c2==null)bad=true;else nxt[s]=c2});
+    if(bad){stale++;continue}
+    const nu=cnt(nxt),ns=scoreOf(pb,nxt);
+    if(nu<cu||(nu===cu&&ns<cs_)){cur=nxt;cu=nu;cs_=ns;stale=0}else{if(nu===cu&&ns===cs_&&rand()<.25)cur=nxt;stale++}}   // 同じ点数のときは、ときどき入れ替えて、ちがう形も試す
+  return{assign:cur,unplaced:cu,score:cs_,nodes,iters:it}}
+async function smartRepair(clsKey,full,start,base,tick,hooks,budgetMs){
+  hooks.stage&&hooks.stage('入れ替えで、入れない人を入れられないか探しています');
+  const t1=performance.now(),asg=ejectFill(full,start,t1+Math.min(2500,budgetMs/3),mulberry(99));
+  if(asg.every(x=>x>=0))return{asg};
+  hooks.stage&&hooks.stage('配置の一部を組み直して探しています');
+  const r=await lnsImprove(clsKey,full,asg,{deadline:t1+budgetMs,perMs:700,mode:'repair',base,tick,maxStale:150,seed:11});
+  return r.unplaced===0?{asg:r.assign}:{asg:null,partial:r.assign}}
 async function solveClass(clsKey,o,hooks={}){
   const eff=o.cutMode==='effort',t0=performance.now(),total=Math.max(5,+o.maxSec||20)*1000;
   const tgt=(()=>{const SLt=gslots(clsKey),tm=o.target?parseT(o.target):null;if(tm==null||!SLt.length)return -1;let b=0;SLt.forEach((x,i)=>{if(Math.abs(x.t-tm)<Math.abs(SLt[b].t-tm))b=i});return b})();
@@ -1981,7 +2064,14 @@ async function solveClass(clsKey,o,hooks={}){
   }
   if(!sol){
     hooks.stage&&hooks.stage(eff?`${o.cutTime}以降の枠も使って探しています`:'配置を探しています');
-    ctl=newCtl(t0+total);const r=await runGen(searchGen(full,{...base,rand:mulberry(seed)},ctl),ctl,tick);nodes+=ctl.nodes;
+    ctl=newCtl(t0+total);const hall=matchSingles(full);   // 事前の診断：どう並べても入れない人がいるときは、長く探さない
+    let r=false,rpPartial=null;
+    if(!hall.deficit)r=await runGen(searchGen(full,{...base,rand:mulberry(seed)},ctl),ctl,tick);
+    nodes+=ctl.nodes;
+    if(!r&&!hall.deficit&&!ctl.abort&&!AUTO.abort){   // 見つからなかったとき：入れ替えの連鎖と、組み直しで、もう一度挑む
+      const st0=(()=>{const g=greedyPartial(full),b=ctl.bestAssign;return b&&b.filter(x=>x>=0).length>g.filter(x=>x>=0).length?b:g})();
+      const rp=await smartRepair(clsKey,full,st0,base,tick,hooks,Math.min(9000,Math.max(3000,total*.4)));
+      if(rp.asg){ctl.solution=rp.asg;r=true}else rpPartial=rp.partial||null}
     if(r){sol=ctl.solution;pb=full}
     else{
       if(!ctl.abort&&!o.sibLoose&&o.sibAuto&&full.links.some(l=>l.anchors.length)){   // 別の学級のきょうだいを避けたせいで入らないとき：避けるのをやめて、もう一度探す（全員が入る配置を優先）
@@ -1989,19 +2079,16 @@ async function solveClass(clsKey,o,hooks={}){
         const r2=await solveClass(clsKey,{...o,sibLoose:true},hooks);if(r2.status==='ok'){r2.loose=true;return r2}
       }
       if(!ctl.abort&&o.keep&&!o.release&&!AUTO.abort){const mv=await releaseSearch(clsKey,o,full,base,seed,tick,hooks,t0);if(mv)return mv}
-      const g=greedyPartial(full),gc=g.filter(x=>x>=0).length,bc=ctl.bestAssign?ctl.bestAssign.filter(x=>x>=0).length:0;
-      const partial=gc>=bc?g:ctl.bestAssign;
-      return{status:ctl.abort?'abort':'fail',pb:full,partial,bestDepth:Math.max(gc,bc),timedOut:ctl.timedOut,diag:diagnose(full)};
+      const cand=[greedyPartial(full),ctl.bestAssign,rpPartial,hall.deficit?hall.mc:null].filter(Boolean),cn=a=>a.filter(x=>x>=0).length;
+      const partial=cand.reduce((a,b)=>cn(b)>cn(a)?b:a);
+      return{status:ctl.abort?'abort':'fail',pb:full,partial,bestDepth:cn(partial),timedOut:ctl.timedOut,diag:diagnose(full),hall:hall.hall};
     }
   }
   let best=sol,bs=scoreOf(pb,best);const first=bs;
-  if((+o.refine>0)&&bs>0){
+  if(bs>0&&!AUTO.abort){   // 仕上げ：一部の人をはがして探しなおし、点数（きょうだい・住所・偏りなど）が良くなるときだけ採用する。点数が0か、良くならなくなったら、自動で終わる
     hooks.stage&&hooks.stage('配置を仕上げています');
-    const end=performance.now()+o.refine*1000;let i=0,stale=0;
-    while(performance.now()<end&&bs>0&&stale<40&&!AUTO.abort){
-      const c2=newCtl(end,40000);const r=await runGen(searchGen(pb,{...base,shuffle:Math.max(1,base.shuffle),rand:mulberry(seed+1000+i++)},c2),c2,tick);nodes+=c2.nodes;
-      if(r){const sc2=scoreOf(pb,c2.solution);if(sc2<bs){bs=sc2;best=c2.solution;stale=0}else stale++}else stale++;
-    }
+    const rr=await lnsImprove(clsKey,pb,best,{deadline:performance.now()+(o.polishMs||Math.min(3500,500+90*pb.list.length)),perMs:500,mode:'polish',base,tick,maxStale:500,seed:5});
+    nodes+=rr.nodes;if(rr.unplaced===0&&rr.score<bs){best=rr.assign;bs=rr.score}
   }
   return{status:'ok',pb,assign:best,limit17:limit,score:bs,firstScore:first,nodes,ms:performance.now()-t0};
 }
@@ -2109,7 +2196,7 @@ async function repairSiblings(out,dlg){
       if(AUTO.abort||performance.now()-t0>budget)return improved;
       const k=x.k,cl=P.classes[k];dlg.set('きょうだいの時刻を調整しています',clsLabel(cl.g,cl.c));
       const before=sibMetric(pairs).cost,lateB=lateTotal(keys),ca=clsAuto(k);
-      const res2=await solveClass(k,{...ca,keep:false,exclude:null,refine:Math.min(2,+ca.refine||0),maxSec:Math.min(8,+ca.maxSec||20)},{stage:()=>{},tick:(c,n)=>dlg.tick(c,n)});
+      const res2=await solveClass(k,{...ca,keep:false,exclude:null,polishMs:1200,maxSec:Math.min(8,+ca.maxSec||20)},{stage:()=>{},tick:(c,n)=>dlg.tick(c,n)});
       if(res2.status!=='ok')continue;
       const mark=tx?tx.ops.length:0;applyResult(res2,false);
       if(sibMetric(pairs).cost<before-1&&lateTotal(keys)<=lateB&&(res2.placed||0)>=(x.res.placed||0)){x.res=res2;x.repaired=true;improved++;any=true}
@@ -2150,6 +2237,9 @@ async function runAuto(mode){
         exclude=new Set(res.dead.map(s=>s.id));AUTO.abort=false;const d2=progressDlg('かこピタしています');Object.assign(dlg,d2);
         res=await solveClass(k,{...ko,exclude},{stage:t=>dlg.set(t),tick:(c,n)=>dlg.tick(c,n)});res.excluded=res.pb.list&&exclude?[...exclude].map(id=>stById(id)):[];
       }
+      if(res.status==='deadlock'&&todo.length>1){   // 複数の学級をまとめてかこピタするときは、入れる枠のない人を除いて、ほかの人を配置する（除いた人は、結果に出す）
+        const ex2=new Set(res.dead.map(s=>s.id));const dd=res.dead;
+        res=await solveClass(k,{...ko,exclude:ex2},{stage:t=>dlg.set(t),tick:(c,n)=>dlg.tick(c,n)});res.excluded=dd;res.deadReasons=dd.map(s=>`${s.name}：${reasonOf(s,res.pb)}`)}
       out.push({k,res});
       if(res.status==='ok'){applyResult(res);if(res.moved&&res.moved.length)toast(`全員を入れるため、配置済みの ${res.moved.length} 人を動かしました：${res.moved.slice(0,6).join('、')}${res.moved.length>6?' ほか':''}`,{ms:10000})}
       if(res.status==='abort')break;
@@ -2193,10 +2283,10 @@ async function showAutoSummary(out,mode,o,skippedKeys=[]){
   for(const{k,res}of out){
     const c=P.classes[k],lab=esc(clsLabel(c.g,c.c));
     if(res.status==='ok'){const late=lateCount(res);una=una.concat(res.pb.una.map(s=>`${clsLabel(c.g,c.c)} ${s.name}`));
-      rows.push(`<div class="okbox"><b>${lab}</b>：${res.pb.list.length}名を配置しました${late?`（${esc(res.pb.o.cutTime)}以降の枠を ${late}名が使っています）`:''}${res.excluded&&res.excluded.length?`<br>除いた児童生徒：${res.excluded.map(s=>esc(s.name)).join('、')}`:''}</div>`)}
+      rows.push(`<div class="okbox"><b>${lab}</b>：${res.pb.list.length}名を配置しました${late?`（${esc(res.pb.o.cutTime)}以降の枠を ${late}名が使っています）`:''}${res.excluded&&res.excluded.length?`<br><span class="tiny">入れる枠がないため除いた児童生徒：${(res.deadReasons||res.excluded.map(s=>s.name)).map(esc).join('<br>')}</span>`:''}</div>`)}
     else if(res.status==='empty')rows.push(`<div class="warnbox"><b>${lab}</b>：配置する児童生徒がいません</div>`);
     else if(res.status==='deadlock')rows.push(`<div class="ngbox"><b>${lab}</b>：入れる枠のない児童生徒がいます（${res.dead.map(s=>esc(s.name)).join('、')}）</div>`);
-    else if(res.status==='fail')rows.push(`<div class="ngbox"><b>${lab}</b>：${res.timedOut?'時間内に':''}全員が入る組み合わせが見つかりませんでした（最大 ${res.bestDepth} / ${res.pb.list.length} 名まで）</div>`);
+    else if(res.status==='fail')rows.push(`<div class="ngbox"><b>${lab}</b>：${res.timedOut?'時間内に':''}全員が入る組み合わせが見つかりませんでした（最大 ${res.bestDepth} / ${res.pb.list.length} 名まで）${res.hall?`<br><span class="tiny">原因：<b>${res.hall.names.map(esc).join('、')}</b>（${res.hall.need}名）は、合わせて ${res.hall.cells} 枠にしか入れません。</span>`:''}</div>`);
     else if(res.status==='abort')rows.push(`<div class="warnbox"><b>${lab}</b>：中断しました</div>`);
   }
   const skipped=skippedKeys.map(k=>{const c=P.classes[k];return clsLabel(c.g,c.c)});
@@ -2222,7 +2312,7 @@ A.auto=()=>{
   const k=curCls();const SL=getSlots();const nAddr=P.students.filter(x=>x.addr).length;
   UI.auto.sel=new Set([k]);
   const el=openDlg('',{wide:true}),box=$('.dlg',el);
-  const NUM=['shuffle','refine','areaN','sibGap'];
+  const NUM=['shuffle','areaN','sibGap'];
   const tgt=()=>{const s=classList().map(c=>c.key).filter(x=>UI.auto.sel.has(x));return s.length?s:[k]};
   const val=(key,v)=>v==='true'?true:v==='false'?false:NUM.includes(key)?(key==='areaN'?Math.min(60,Math.max(2,Math.round(+v)||5)):+v):v;
   const setK=(key,v)=>{const ks=tgt();act(()=>{for(const kk of ks){const c=P.classes[kk];if(c)setProp(c,'auto',Object.assign({},c.auto||{},{[key]:v}))}})};   // 変えた項目だけを、選んだ学級に反映
@@ -2238,7 +2328,7 @@ A.auto=()=>{
       <label class="f">自動配置の方針${seg('shuffle',[[0,'出席番号順優先'],[2,'シャッフル']])}<span class="tiny muted" style="font-weight:500">シャッフル＝実行のたびに別の案になります</span>${diff('shuffle')}</label>
       <label class="f">日ごとの人数${seg('balance',[['true','均等にする'],['false','成り行き']])}<span class="tiny muted" style="font-weight:500">均等＝人数の少ない日から先に埋めます</span>${diff('balance')}</label>
       <label class="f">詰める時刻<select data-ac-sel="target"><option value="">指定しない</option>${gslots(rep).map(x=>`<option value="${x.key}" ${o.target===x.key?'selected':''}>${x.label} 付近から</option>`).join('')}</select><span class="tiny muted" style="font-weight:500">選んだ時刻に近い枠から順に使います</span>${diff('target')}</label>
-      <label class="f">仕上げの探索<select data-ac-sel="refine">${[0,3,6,10].map(v=>`<option value="${v}" ${+o.refine===v?'selected':''}>${v?v+'秒まで':'しない（最初の解で終了）'}</option>`).join('')}</select><span class="tiny muted" style="font-weight:500">${esc(o.cutTime)}以降の人数や偏りが減る組み合わせを探します</span>${diff('refine')}</label>
+      
       <label class="f">いまの配置${seg('keep',[['false','消して組み直す'],['true','残して、足りない分だけ']])}${diff('keep')}</label>
       <div class="f"><span class="tiny muted" style="font-weight:600">時刻のルール・1枠の長さは、「4. かこピタ(配置)」の上の欄で、学級ごとに決めます（すぐ日程表に反映されます）。</span></div></div>
      <div class="row aosel" style="margin-top:14px;gap:8px;flex-wrap:wrap"><span style="font-weight:800;font-size:12.5px;color:var(--ink2)">学級を決める順番（まとめてかこピタするとき）</span><div class="seg"><button data-ord="sib" class="${autoOpt().order!=='class'?'on':''}">きょうだいの多い学級から</button><button data-ord="class" class="${autoOpt().order==='class'?'on':''}">学年・組の順</button></div><span class="tiny muted" style="flex-basis:100%">別の学級にきょうだいがいる人の多い学級を先に決めると、あとの学級が、時刻を合わせやすくなります。</span></div>
@@ -2723,7 +2813,7 @@ function submitAnswer(o) {
   const gc = txt_(o.gc, 30), n = txt_(o.n, 4), name = txt_(o.name, 60), kana = txt_(o.kana, 80);
   if (CFG.classes.indexOf(gc) < 0 || !/^\d{1,3}$/.test(n) || +n < 1 || !name || !kana) throw new Error(BAD);
   if (!KANA_RE.test(kana)) throw new Error('ふりがなは、ひらがな等の、漢字以外で入力してください。');
-  const r = [Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss'), gc, n, name, kana];
+  const r = [Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy/MM/dd HH:mm:ss'), gc, +n, name, kana], numIdx = [2];   // 出席番号は数値で書き込む（並べ替えで 1, 2, 10 の順になるように）
   if (CFG.addr) {
     const a = txt_(o.addr, 60);
     if (CFG.addr !== 'text' && a && CFG.addr.indexOf(a) < 0) throw new Error(BAD);
@@ -2734,7 +2824,8 @@ function submitAnswer(o) {
     if ((sg && CFG.classes.indexOf(sg) < 0) || (sn && !/^\d{1,3}$/.test(sn))) throw new Error(BAD);
     const sk = txt_(s.kana, 80);
     if (sk && !KANA_RE.test(sk)) throw new Error('きょうだいのふりがなは、ひらがな等の、漢字以外で入力してください。');
-    r.push(txt_(s.name, 60), sk, sg, sn);
+    if (sn) numIdx.push(r.length + 3);
+    r.push(txt_(s.name, 60), sk, sg, sn ? +sn : '');
   }
   const okNg = {}; CFG.dates.forEach(d => CFG.slots.forEach(t => { okNg[d.k + ' ' + t] = 1; }));
   const want = Array.isArray(o.ng) ? o.ng.slice(0, 3000).map(x => txt_(x, 20)).filter(String) : [];
@@ -2748,9 +2839,11 @@ function submitAnswer(o) {
     const sh = ss.getSheetByName('回答');
     if (!sameHdr_(sh)) throw new Error('受付の準備が整っていません。担任までお電話ください。');
     if (sh.getLastRow() > 5000) throw new Error('受付件数の上限に達しました。担任までお電話ください。');
-    // 先頭が「=」などの入力が、計算式として動かないよう、すべて「文字列」として書き込む
-    const rng = sh.getRange(sh.getLastRow() + 1, 1, 1, r.length);
-    rng.setNumberFormat('@').setValues([r]);
+    // 先頭が「=」などの入力が、計算式として動かないよう、すべて「文字列」として書き込む（出席番号だけは、検査ずみの数字なので、数値にする）
+    const row = sh.getLastRow() + 1, rng = sh.getRange(row, 1, 1, r.length);
+    rng.setNumberFormat('@');
+    numIdx.forEach(i => sh.getRange(row, i + 1).setNumberFormat('0'));
+    rng.setValues([r]);
   } finally { lock.releaseLock(); }
   return true;
 }
@@ -2811,11 +2904,12 @@ button.go:disabled{background:#9DB3C6;box-shadow:none}
 <script>
 var C=__CFGJSON__, ng={}, mode='', LANG='ja', I=C.i18n||null, TX0=JSON.parse(JSON.stringify(C.tx));
 var UI0={info:'児童生徒の情報',pick:'選んでください',req:'（必須）',sibN:'きょうだい{n}人目',red:'（赤＝×）',cnt:'× を付けた日時：{n}か所',kanaBad:'ふりがなに、漢字などが入っています。ひらがな等に直してください。',kanaFix:'ふりがなを、ひらがな等に直してください（漢字は入れられません）。',needMode:'「{a}」か「{b}」を選んでください。',needAll:'必須の項目を入力してください。',kanaChk:'ふりがなを確認してください：',sibKanaChk:'きょうだい{n}人目のふりがなを確認してください：',needNg:'×にする日時を1つ以上選ぶか、「{a}」を選んでください。',sending:'送信中…',close:'このページは、閉じて大丈夫です。',fail:'送信できませんでした：',dl:'📌 回答の締め切り：'};
-function U(k,o){var s=(I&&I.ui&&I.ui[LANG]&&I.ui[LANG][k]!=null&&I.ui[LANG][k]!=='')?I.ui[LANG][k]:UI0[k];if(o)for(var q in o)s=s.split('{'+q+'}').join(o[q]);return s}
+function ORD(n){return LANG==='ej'?(['','ひとり','ふたり','さんにん','よにん','ごにん','ろくにん','しちにん','はちにん'][n]||n+'にん'):String(n)}
+function U(k,o){var s=(I&&I.ui&&I.ui[LANG]&&I.ui[LANG][k]!=null&&I.ui[LANG][k]!=='')?I.ui[LANG][k]:UI0[k];if(o)for(var q in o)s=s.split('{'+q+'}').join(q==='n'?ORD(o[q]):o[q]);return s}
 function P0(s){return String(s).replace(/〔([^|〕]*)[|][^〕]*〕/g,'$1')}
 function R(s){return esc(s).replace(/〔([^|〕]*)[|]([^〕]*)〕/g,'<ruby>$1<rt>$2</rt></ruby>')}
 function applyLang(){var t=JSON.parse(JSON.stringify(TX0)),o=I&&I.tx&&I.tx[LANG];
-  if(o)for(var k in o){if(o[k]==null||o[k]==='')continue;if(k==='sibL'){t.sibL=TX0.sibL.map(function(_,i){return o.sibL.map(function(x){return x.split('{n}').join(String(i+1))})}).map(function(a){return a})}else t[k]=o[k]}
+  if(o)for(var k in o){if(o[k]==null||o[k]==='')continue;if(k==='sibL'){t.sibL=TX0.sibL.map(function(_,i){return o.sibL.map(function(x){return x.split('{n}').join(ORD(i+1))})}).map(function(a){return a})}else t[k]=o[k]}
   if(!TX0.skip)t.skip='';t.skipG=TX0.skipG;C.tx=t}
 function DL(d){if(LANG==='ja'||LANG==='ej')return d.l;var wd=I&&I.wd&&I.wd[LANG],m=/（(.)）/.exec(d.l),i='日月火水木金土'.indexOf(m?m[1]:'');return d.k+(wd&&i>=0?' ('+wd[i]+')':'')}
 function $(i){return document.getElementById(i)}
@@ -3368,28 +3462,27 @@ function vForm(){
   h+=`<div style="margin-top:14px"><div style="font-weight:800;font-size:12.5px;color:var(--ink2);margin-bottom:6px">住所を聞くか（家庭訪問で近い家を続けたいとき）</div><div class="seg">${[['none','聞かない'],['text','入力してもらう'],['list','リストから選ぶ']].map(([v,l])=>`<button data-act="f-addr" data-v="${v}" class="${F.addr===v?'on':''}">${l}</button>`).join('')}</div>
    ${(()=>{const nR=P.students.filter(s=>rosterAddr(s)).length;return nR?`<p class="tiny muted" style="margin-top:6px">名簿に住所が入っている人が${nR}名います。保護者には、聞かなくても大丈夫です（カレンダーの「場所」にも、名簿の住所を使えます）。</p>`:`<p class="tiny muted" style="margin-top:6px">名簿に住所が入っていないときは、「入力してもらう」がおすすめです。<b>都道府県名から番地まで</b>入力してもらうと、カレンダーやGoogleマップに、正しく表示できます。</p>`})()}
    ${F.addr==='list'?`<div class="row" style="margin-top:8px"><label class="tog">先頭<input type="number" min="2" max="60" data-ch="fopt" data-k="addrN" value="${F.addrN}" style="width:64px">文字ほど</label></div>`:''}
-   ${F.addr==='list'?`<label class="f" style="margin-top:8px">選択肢（1行に1つ。名簿の住所の先頭${F.addrN}文字から自動で作った分に、追加できます）<textarea class="paste" data-ch="fopt" data-k="addrList" style="min-height:70px" placeholder="例：みどり町1丁目">${esc(F.addrList)}</textarea></label><p class="tiny muted" style="margin-top:4px">いまの選択肢：${areaChoices().length?esc(areaChoices().join('、')):'まだありません（名簿に住所を入れるか、上の欄に書いてください）'}</p>`:''}
+   ${F.addr==='list'?`<div style="margin-top:8px;padding:10px 12px;border-radius:10px;background:var(--brand-t,#e8f2fb);border-left:5px solid var(--brand,#1b7fd0);font-size:14.5px;line-height:1.7"><b style="color:var(--brand,#1b7fd0)">いまの選択肢（${areaChoices().length}件）</b><br>${areaChoices().length?`<span style="font-weight:700">${esc(areaChoices().join('、'))}</span>`:'<span style="color:var(--ng)">まだありません（名簿に住所を入れるか、下の欄に書いてください）</span>'}</div><label class="f" style="margin-top:8px">追加する選択肢（1行に1つ。上の名簿の住所の先頭${F.addrN}文字から自動で作った分に、追加できます）<textarea class="paste" data-ch="fopt" data-k="addrList" style="min-height:70px" placeholder="例：みどり町1丁目">${esc(F.addrList)}</textarea></label>`:''}
    ${F.addr!=='none'?'<p class="tiny muted" style="margin-top:6px">住所は個人情報です。必要なときだけ聞いてください。</p>':''}</div>`;
   if(g)h+=`<p class="tiny muted" style="margin:12px 0 0">フォームに入る内容：${g.classes}学級の学年・組／日時の選択肢 ${g.choices}個（${S.dates.length}日 × ${getSlots().length}枠）${g.closeStr?`／${esc(g.closeStr)}に自動締め切り`:''}</p>`;
   if(g&&F.autoClose&&!F.closeDate)h+=`<div class="warnbox" style="margin-top:12px">回答を設定した日時で締め切る設定になっています。<b>上の「締め切りの日」を入れてください</b>（日付を入れるまで、GASはコピーできません）。締め切らないときは、「回答を設定した日時で締め切る」のチェックを外します。</div>`;
   const wg=gOK?buildWebGas():null;
   h+=`<div class="row" style="margin-top:14px"><button class="btn" data-act="f-txt">フォームの文言を編集する</button><span class="tiny muted">${ftxtCount()?`（${ftxtCount()}件を書き換え済み）`:'（説明・見出し・送信後のメッセージなど。フォーム版・Webアプリ版の両方に使われます）'}</span></div>
-  <h3 style="margin:14px 0 0">方式1：Webアプリ（スマホ向け、おすすめ）</h3>
+  `;
+  const stepBtn=k=>`<div class="row" style="margin-top:8px"><button class="btn sm" data-act="f-det" data-k="${k}">${(UI.form.open||{})[k]?'▲ GASの使い方の手順を閉じる':'▼ GASの使い方の手順を見る'}</button></div>`;
+  const MH=`<p class="tiny muted" style="margin:14px 0 6px">下の方式1・方式2のうち、<b>どちらか1つ</b>を選んで進めてください。</p><div style="border:2px solid color-mix(in srgb,var(--brand,#1b7fd0) 60%,#fff);background:color-mix(in srgb,var(--brand,#1b7fd0) 5%,transparent);border-radius:12px;padding:12px;margin-top:6px;min-width:0"><h3 style="margin:0">方式1：Webアプリ（スマホ向け、おすすめ）</h3>
    <p class="tiny muted" style="margin:4px 0 0">日付ごとに区切って表示する、スマホ向けの専用ページです。回答は、方式2（Googleフォーム）と同じ項目名のスプレッドシートにたまるので、取り込みは同じ方法でできます。</p>
    <div class="f" style="margin-top:8px"><label class="tog"><input type="checkbox" data-ch="fi18n" ${F.i18n!==false?'checked':''}>保護者の画面（Webアプリ）を、多言語にする（画面の上に、言語の切り替えが付きます）</label><div class="row" style="margin-top:6px"><button class="btn sm" data-act="f-i18n">言語ごとの文言を編集する</button></div><span class="tiny muted">やさしい日本語と、8つの言語（英語・中国語・ポルトガル語・フィリピノ語・ベトナム語・スペイン語・韓国語・タイ語）に切り替えられます。機械（AI）による翻訳なので、使う前に、母語話者や通訳の方に確認してください。翻訳されるのは初期の文言だけで、日本語の文言を編集した部分は、日本語のままです。標準はオンです。変えたあとは、GASを作り直してください。翻訳版の案内文書の二次元コードには、その言語で開く指定が付きます。</span></div>
    <div class="row" style="margin-top:8px"><button class="btn pri big" data-act="web-copy" ${gOK?'':'disabled'}>${ic('send',18)}Webアプリ版GASをコピーする</button><button class="btn ghost" data-act="web-show" ${gOK?'':'disabled'}>${UI.form.showWeb?'コードを隠す':'コードを見る'}</button><button class="btn" data-act="web-prev" ${gOK?'':'disabled'}>${UI.form.prevWeb?'プレビューを閉じる':'画面のプレビュー'}</button></div>
    ${UI.form.prevWeb&&wg?`<div style="margin-top:10px;text-align:center"><iframe sandbox="allow-scripts" srcdoc="${esc(webPreviewHtml(wg.code))}" style="width:min(100%,400px);height:720px;border:8px solid #1E3350;border-radius:26px;background:#fff"></iframe><div class="tiny muted">スマートフォンの画面の大きさで表示しています（実際の見た目は端末で少し変わります）</div></div>`:''}
    ${UI.form.showWeb&&wg?`<textarea class="paste" readonly style="min-height:200px;margin-top:10px" onfocus="this.select()">${esc(wg.code)}</textarea>`:''}
-   ${chkSteps('w',`<ol class="steps"><li><a href="https://script.new" target="_blank" rel="noopener">script.new</a> を開く（Googleにログインした状態で）<br><b>または</b> <a href="https://script.google.com" target="_blank" rel="noopener">Google Apps Script</a> を開いて「新しいプロジェクト」を作る<span class="tiny muted">（セキュリティ設定でリンクから開けないときは、Googleにログインしたブラウザで「Google Apps Script」を検索して開いてください）</span>。</li><li>最初からあるコードを<b>すべて消して</b>、コピーしたGASを貼り付ける。</li><li>上の「実行」で <b>createWebApp</b> を<b>1回だけ</b>実行する（初回は権限の承認が出ます。<b>表示される権限は、すべて許可</b>してください。一部だけだと失敗します。「Googleで確認されていません」と出たら「詳細」→「（安全ではないページ）に移動」→「許可」を押します。自分で貼り付けたコードなので問題ありません）。回答がたまる<b>スプレッドシートが、あなたのマイドライブの直下に作られます</b>。そのURLは、画面下の「実行ログ」に出ます（メール通知がオンなら、あなた宛のメールにも届きます）。</li><li>右上の<b>「デプロイ」→「新しいデプロイ」</b>→「種類の選択」の歯車で<b>「ウェブアプリ」</b>を選ぶ。<b>次のユーザーとして実行：自分／アクセスできるユーザー：全員</b>にして「デプロイ」（この操作だけは手作業が必要です。最初の1回だけです）。</li><li>出てきた<b>「ウェブアプリのURL」</b>をコピーし、下の<b>「二次元コードを、かこピタで作る」欄</b>に貼り付けて、二次元コードを作り、<b>PNG（またはSVG）で保存</b>する。
-</li><li>スマホで二次元コードを読み取り、ページが開くか確かめる。<b>テスト送信を1件</b>して、回答のスプレッドシートにその1行が入ったことを確認し、テストの行は削除する。</li><li>問題なければ、保護者に二次元コードかURLを配る。</li><li><b>（回答のスプレッドシートを共有ドライブへ移すとき）</b>スプレッドシートを共有ドライブへ移動します。スプレッドシートのURLも、WebアプリのURLも、二次元コードも<b>そのまま使えます</b>。ただし、このGASを動かす<b>あなたのアカウントが、その共有ドライブの「投稿者」以上のメンバー</b>である必要があります（外れると、回答が保存できなくなります）。移したあとに、もう一度テスト送信をして確かめてください。</li><li><b>日程などを変えたとき</b>：新しいGASを貼り直し、「デプロイ」→「デプロイを管理」→鉛筆→バージョン「新バージョン」→「デプロイ」。<b>URLも二次元コードも、回答のスプレッドシートも、そのまま</b>です。「新しいデプロイ」にするとURLが変わるので、二次元コードを作り直してください（スプレッドシートは同じです）。別のプロジェクトに貼って実行したときだけ、新しいスプレッドシートが作られます。</li><li>回答は、そのスプレッドシートを「カンマ区切り形式（.CSV）」でダウンロードするか、表をコピーして、「回答を取り込む」の欄で読み込みます。</li></ol>`)}
-   <div class="panel" style="margin-top:14px;padding:12px"><b>二次元コードを、かこピタで作る</b><span class="tiny muted">（URLを貼ると、すぐにできます。通信はせず、この画面の中だけで作ります）</span>
-    <div class="row" style="margin-top:8px"><input id="codeIn" type="text" placeholder="https://…" value="${esc(UI.form.codeIn!=null?UI.form.codeIn:((P.letter&&P.letter.url)||''))}" style="flex:1;min-width:200px" autocomplete="off" spellcheck="false"></div>
-    <div id="codeOut">${codeHtml(UI.form.code||(UI.form.codeIn==null&&P.letter&&P.letter.url?codeCalc(P.letter.url):null))}</div><div class="tiny muted" style="margin-top:6px">ここに入れたURLは保存され、「5. 印刷」の「保護者への案内文書」にも使われます。</div></div>
-
-   <h3 style="margin:22px 0 0">方式2：Googleフォーム</h3><div class="row" style="margin-top:8px"><button class="btn pri big" data-act="gas-copy" ${gOK?'':'disabled'}>${ic('send',18)}Googleフォーム版GASをコピーする</button><button class="btn ghost" data-act="gas-show" ${gOK?'':'disabled'}>${UI.form.show?'コードを隠す':'コードを見る'}</button><button class="btn" data-act="gas-dl" ${gOK?'':'disabled'}>${ic('down',17)}ファイルで保存</button></div>
+   ${stepBtn('w')}${(UI.form.open||{}).w?chkSteps('w',`<ol class="steps"><li><a href="https://script.new" target="_blank" rel="noopener">script.new</a> を開く（Googleにログインした状態で）<br><b>または</b> <a href="https://script.google.com" target="_blank" rel="noopener">Google Apps Script</a> を開いて「新しいプロジェクト」を作る<span class="tiny muted">（セキュリティ設定でリンクから開けないときは、Googleにログインしたブラウザで「Google Apps Script」を検索して開いてください）</span>。</li><li>最初からあるコードを<b>すべて消して</b>、コピーしたGASを貼り付ける。</li><li>上の「実行」で <b>createWebApp</b> を<b>1回だけ</b>実行する（初回は権限の承認が出ます。<b>表示される権限は、すべて許可</b>してください。一部だけだと失敗します。「Googleで確認されていません」と出たら「詳細」→「（安全ではないページ）に移動」→「許可」を押します。自分で貼り付けたコードなので問題ありません）。回答がたまる<b>スプレッドシートが、あなたのマイドライブの直下に作られます</b>。そのURLは、画面下の「実行ログ」に出ます（メール通知がオンなら、あなた宛のメールにも届きます）。</li><li>右上の<b>「デプロイ」→「新しいデプロイ」</b>→「種類の選択」の歯車で<b>「ウェブアプリ」</b>を選ぶ。<b>次のユーザーとして実行：自分／アクセスできるユーザー：全員</b>にして「デプロイ」（この操作だけは手作業が必要です。最初の1回だけです）。</li><li>出てきた<b>「ウェブアプリのURL」</b>をコピーし、下の<b>「二次元コードを、かこピタで作る」欄</b>に貼り付けて、二次元コードを作り、<b>PNG（またはSVG）で保存</b>する。
+</li><li>スマホで二次元コードを読み取り、ページが開くか確かめる。<b>テスト送信を1件</b>して、回答のスプレッドシートにその1行が入ったことを確認し、テストの行は削除する。</li><li>問題なければ、保護者に二次元コードかURLを配る。</li><li><b>（回答のスプレッドシートを共有ドライブへ移すとき）</b>スプレッドシートを共有ドライブへ移動します。スプレッドシートのURLも、WebアプリのURLも、二次元コードも<b>そのまま使えます</b>。ただし、このGASを動かす<b>あなたのアカウントが、その共有ドライブの「投稿者」以上のメンバー</b>である必要があります（外れると、回答が保存できなくなります）。移したあとに、もう一度テスト送信をして確かめてください。</li><li><b>日程などを変えたとき</b>：新しいGASを貼り直し、「デプロイ」→「デプロイを管理」→鉛筆→バージョン「新バージョン」→「デプロイ」。<b>URLも二次元コードも、回答のスプレッドシートも、そのまま</b>です。「新しいデプロイ」にするとURLが変わるので、二次元コードを作り直してください（スプレッドシートは同じです）。別のプロジェクトに貼って実行したときだけ、新しいスプレッドシートが作られます。</li><li>回答は、そのスプレッドシートを「カンマ区切り形式（.CSV）」でダウンロードするか、表をコピーして、「回答を取り込む」の欄で読み込みます。</li></ol>`):''}</div><div style="border:2px solid color-mix(in srgb,var(--brand,#1b7fd0) 60%,#fff);background:color-mix(in srgb,var(--brand,#1b7fd0) 5%,transparent);border-radius:12px;padding:12px;margin-top:12px;min-width:0"><h3 style="margin:0">方式2：Googleフォーム</h3><div class="row" style="margin-top:8px"><button class="btn pri big" data-act="gas-copy" ${gOK?'':'disabled'}>${ic('send',18)}Googleフォーム版GASをコピーする</button><button class="btn ghost" data-act="gas-show" ${gOK?'':'disabled'}>${UI.form.show?'コードを隠す':'コードを見る'}</button><button class="btn" data-act="gas-dl" ${gOK?'':'disabled'}>${ic('down',17)}ファイルで保存</button></div>
    ${UI.form.show&&gOK?`<textarea class="paste" readonly style="min-height:200px;margin-top:10px" onfocus="this.select()">${esc(g.code)}</textarea>`:''}
-   ${chkSteps('f',`<ol class="steps"><li><a href="https://script.new" target="_blank" rel="noopener">script.new</a> を開く（Googleにログインした状態で）<br><b>または</b> <a href="https://script.google.com" target="_blank" rel="noopener">Google Apps Script</a> を開いて「新しいプロジェクト」を作る<span class="tiny muted">（セキュリティ設定でリンクから開けないときは、Googleにログインしたブラウザで「Google Apps Script」を検索して開いてください）</span>。</li><li>最初からあるコードを<b>すべて消して</b>、コピーしたGASを貼り付ける。</li><li>上の「実行」で <b>createKadanForm</b> を実行する（初回は権限の承認が出ます。<b>表示される権限は、すべて許可</b>してください。一部だけだと失敗します。「Googleで確認されていません」と出たら「詳細」→「（安全ではないページ）に移動」→「許可」を押します。自分で貼り付けたコードなので問題ありません）。</li><li>画面下の「実行ログ」に、フォームの編集URLと回答用URL（短縮URL）が出ます。<b>マイドライブに、二次元コードの画像（PNG・SVG）も自動でできます</b>（「実行ログ」に場所が出ます。メール通知がオンなら、あなた宛のメールにも、画像つきで届きます）。</li><li>スマホで二次元コードを読み取り、フォームが開くか確かめる。<b>テスト送信を1件</b>して、フォームの「回答」画面にその1件が入ったことを確認し、テストの回答は削除する。</li><li>問題なければ、保護者に二次元コードかURLを配る。</li></ol>`)}
-   </section>`;
+   ${stepBtn('f')}${(UI.form.open||{}).f?chkSteps('f',`<ol class="steps"><li><a href="https://script.new" target="_blank" rel="noopener">script.new</a> を開く（Googleにログインした状態で）<br><b>または</b> <a href="https://script.google.com" target="_blank" rel="noopener">Google Apps Script</a> を開いて「新しいプロジェクト」を作る<span class="tiny muted">（セキュリティ設定でリンクから開けないときは、Googleにログインしたブラウザで「Google Apps Script」を検索して開いてください）</span>。</li><li>最初からあるコードを<b>すべて消して</b>、コピーしたGASを貼り付ける。</li><li>上の「実行」で <b>createKadanForm</b> を実行する（初回は権限の承認が出ます。<b>表示される権限は、すべて許可</b>してください。一部だけだと失敗します。「Googleで確認されていません」と出たら「詳細」→「（安全ではないページ）に移動」→「許可」を押します。自分で貼り付けたコードなので問題ありません）。</li><li>画面下の「実行ログ」に、フォームの編集URLと回答用URL（短縮URL）が出ます。<b>マイドライブに、二次元コードの画像（PNG・SVG）も自動でできます</b>（「実行ログ」に場所が出ます。メール通知がオンなら、あなた宛のメールにも、画像つきで届きます）。</li><li>スマホで二次元コードを読み取り、フォームが開くか確かめる。<b>テスト送信を1件</b>して、フォームの「回答」画面にその1件が入ったことを確認し、テストの回答は削除する。</li><li>問題なければ、保護者に二次元コードかURLを配る。</li></ol>`):''}</div><div class="panel" style="margin-top:12px;padding:12px;border:2px solid color-mix(in srgb,var(--brand,#1b7fd0) 60%,#fff);background:color-mix(in srgb,var(--brand,#1b7fd0) 5%,transparent)"><b>二次元コードを、かこピタで作る</b><span class="tiny muted">（URLを貼ると、すぐにできます。通信はせず、この画面の中だけで作ります）</span>
+    <div class="row" style="margin-top:8px"><input id="codeIn" type="text" placeholder="https://…" value="${esc(UI.form.codeIn!=null?UI.form.codeIn:((P.letter&&P.letter.url)||''))}" style="flex:1;min-width:200px" autocomplete="off" spellcheck="false"></div>
+    <div id="codeOut">${codeHtml(UI.form.code||(UI.form.codeIn==null&&P.letter&&P.letter.url?codeCalc(P.letter.url):null))}</div><div class="tiny muted" style="margin-top:6px">ここに入れたURLは保存され、「5. 印刷」の「保護者への案内文書」にも使われます。</div></div>`;
+  h+=MH+'</section>';
   h+=`<section class="panel"><h2><span class="stepno">B</span>回答を取り込む<small>回答ファイルの読み込み、または表の貼り付け</small></h2>`;
   if(IMP.stage==='review'&&IMP.plan)h+=vImportReview();
   else if(IMP.stage==='map'&&IMP.rows)h+=vImportMap();
@@ -3490,21 +3583,21 @@ A['f-open-go']=()=>{UI.afterOpen=true;openFile()};
 /* ================= 6. print (notice / reminder) ================= */
 const TPL_DEF={
  meeting:{title:'{行事} 日程のお知らせ',who:'{学年}年{組}組　{番}番\n{名前} さんと保護者の方へ',when:'{日付}　{時刻}',
-  body:'上記の日程で {行事} を\n{学年}年{組}組 の教室で行います。 よろしくお願いします。\n＊ ご都合が悪ければ {学校}（電話 {電話}）までご連絡ください。\n＊ 保護者証とスリッパをご持参ください。\n＊ 時間が多少前後する場合もありますのでご了承ください。',
+  body:'上記の日程で {行事} を\n{学年}年{組}組 の教室で行います。 よろしくお願いします。\n＊ ご都合が悪ければ {学校}（電話 {電話}）までご連絡ください。\n＊ 保護者証と上履きをお持ちください。\n＊ 時間が多少前後する場合もありますのでご了承ください。',
   foot:'{学校}',teacher:'{学年}年{組}組 担任　{担任}'},
  visit:{title:'{行事} 日程のお知らせ',who:'{学年}年{組}組　{番}番\n{名前} さんと保護者の方へ',when:'{日付}　{時刻}',
   body:'上記の日程で {行事} に伺います。 よろしくお願いします。\n＊ ご都合が悪ければ {学校}（電話 {電話}）までご連絡ください。\n＊ 時間が多少前後する場合もありますのでご了承ください。',
   foot:'{学校}',teacher:'{学年}年{組}組 担任　{担任}'},
- remindAfter:{to:'{学年}年{組}組　{番}番\n{名前} さんの保護者の方へ',title:'{行事} の日時希望調査について',
-  body:'締め切り時点で未回答となっているようです。\n担任までご連絡ください。\n（電話番号 {電話}）\n行き違いがありましたら申し訳ございません。',foot:'{日付}',teacher:'{学校}　{学年}年{組}組 担任　{担任}'},
- remindBefore:{to:'{学年}年{組}組　{番}番\n{名前} さんの保護者の方へ',title:'{行事} の日時希望調査について',
-  body:'{今} 時点で未回答となっているようです。\n期限までにご回答ください。\n（入力間違いも未回答処理されています。）\n行き違いがありましたら申し訳ございません。',foot:'{日付}',teacher:'{学校}　{学年}年{組}組 担任　{担任}'}};
+ remindAfter:{to:'{学年}年{組}組　{番}番\n{名前} さんの保護者の方へ',title:'{行事} の日時希望調査について（ご確認のお願い）',
+  body:'回答期限を過ぎましたが、ご回答を確認できておりません。ご多用のところ恐れ入りますが、担任までご連絡いただけますでしょうか。（電話 {電話}）\nすでにご回答済みの場合は、行き違い、または入力内容（お名前・出席番号など）の相違で、こちらで確認できていない可能性があります。行き違いがありましたら、申し訳ございません。',foot:'{日付}\n{学校}',teacher:'{学年}年{組}組 担任　{担任}'},
+ remindBefore:{to:'{学年}年{組}組　{番}番\n{名前} さんの保護者の方へ',title:'{行事} の日時希望調査について（ご確認のお願い）',
+  body:'{今} 時点で、ご回答を確認できておりません。\nすでにご回答済み、またはこれからご回答の予定でしたら、行き違いとなりますことをご容赦ください。お手数ですが、期限までにご回答をお願いいたします。\n（お名前や出席番号などの入力が異なると、こちらで確認できないことがあります。）\nご回答済みのはずの場合は、こちらの確認の行き違いかもしれません。恐れ入りますが、担任までご連絡ください（電話 {電話}）。',foot:'{日付}\n{学校}',teacher:'{学年}年{組}組 担任　{担任}'}};
 const TPL_NAMES={meeting:'お知らせ（懇談用）',visit:'お知らせ（家庭訪問用）',remindAfter:'催促状（締め切り後）',remindBefore:'催促状（締め切り前）'};
 const TPL_FIELDS={meeting:['title','who','when','body','foot','teacher'],visit:['title','who','when','body','foot','teacher'],remindAfter:['to','title','body','foot','teacher'],remindBefore:['to','title','body','foot','teacher']};
 const TPL_LABEL={title:'見出し',who:'児童生徒の行',when:'日時の行',body:'本文（改行できます）',foot:'下部（学校名・日付）',teacher:'担任の行',to:'あて名'};
 const tplGet=n=>Object.assign({},TPL_DEF[n],(P.tpl||{})[n]||{});
 const isVisit=()=>/家庭訪問/.test(kindName());
-UI.print={mode:'notice',sel:null,from:'',to:'',skipUnplaced:true,rTarget:'unans',rState:'after',rDate:'today',rDateVal:'',page:0};
+UI.print={mode:'notice',sel:null,from:'',to:'',unplacedMode:'remind',mixState:'after',rTarget:'unans',rState:'before',rDate:'today',rDateVal:'',page:0};
 
 function nextWeekday(iso){const p=dp(iso);let d=new Date(p.y,p.m-1,p.d);do{d.setDate(d.getDate()+1)}while(d.getDay()===0||d.getDay()===6);return isoOf(d)}
 function pDate(){const U=UI.print,t=todayISO();return U.rDate==='today'?t:U.rDate==='next'?nextWeekday(t):(U.rDateVal||t)}
@@ -3516,6 +3609,8 @@ function slipVars(st,extra={}){
   const v={行事:kindNameG(st.g),学年:st.g,組:st.c,番:st.n,名前:'\uE000'+st.name+'\uE001',氏名:'\uE000'+st.name+'\uE001',学校:(P.meta.school||'').trim(),電話:(P.meta.tel||'').trim(),担任:(cls.teacher||'').trim(),今:`${now.getMonth()+1}/${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`,日付:'',時刻:''};
   const hk=cls.grid?headKey(cls,st.id):null;
   if(hk){const [d,t]=hk.split('|'),p=dp(d),m=parseT(t);v.日付=`${p.m}月${p.d}日(${WD[p.wd]})`;v.時刻=`${Math.floor(m/60)}時${pad(m%60)}分`}
+  if(UI.print.showSchool===false)v.学校='';
+  if(!UI.print.showTeacher)v.担任='';
   return Object.assign(v,extra);
 }
 const pGuardian=()=>UI.print.guardian==null?!/二者懇談|教育相談/.test(kindName()):!!UI.print.guardian;   // 二者懇談・教育相談は既定で入れない
@@ -3533,28 +3628,37 @@ function slipF(T,v,k){const orig=T[k];let t=slipTidy(fill(slipClean(orig,v),v),o
 function slipNotice(st){
   const T=tplGet(isVisit()?'visit':'meeting'),v=slipVars(st),f=k=>slipF(T,v,k);
   const ad=pAddrSlip()&&st.addr?`<div class="s-addr">住所　${esc(st.addr)}</div>`:'';
-  return `<div class="slip"><div class="s-title">${f('title')}</div><div class="s-who">${f('who')}</div>${ad}<div class="s-when">${f('when')}</div><div class="s-body">${f('body')}</div><div class="s-foot"><div>${f('foot')}</div><div>${f('teacher')}</div></div></div>`;
+  return `<div class="slip"><div class="s-title">${f('title')}</div><div class="s-who">${f('who')}</div>${ad}<div class="s-when">${f('when')}</div><div class="s-body">${f('body')}</div>${slipFoot(T,v)}</div>`;
 }
-function slipRemind(st){
-  const T=tplGet(UI.print.rState==='after'?'remindAfter':'remindBefore'),v=slipVars(st,{日付:ymd(pDate())}),f=k=>slipF(T,v,k);
+function slipFoot(T,v){   // 学校名・担任名：お知らせと催促状で、同じ書式（学校名を出す／出さない、担任名を出す／出さない は、印刷画面のスイッチ）
+  const T2={...T};if(!UI.print.showTeacher)T2.teacher='';
+  const f=k=>slipF(T2,v,k);return `<div class="s-foot"><div>${f('foot')}</div>${T2.teacher?`<div>${f('teacher')}</div>`:''}</div>`}
+function slipReply(st){   // 締め切り前の催促状だけ：回答期限・回答用のURL・二次元コード
+  const F=P.form||{},dl=F.autoClose&&F.closeDate?`${fmtMD(F.closeDate)}　${(F.closeTime||'17:00').replace(/^0/,'')}`:'',url=letUrlOf(st.g),qr=url?codeCalc(url):null;
+  if(!dl&&!url)return '';
+  return `<div class="s-reply"><div>${dl?`<div><b>回答期限</b>　${esc(dl)} まで</div>`:''}${url?`<div><b>回答はこちら</b>（二次元コード・URL）</div><div class="s-url">${esc(url)}</div>`:''}</div>${qr&&qr.svg?`<div class="s-qr">${qr.svg}</div>`:''}</div>`}
+function slipRemind(st,rs=UI.print.rState){
+  const T=tplGet(rs==='after'?'remindAfter':'remindBefore'),v=slipVars(st,{日付:ymd(pDate())}),f=k=>slipF(T,v,k);
   const ad=pAddrSlip()&&st.addr?`<div class="s-addr">住所　${esc(st.addr)}</div>`:'';
-  return `<div class="slip"><div class="s-to">${f('to')}</div>${ad}<div class="s-title">${f('title')}</div><div class="s-body r">${f('body')}</div><div class="s-foot"><div>${f('foot')}</div><div>${f('teacher')}</div></div></div>`;
+  return `<div class="slip rm ${rs==='after'?'ra':'rb'}"><div class="s-to">${f('to')}</div>${ad}<div class="s-title">${f('title')}</div><div class="s-body r">${f('body')}</div>${rs==='after'?'':slipReply(st)}${slipFoot(T,v)}</div>`;
 }
+const upm=()=>UI.print.unplacedMode||(UI.print.skipUnplaced?'skip':'print');   // 日時が決まっていない人：print＝そのまま／skip＝印刷しない／remind＝催促状にして、順番どおりに混ぜて印刷
+const slipMixed=st=>{const cls=P.classes[st.g+'|'+st.c];return upm()==='remind'&&!(cls&&headKey(cls,st.id))?slipRemind(st,UI.print.mixState||'after'):slipNotice(st)};
 function printTargets(){
   const U=UI.print,all=plist();if(!U.sel)U.sel=new Set(all.map(c=>c.key));
-  const from=parseInt(U.from,10),to=parseInt(U.to,10);const out=[],skipped=[],noPlace=[];
+  const from=parseInt(U.from,10),to=parseInt(U.to,10);const out=[],skipped=[],noPlace=[],asRemind=[];
   for(const c of all){if(!U.sel.has(c.key))continue;const cls=P.classes[c.key];
     for(const st of members(c.key)){
       if(!isNaN(from)&&st.n<from)continue;if(!isNaN(to)&&st.n>to)continue;
       if(st.skip)continue;   // 「今回は希望しません」は、お知らせにも催促状にも入れない
       const t=stStatus(st);
       if(U.mode==='notice'){
-        if(t==='unans'){skipped.push(st);continue}
-        if(!headKey(cls,st.id)){if(U.skipUnplaced){noPlace.push(st);continue}}
+        if(t==='unans'){if(upm()==='remind'){asRemind.push(st);out.push(st);continue}skipped.push(st);continue}
+        if(!headKey(cls,st.id)){const m=upm();if(m==='skip'){noPlace.push(st);continue}if(m==='remind')asRemind.push(st)}
         out.push(st);
       }else{if(U.rTarget==='unans'&&!(t==='unans'||(t==='blank'&&P.imp)))continue;out.push(st)}
     }}
-  return{out,skipped,noPlace};
+  return{out,skipped,noPlace,asRemind};
 }
 function sheetsHtml(list,fn,max,W0=210,H0=297){
   const W=W0-SLK_W,H=H0-SLK_H,land=W>H,pages=Math.ceil(list.length/2),lim=max?Math.min(max,pages):pages;
@@ -3588,9 +3692,9 @@ function vPrint(){
   const U=UI.print,all=plist();if(!U.sel)U.sel=new Set(all.map(c=>c.key));
   const T=printTargets(),iss=printIssues(U.mode),DOC=isDocM(U.mode),PW=paperWH(U.mode),DP=DOC?docPages():{pages:[],w:PW[0],h:PW[1]};
   const pages=DOC?DP.pages.length:Math.ceil(T.out.length/2);
-  const fn=U.mode==='notice'?slipNotice:slipRemind;
-  PVI=Math.max(0,Math.min(PVI,pages-1));const first=DOC?DP.pages:T.out,pv=DOC?(DP.pages.length?'x':''):(first.length?sheetsHtml(T.out,fn,PVI+1,PW[0],PW[1]):'');
-  const pvl=DOC?DP.pages.slice(PVI,PVI+1):(first.length?pv.split('</section>').filter(Boolean).map(s=>s+'</section>').slice(-1):[]);
+  const fn=U.mode==='notice'?slipMixed:slipRemind;
+  const first=DOC?DP.pages:T.out,pv=DOC?(DP.pages.length?'x':''):(first.length?sheetsHtml(T.out,fn,PVN,PW[0],PW[1]):'');
+  const pvl=DOC?DP.pages.slice(0,PVN):(first.length?pv.split('</section>').filter(Boolean).map(s=>s+'</section>'):[]);
   let h=`<div class="page"><div class="ph"><div><h1>5. 印刷</h1><p>日程のお知らせ・催促状・学級の一覧表・条件ブロックを印刷します。縦横を選べます（プリンタ側の設定で、拡大・縮小もできます）。お知らせは2段に並べて印刷し、切って重ねると順番がそろいます。</p></div><span class="grow"></span><button class="btn pri big fab ${iss.some(i=>i.lv==='ng')?'fabng':iss.length?'fabwarn':''}" data-act="p-print" title="${iss.length?esc(iss.map(i=>i.t).join(' ／ ')):'印刷する'}" ${(DOC?DP.pages.length:T.out.length)?'':'disabled'}>${ic('print',18)}印刷する（${pages}枚）${iss.length?`<span class="fbadge">確認${iss.length}件</span>`:''}</button></div>
   <div class="pgrid"><div>
    <section class="panel"><div class="seg" style="margin-bottom:6px;flex-wrap:wrap">${[['notice','日程のお知らせ'],['remind','未回答の催促状'],['table','学級の一覧表'],['blocks','条件ブロック'],['letter','保護者への案内文書']].map(([m,l])=>`<button data-act="p-mode" data-m="${m}" class="${U.mode===m?'on':''}">${l}</button>`).join('')}</div>
@@ -3604,22 +3708,24 @@ function vPrint(){
     ${(U.mode==='table'||U.mode==='blocks')?`<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><label class="tog"><input type="checkbox" data-ch="paddrdoc" ${pAddrDoc()?'checked':''}>住所も印刷する（家庭訪問のときだけ、最初から印刷します）</label>
       ${U.mode==='table'?`<div class="row"><b style="font-size:13px;min-width:4em">きょうだい</b><div class="seg">${[['out','表の外に一覧'],['in','表の中に'],['both','両方']].map(([v,l])=>`<button data-act="p-r" data-k="sibMode" data-v="${v}" class="${(U.sibMode||'both')===v?'on':''}">${l}</button>`).join('')}</div><span class="tiny muted">赤字と★で強調（白黒でも目立ちます）</span></div><div class="row" style="margin-top:8px"><button class="btn sm" data-act="p-export">${ic('down',15)}書き出し…（Excel・CSV・カレンダー）</button><span class="tiny muted">選んだ学級の表を、Excel・CSVで保存したり、カレンダー用の予定を作ったりします</span></div>`:''}
       ${U.mode==='blocks'?`<div class="row"><b style="font-size:13px;min-width:4em">枚数</b><div class="seg">${[['2','2枚（標準）'],['3','3枚'],['4','4枚'],['auto','自動（読める最小）']].map(([v,l])=>`<button data-act="p-r" data-k="pages" data-v="${v}" class="${String(U.pages)===v?'on':''}">${l}</button>`).join('')}</div><span class="tiny muted">（1学級あたり）</span></div><label class="tog"><input type="checkbox" data-ch="pplace" ${U.showPlace?'checked':''}>配置済みの日時も印字する</label>`:''}</div>`
-     :U.mode==='notice'?`<label class="tog" style="margin-top:10px"><input type="checkbox" data-ch="pskip" ${U.skipUnplaced?'checked':''}>日時が決まっていない児童生徒は印刷しない</label>`
+     :U.mode==='notice'?`<div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap"><b style="font-size:13px">日時が決まっていない人は</b><div class="seg"><button data-act="p-r" data-k="unplacedMode" data-v="remind" class="${upm()==='remind'?'on':''}">催促状にして印刷</button><button data-act="p-r" data-k="unplacedMode" data-v="print" class="${upm()==='print'?'on':''}">そのまま印刷</button><button data-act="p-r" data-k="unplacedMode" data-v="skip" class="${upm()==='skip'?'on':''}">印刷しない</button></div></div>${upm()==='remind'?`<div class="row" style="margin-top:8px;gap:8px;flex-wrap:wrap"><b style="font-size:13px">催促状の状況</b><div class="seg"><button data-act="p-r" data-k="mixState" data-v="after" class="${(U.mixState||'after')==='after'?'on':''}">締め切り後</button><button data-act="p-r" data-k="mixState" data-v="before" class="${U.mixState==='before'?'on':''}">締め切り前</button></div></div><div class="tiny muted" style="margin-top:4px">日時が決まっていない人（未回答の人も含む）だけ、お知らせの代わりに催促状を、学級・番号の順番のまま、混ぜて印刷します。</div>`:''}`
       :U.mode==='letter'?'':`<div style="margin-top:12px;display:flex;flex-direction:column;gap:10px"><div class="row"><b style="font-size:13px;min-width:4em">対象</b><div class="seg"><button data-act="p-r" data-k="rTarget" data-v="unans" class="${U.rTarget==='unans'?'on':''}">回答が必要な人</button><button data-act="p-r" data-k="rTarget" data-v="all" class="${U.rTarget==='all'?'on':''}">全員</button></div><span class="tiny muted">回答が必要な人＝未回答のほか、回答が読み取れず（組・名前が合わない等）反映できていない人</span></div>
       <div class="row"><b style="font-size:13px;min-width:4em">状況</b><div class="seg"><button data-act="p-r" data-k="rState" data-v="after" class="${U.rState==='after'?'on':''}">締め切り後</button><button data-act="p-r" data-k="rState" data-v="before" class="${U.rState==='before'?'on':''}">締め切り前（期限内の催促）</button></div></div>
       <div class="row"><b style="font-size:13px;min-width:4em">日付</b><div class="seg"><button data-act="p-r" data-k="rDate" data-v="today" class="${U.rDate==='today'?'on':''}">本日</button><button data-act="p-r" data-k="rDate" data-v="next" class="${U.rDate==='next'?'on':''}">次の平日</button><button data-act="p-r" data-k="rDate" data-v="pick" class="${U.rDate==='pick'?'on':''}">指定</button></div>${U.rDate==='pick'?`<input type="date" data-ch="pfld" data-k="rDateVal" value="${esc(U.rDateVal)}">`:''}<span class="tiny muted">印刷する日付：${ymd(pDate())}</span></div></div>`}
+    ${(U.mode==='notice'||U.mode==='remind')?`<div class="row" style="margin-top:12px;gap:18px;flex-wrap:wrap"><label class="tog"><input type="checkbox" data-ch="pschool" ${U.showSchool===false?'':'checked'}>学校名を入れる</label><label class="tog"><input type="checkbox" data-ch="pteacher" ${U.showTeacher?'checked':''}>担任名（学年・組）を入れる</label></div>`:''}
     ${(U.mode==='notice'||U.mode==='remind')?`<label class="tog" style="margin-top:12px"><input type="checkbox" data-ch="pguard" ${pGuardian()?'checked':''}>あて名に「${U.mode==='remind'?'の':'と'}保護者の方へ」を入れる（二者懇談・教育相談のときは、最初から入れません）</label>`:''}
     ${(U.mode==='notice'||U.mode==='remind')?`<label class="tog" style="margin-top:12px"><input type="checkbox" data-ch="paddrslip" ${pAddrSlip()?'checked':''}>個票に住所も印刷する</label>`:''}
-    <div class="${isDocM(U.mode)?(DP.pages.length?'okbox':'warnbox'):(T.out.length?'okbox':'warnbox')}" style="margin-top:14px">${isDocM(U.mode)?`対象 <b>${docClassList().length}学級</b> → <b>${DP.pages.length}枚</b>（${paperLabel(U.mode)}）`:`対象 <b>${T.out.length}名</b> → ${paperLabel(U.mode)} <b>${pages}枚</b>（${PW[0]>PW[1]?'左右2段':'上下2段'}）${T.noPlace.length?`<br>日時未定のため除く：${T.noPlace.length}名`:''}${T.skipped.length?`<br>未回答のため除く：${T.skipped.length}名`:''}`}</div>
+    <div class="${isDocM(U.mode)?(DP.pages.length?'okbox':'warnbox'):(T.out.length?'okbox':'warnbox')}" style="margin-top:14px">${isDocM(U.mode)?`対象 <b>${docClassList().length}学級</b> → <b>${DP.pages.length}枚</b>（${paperLabel(U.mode)}）`:`対象 <b>${T.out.length}名</b> → ${paperLabel(U.mode)} <b>${pages}枚</b>（${PW[0]>PW[1]?'左右2段':'上下2段'}）${T.noPlace.length?`<br>日時未定のため除く：${T.noPlace.length}名`:''}${T.asRemind&&T.asRemind.length?`<br>うち、催促状にして印刷：${T.asRemind.length}名`:''}${T.skipped.length?`<br>未回答のため除く：${T.skipped.length}名`:''}`}</div>
     ${U.mode==='blocks'?blocksWarnHtml():''}
     ${U.mode==='letter'?letterPanel():''}<div class="row" style="margin-top:12px"><button class="btn" data-act="${U.mode==='letter'?'p-ltpl':'p-tpl'}">${ic('gear',16)}文面を編集する</button>${U.mode==='letter'?'<button class="btn" data-act="p-docx">Wordファイル（.docx）で保存</button>':''}<button class="btn" data-act="p-test" ${(DOC?DP.pages.length:T.out.length)?'':'disabled'}>${ic('print',16)}1枚だけ試し印刷</button></div>
     <p class="tiny muted" style="margin-top:8px">印刷の画面で「PDFに保存」を選ぶと、PDFファイルにもできます。</p></section>
    <section class="panel"><h2>印刷前の点検<small>${iss.length?iss.length+'件':'問題なし'}</small></h2>${iss.length?iss.map(i=>`<div class="${i.lv==='ng'?'ngbox':'warnbox'}" style="margin-bottom:8px">${esc(i.t)}${i.names?`<div class="tiny" style="margin-top:4px">${i.names.slice(0,6).map(s=>esc(clsLabel(s.g,s.c)+' '+s.n+'番 '+s.name)).join('、')}${i.names.length>6?' ほか':''}</div>`:''}<div style="margin-top:6px"><button class="btn sm" data-act="${i.go==='namefont'?'namefont':i.go==='ngreview'?'ng-review':'go'}" data-v="${i.go}">${{ngreview:'配置を見直す',grid:'かこピタ(配置)を開く',cond:'条件を開く',roster:'名簿を開く',schedule:'日程を開く',setup:'準備を開く',form:'フォームを開く',namefont:'名前のフォントを選ぶ'}[i.go]||'開く'}</button></div></div>`).join(''):'<div class="okbox">日時の抜けや空欄はありません。</div>'}</section></div>
-  <section class="panel pvpanel"><h2>プレビュー<small>${pages?`全${pages}枚`:'対象がいません'}</small></h2>${pages>1?`<div class="row" style="justify-content:center;align-items:center;gap:10px;margin:0 0 6px"><button class="btn sm" data-act="p-pv" data-v="-1" ${PVI<=0?'disabled':''}>◀ まえ</button><b style="font-size:13px">${PVI+1} / ${pages} 枚目</b><button class="btn sm" data-act="p-pv" data-v="1" ${PVI>=pages-1?'disabled':''}>つぎ ▶</button></div>`:''}${pv?`<div class="pvlist" data-keep="pv2">${first.length?pvl.map(s=>{const sc=Math.max(.3,Math.min(.7,600/(DP.w*3.7795),(innerHeight-250)/(DP.h*3.7795)));return `<div class="pvbox" data-w="${DP.w}" data-h="${DP.h}" style="width:${(DP.w*sc).toFixed(1)}mm;height:${(DP.h*sc).toFixed(1)}mm"><div class="pvin" style="width:${DP.w}mm;height:${DP.h}mm;transform:scale(${sc.toFixed(3)})">${s}</div></div>`}).join(''):''}</div>`:'<div class="empty"><h3>印刷する人がいません</h3><p>対象の学級を選ぶか、配置を進めてください。</p></div>'}</section></div></div>`;
+  <section class="panel pvpanel"><h2>プレビュー<small>${pages?`全${pages}枚（上から順に表示）`:'対象がいません'}</small></h2>${pv?`<div class="row pvctl" style="position:sticky;top:0;z-index:2;background:var(--panel,#fff);padding:4px 0 6px;justify-content:center;align-items:center;gap:6px"><button class="btn sm" data-act="pv-zoom" data-v="out" aria-label="縮小">－</button><b id="pvz" style="min-width:52px;text-align:center">${Math.round(PVZ*100)}%</b><button class="btn sm" data-act="pv-zoom" data-v="in" aria-label="拡大">＋</button><button class="btn sm" data-act="pv-zoom" data-v="fit">横幅に合わせる</button></div><div class="pvlist" data-keep="pv2">${first.length?pvl.map(s=>{const sc=Math.max(.3,Math.min(.7,600/(DP.w*3.7795),(innerHeight-250)/(DP.h*3.7795)));return `<div class="pvbox" data-w="${DP.w}" data-h="${DP.h}" style="width:${(DP.w*sc).toFixed(1)}mm;height:${(DP.h*sc).toFixed(1)}mm"><div class="pvin" style="width:${DP.w}mm;height:${DP.h}mm;transform:scale(${sc.toFixed(3)})">${s}</div></div>`}).join(''):''}${pages>PVN?`<div class="row" style="justify-content:center;margin-top:8px"><button class="btn sm" data-act="p-pvmore">つづきを表示（残り${pages-PVN}枚）</button></div>`:''}</div>`:'<div class="empty"><h3>印刷する人がいません</h3><p>対象の学級を選ぶか、配置を進めてください。</p></div>'}</section></div></div>`;
   return h;
 }
 A['mini-go']=el=>{UI.cond.sid=el.dataset.s;UI.cond.mode='one';go('cond')};
-let PVI=0;A['p-pv']=el=>{PVI+=+el.dataset.v;render()};
+A['f-det']=el=>{const k=el.dataset.k;UI.form.open=UI.form.open||{};UI.form.open[k]=!UI.form.open[k];render()};
+let PVN=2,PVZ=1;A['pv-zoom']=el=>{const d=el.dataset.v;PVZ=d==='fit'?1:Math.max(.4,Math.min(3,PVZ*(d==='in'?1.25:.8)));const z=document.getElementById('pvz');if(z)z.textContent=Math.round(PVZ*100)+'%';fitPv()};A['p-pvmore']=()=>{PVN+=2;render()};
 A['p-gm']=el=>{GLY.pm=el.dataset.v;lsSet('kp_glyphpm',GLY.pm);render()};
 A['p-mode']=el=>{UI.print.mode=el.dataset.m;render()};
 A['p-tog']=el=>{const s=UI.print.sel;s.has(el.dataset.k)?s.delete(el.dataset.k):s.add(el.dataset.k);render()};
@@ -3632,13 +3738,14 @@ CH.pfld=el=>{UI.print[el.dataset.k]=el.value;render()};
 CH.paddrdoc=el=>{UI.print.addrDoc=el.checked;render()};
 CH.paddrslip=el=>{UI.print.addrSlip=el.checked;render()};
 CH.pguard=el=>{UI.print.guardian=el.checked;render()};
+CH.pschool=el=>{UI.print.showSchool=el.checked;render()};CH.pteacher=el=>{UI.print.showTeacher=el.checked;render()};
 CH.pplace=el=>{UI.print.showPlace=el.checked;render()};
 CH.pskip=el=>{UI.print.skipUnplaced=el.checked;render()};
 function printRoot(){let r=$('#printRoot');if(!r){r=document.createElement('div');r.id='printRoot';document.body.appendChild(r)}return r}
 function buildPrint(){
   const U=UI.print;
   if(isDocM(U.mode)){const D=docPages();setPageStyle(D.w,D.h,0);printRoot().innerHTML=D.pages.join('');try{fixGlyphs(printRoot(),GLY.pm)}catch(e){}if(U.mode!=='letter')try{fitBlockText(printRoot(),true)}catch(e){}return D.pages.length}
-  const [pw,ph]=paperWH(U.mode);setPageStyle(pw,ph,0);const T=printTargets(),fn=U.mode==='notice'?slipNotice:slipRemind;
+  const [pw,ph]=paperWH(U.mode);setPageStyle(pw,ph,0);const T=printTargets(),fn=U.mode==='notice'?slipMixed:slipRemind;
   printRoot().innerHTML=sheetsHtml(T.out,fn,0,pw,ph);try{fixGlyphs(printRoot(),GLY.pm)}catch(e){}return T.out.length;
 }
 async function printGuide(){
@@ -3706,10 +3813,10 @@ const letOpt=k=>{const v=(P.letter||{})[k];return v===undefined||v===null?LET_OP
 const gradesText=a=>{a=[...a].sort();return a.length?a.join('・')+'年':''};
 const LET_GREET='拝啓　{時候}、保護者の皆様にはますますご清祥のこととお慶び申し上げます。平素より本校の教育活動に格別のご理解とご協力を賜り、厚くお礼申し上げます。';
 const LET_ASK='また、ご都合のつかない日時を、下記の方法でご回答くださいますようお願い申し上げます。';
-const letItems=(place,other)=>['1．日　　時：{日程}の{開始時刻}頃〜{終了時刻}頃','2．場　　所：'+place,'3．回答方法：下の二次元コードを読み取り、{強調}ご都合のつかない日時{/強調}をお選びください。','※学年によって、URLや二次元コードが異なる場合があります。','※回答を間違えた場合や、{期限まで}変更したい場合は、改めて正しい内容をご回答ください。最新の回答が有効となります。','{QR}','4．回答期限：{強調}{回答期限}　までにご回答ください{/強調}。','回答についてご相談のある場合は、担任までご連絡ください。'].concat(other?['5．その他：上履きをお持ちください。','保護者証の着用をよろしくお願いいたします。','下校中や活動中の児童（生徒）の安全確保のため、原則としてお車でのご来校はお断りしております。','特別なご事情でお車が必要な場合は、必ず事前に学校へご相談ください。']:[]).join('\n');
+const letItems=(place,other)=>['1．日　　時：{日程}の{開始時刻}頃〜{終了時刻}頃','2．場　　所：'+place,'3．回答方法：下の二次元コードを読み取り、{強調}ご都合のつかない日時{/強調}をお選びください。','※学年によって、URLや二次元コードが異なる場合があります。','※回答を間違えた場合や、{期限まで}変更したい場合は、改めて正しい内容をご回答ください。最新の回答が有効となります。','{QR}','4．回答期限：{強調}{回答期限}　までにご回答ください{/強調}。','回答についてご相談のある場合は、担任までご連絡ください。'].concat(other?['5．その他：上履きをお持ちください。','保護者証の着用をよろしくお願いいたします。','下校中や活動中の{児童生徒}の安全確保のため、原則としてお車でのご来校はお断りしております。','特別なご事情でお車が必要な場合は、必ず事前に学校へご相談ください。']:[]).join('\n');
 const LET_DEF={
  sansha:{title:'{行事}の開催について',greet:LET_GREET,body:'さて、本校では、下記のとおり{行事}を実施いたします。{三者}普段の学校生活や家庭での生活の様子を交流し、今後の家庭生活や学校生活がより有意義なものとなるよう、率直にお話しする機会にしたいと考えております。つきましては、ご多用中恐れ入りますが、ぜひご出席くださいますようお願いいたします。'+LET_ASK,items:letItems('各学級',true),close:'敬具'},
- shinro:{title:'{行事}の開催について',greet:LET_GREET,body:'さて、本校では、下記のとおり{行事}を実施いたします。{三者}お子様の進路について、受験する高校の相談や決定、また中学校卒業後の進路についての相談をするための大切な機会です。つきましては、ご多用中恐れ入りますが、ぜひご出席くださいますようお願いいたします。'+LET_ASK,items:letItems('各学級',true),close:'敬具'},
+ shinro:{title:'{行事}の開催について',greet:LET_GREET,body:'さて、本校では、下記のとおり{行事}を実施いたします。{三者}お子様の進路について、受験する{次校}の相談や決定、また{現校}卒業後の進路についての相談をするための大切な機会です。つきましては、ご多用中恐れ入りますが、ぜひご出席くださいますようお願いいたします。'+LET_ASK,items:letItems('各学級',true),close:'敬具'},
  visit:{title:'{行事}の実施について',greet:LET_GREET,body:'さて、本校では、下記のとおり{行事}を実施いたします。{三者}教員が各ご家庭を訪問し、お子様の家庭や学校での様子、通学の様子などについて、保護者の皆様とお話しする機会にしたいと考えております。つきましては、ご多用中恐れ入りますが、ご在宅くださいますようお願いいたします。'+LET_ASK,items:letItems('各ご家庭',false),close:'敬具',
   slip:'なお、{希望学年}で、以前にも同じ教員が担任として家庭訪問をさせていただいたご家庭につきましては、今回の家庭訪問を「希望制」といたします。今回の家庭訪問を希望されない場合は、下の票を切り取って、担任にお渡しください。',slipBox:'今回は家庭訪問を希望しません。　　　　年　　　組　　　番　名前　　　　　　　　　　　　',
   slipBtn:'なお、{希望学年}で、以前にも同じ教員が担任として家庭訪問をさせていただいたご家庭につきましては、今回の家庭訪問を「希望制」といたします。今回の家庭訪問を希望されない場合は、上の二次元コードを読み取り、「今回は希望しません」を選択してご回答ください。'},
@@ -3721,8 +3828,21 @@ const LET_LABEL={title:'件名（題名）',greet:'前文（頭語・時候の�
 const letFields=t=>['title','greet','body','items','close','slipBtn','slip','slipBox'];
 const letGet=k=>Object.assign({},LET_DEF[k],((P.letter||{}).t||{})[k]||{});
 const letType=g=>{const k=P.meta.kind;if(k==='家庭訪問')return'visit';if(k==='三者懇談会')return'sansha';if(k===KIND_COMBO)return+g===3?'shinro':'sansha';if(k==='進路懇談会'||k==='特別選抜懇談会'||k==='一般選抜懇談会')return'shinro';return'other'};
-const letName=g=>{const n=kindNameG(g);return letType(g)==='shinro'&&!/^3年/.test(n)?'3年生'+n:n};
-const letWho=()=>{const w=letOpt('who');return w||(/小学校|小学部/.test(P.meta.school||'')?'児童':'生徒')};
+const letName=g=>{const n=kindNameG(g);return P.meta.kind===KIND_COMBO&&letType(g)==='shinro'&&!/^3年/.test(n)?'3年生'+n:n};   // 「3年生」を付けるのは、「三者懇談会・進路懇談会」で1・2年と区別するときだけ
+const letStage=()=>{const w=letOpt('who'),sc=P.meta.school||'';if(/中等教育学校後期課程/.test(sc))return 2;if(/中等教育学校前期課程|義務教育学校後期課程/.test(sc))return 1;if(/義務教育学校前期課程/.test(sc))return 0;return w==='児童'||/小学校|小学部/.test(sc)?0:/高等学校|高校|高等部/.test(sc)?2:1};   // 0=小学校 1=中学校 2=高校
+const STG={   // 進路の文などの「次の校種・いまの校種・児童/生徒」（小学校／中学校／高校の順）
+ja:{N:['中学校','高校','大学や専門学校'],C:['小学校','中学校','高校'],K:['児童','生徒','生徒']},
+ej:{N:['〔中学校|ちゅうがっこう〕','〔高校|こうこう〕','〔大学|だいがく〕や 〔専門学校|せんもんがっこう〕'],C:['〔小学校|しょうがっこう〕','〔中学校|ちゅうがっこう〕','〔高校|こうこう〕'],K:['〔子|こ〕ども','〔生徒|せいと〕','〔生徒|せいと〕']},
+en:{N:['junior high school','high school','university or vocational school'],C:['elementary school','junior high school','high school'],K:['children','students','students']},
+zh:{N:['初中','高中','大学或专科学校'],C:['小学','初中','高中'],K:['孩子','学生','学生']},
+pt:{N:['escola de ensino fundamental II (ginásio)','escola de ensino médio','universidade ou escola técnica'],C:['da escola primária','do ginásio','do ensino médio'],K:['das crianças','dos alunos','dos alunos']},
+fil:{N:['junior high school','high school','unibersidad o vocational school'],C:['elementarya','junior high school','high school'],K:['mga bata','mga estudyante','mga estudyante']},
+vi:{N:['trường cấp 2','trường cấp 3','trường đại học hoặc trường nghề'],C:['cấp 1','cấp 2','cấp 3'],K:['học sinh','học sinh','học sinh']},
+es:{N:['secundaria','preparatoria','universidad o escuela técnica'],C:['la primaria','la secundaria','la preparatoria'],K:['los niños','los estudiantes','los estudiantes']},
+ko:{N:['중학교','고등학교','대학이나 전문학교'],C:['초등학교','중학교','고등학교'],K:['학생','학생','학생']},
+th:{N:['โรงเรียนมัธยมต้น','โรงเรียนมัธยมปลาย','มหาวิทยาลัยหรือสถาบันอาชีวศึกษา'],C:['ประถม','มัธยมต้น','มัธยมปลาย'],K:['นักเรียน','นักเรียน','นักเรียน']}};
+const stgTx=(t,id)=>{const d=STG[id]||STG.ja,i=letStage();return String(t==null?'':t).split('{NEXT}').join(d.N[i]).split('{CUR}').join(d.C[i]).split('{KID}').join(d.K[i])};
+const letWho=()=>{const w=letOpt('who');return w||(letStage()===0?'児童':'生徒')};
 const wareki=iso=>{const p=dp(iso),n=p.y-2018;return `${p.y>=2019?'令和'+(n===1?'元':n)+'年':p.y+'年'}${p.m}月${p.d}日`};
 const fmtMD=iso=>{const p=dp(iso);return `${p.m}月${p.d}日(${WD[p.wd]})`};
 function letDates(ds){ds=(ds||[]).slice().sort();if(!ds.length)return'';if(ds.length>7)return`${fmtMD(ds[0])}〜${fmtMD(ds[ds.length-1])}`;let pm=0;return ds.map(d=>{const p=dp(d),t=`${p.m===pm?'':p.m+'月'}${p.d}日(${WD[p.wd]})`;pm=p.m;return t}).join('・')}
@@ -3745,7 +3865,7 @@ function letModel(G){
   const cl=P.classes[c0.key]||{},teacher=tg==='class'?(cl.teacher||'').trim():'',school=(P.meta.school||'').trim(),pr=(P.meta.principal||'').trim();
   const v={行事:letName(c0.g),生徒:letWho(),日程:letDates(S.dates),開始時刻:a!=null?hm(a):'',終了時刻:a!=null?hm(a+sm*n):'',
     回答期限:F.autoClose&&F.closeDate?`${fmtMD(F.closeDate)}　${(F.closeTime||'17:00').replace(/^0/,'')}`:'',
-    学校:school,電話:(P.meta.tel||'').trim(),時候:L.season||seasonOf(d),学年:tg==='class'?c0.g:'',組:tg==='class'?c0.c:'',担任:teacher,期限まで:F.autoClose&&F.closeDate?'期限までに':'',三者:letSanshaOn()?`この${/懇談会$/.test(letName(c0.g))?'懇談会':letName(c0.g)}は、保護者・${letWho()}・学校の三者で行います。`:'',希望学年:gradesText([...G.grades].filter(g=>optGrades().includes(g)))+'生'};
+    学校:school,電話:(P.meta.tel||'').trim(),時候:L.season||seasonOf(d),学年:tg==='class'?c0.g:'',組:tg==='class'?c0.c:'',担任:teacher,期限まで:F.autoClose&&F.closeDate?'期限までに':'',次校:STG.ja.N[letStage()],現校:STG.ja.C[letStage()],児童生徒:letWho(),三者:letSanshaOn()?`この${/懇談会$/.test(letName(c0.g))?'懇談会':letName(c0.g)}は、保護者・${letWho()}・学校の三者で行います。`:'',希望学年:gradesText([...G.grades].filter(g=>optGrades().includes(g)))+'生'};
   const one=t=>letFill(t,v,false).join('');
   const sign=[];if(school)sign.push(school);if(pr)sign.push('校長　'+pr);if(teacher)sign.push(`${c0.g}年${c0.c}組 担任　${teacher}`);
   const gs=[...G.grades].sort(),am=letOpt('addrMode'),showG=am==='on'||(am==='auto'&&letGradesDiffer());
@@ -3768,7 +3888,7 @@ ej:{name:'やさしい日本語',lang:'ja',font:LET_FONT_GO,df:{a:'游ゴシッ�
  ev:{'三者懇談会':'〔三者懇談会|さんしゃこんだんかい〕','進路懇談会':'〔進路懇談会|しんろこんだんかい〕','特別選抜懇談会':'〔特別選抜懇談会|とくべつせんばつこんだんかい〕','一般選抜懇談会':'〔一般選抜懇談会|いっぱんせんばつこんだんかい〕','家庭訪問':'〔家庭訪問|かていほうもん〕','教育相談':'〔教育相談|きょういくそうだん〕','二者懇談':'〔二者懇談|にしゃこんだん〕'},
  to:'{g}の 〔保護者|ほごしゃ〕の みなさんへ',toAll:'〔保護者|ほごしゃ〕の みなさんへ',pr:'〔校長|こうちょう〕',tc:'〔担任|たんにん〕',
  title:'{ev}の おしらせ',greet:'いつも ありがとうございます。',lead:'{ev}を します。',three:'〔保護者|ほごしゃ〕と、〔子|こ〕どもと、〔学校|がっこう〕の 3つで はなします。',
- pur:{sansha:'〔学校|がっこう〕と 〔家|いえ〕での ようすを はなします。これからの 〔生活|せいかつ〕に ついても はなします。',shinro:'どの 〔高校|こうこう〕を うけるか はなします。〔中学校|ちゅうがっこう〕を でた あとの ことも はなします。',visit:'〔先生|せんせい〕が 〔家|いえ〕に いきます。〔家|いえ〕と 〔学校|がっこう〕での ようすを はなします。〔学校|がっこう〕に くる みちの ことも はなします。',other:''},
+ pur:{sansha:'〔学校|がっこう〕と 〔家|いえ〕での ようすを はなします。これからの 〔生活|せいかつ〕に ついても はなします。',shinro:'どの {NEXT}を うけるか はなします。{CUR}を でた あとの ことも はなします。',visit:'〔先生|せんせい〕が 〔家|いえ〕に いきます。〔家|いえ〕と 〔学校|がっこう〕での ようすを はなします。〔学校|がっこう〕に くる みちの ことも はなします。',other:''},
  att:{visit:'〔家|いえ〕に いて ください。',other:'きて ください。'},ask:'こられない 〔日|ひ〕と 〔時間|じかん〕を おしえて ください。',
  h:['〔日|ひ〕と 〔時間|じかん〕','〔場所|ばしょ〕','こたえる 〔方法|ほうほう〕','しめきり','ほか'],
  dt:'{d}の {a}から {b}までです。だいたいの 〔時間|じかん〕です。',pl:{class:'クラスの 〔教室|きょうしつ〕',home:'みなさんの 〔家|いえ〕'},
@@ -3780,7 +3900,7 @@ ej:{name:'やさしい日本語',lang:'ja',font:LET_FONT_GO,df:{a:'游ゴシッ�
 en:{name:'English',lang:'en',font:LET_FONT_LA,df:{a:'Arial',ea:'游ゴシック',cs:'Arial'},head:9,wd:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
  ev:{'三者懇談会':'three-way meeting (parents, student and school)','進路懇談会':'career guidance meeting','特別選抜懇談会':'special selection (high school entrance) meeting','一般選抜懇談会':'general selection (high school entrance) meeting','家庭訪問':'home visit','教育相談':'educational consultation','二者懇談':'two-way meeting (parents and school)'},
  to:'To the parents of {g}',toAll:'To all parents',pr:'Principal',tc:'Homeroom teacher',title:'Notice of {ev}',greet:'Thank you for always supporting our school.',lead:'We will hold a {ev}.',three:'Parents, your child and the school will talk together.',
- pur:{sansha:'We will talk about school life and life at home, and about how to make the future better.',shinro:"We will talk about which high school to take the exam for, and about your child's path after junior high school.",visit:"The teacher will visit your home. We will talk about your child's life at home and at school, and about the way to school.",other:''},
+ pur:{sansha:'We will talk about school life and life at home, and about how to make the future better.',shinro:"We will talk about which {NEXT} to take the exam for, and about your child's path after {CUR}.",visit:"The teacher will visit your home. We will talk about your child's life at home and at school, and about the way to school.",other:''},
  att:{visit:'Please be at home.',other:'Please attend.'},ask:'Please tell us the dates and times when you cannot come.',h:['Date and time','Place','How to answer','Deadline','Others'],
  dt:'{d}, from about {a} to about {b}',pl:{class:'Each classroom',home:'Each home'},how:'Please read the QR code below and choose the dates and times when you cannot come.',url:'The URL and QR code may be different for each grade.',
  fix:'If you made a mistake, or want to change your answer{until}, please answer again. The latest answer is used.',until:' before the deadline',consult:'If you would like to talk with us, please contact the homeroom teacher.',dl:'Please answer by {t}.',
@@ -3789,7 +3909,7 @@ en:{name:'English',lang:'en',font:LET_FONT_LA,df:{a:'Arial',ea:'游ゴシック'
 zh:{name:'中文（简体）',lang:'zh-Hans',font:"'Microsoft YaHei','PingFang SC','Noto Sans SC','Hiragino Sans GB',sans-serif",df:{a:'Arial',ea:'Microsoft YaHei',cs:'Arial'},head:7,wd:['周日','周一','周二','周三','周四','周五','周六'],
  ev:{'三者懇談会':'三方恳谈会（家长、学生、学校）','進路懇談会':'升学指导恳谈会','特別選抜懇談会':'特别选拔（升高中）恳谈会','一般選抜懇談会':'一般选拔（升高中）恳谈会','家庭訪問':'家访','教育相談':'教育咨询','二者懇談':'双方恳谈会（家长与学校）'},
  to:'致{g}的家长',toAll:'致各位家长',pr:'校长',tc:'班主任',title:'关于{ev}的通知',greet:'感谢您一直以来对学校的支持。',lead:'学校将举行{ev}。',three:'家长、孩子和学校三方一起交谈。',
- pur:{sansha:'我们会谈谈孩子在学校和在家的生活，以及今后如何让生活更好。',shinro:'我们会商量报考哪所高中，也会谈谈孩子初中毕业后的出路。',visit:'老师会到您家拜访，谈谈孩子在家和在学校的情况，以及上学的路线。',other:''},
+ pur:{sansha:'我们会谈谈孩子在学校和在家的生活，以及今后如何让生活更好。',shinro:'我们会商量报考哪所{NEXT}，也会谈谈孩子{CUR}毕业后的出路。',visit:'老师会到您家拜访，谈谈孩子在家和在学校的情况，以及上学的路线。',other:''},
  att:{visit:'请您在家等候。',other:'请您出席。'},ask:'请告诉我们您不方便的日期和时间。',h:['日期和时间','地点','回答方法','截止时间','其他'],
  dt:'{d}，大约{a}至{b}',pl:{class:'各班教室',home:'各位家长的家中'},how:'请扫描下面的二维码，选择您不方便的日期和时间。',url:'不同年级的网址（URL）和二维码可能不同。',
  fix:'如果回答错了，或想{until}修改回答，请重新回答。我们以最新的回答为准。',until:'在截止时间前',consult:'如果有想商量的事情，请联系班主任。',dl:'请在{t}之前回答。',
@@ -3798,7 +3918,7 @@ zh:{name:'中文（简体）',lang:'zh-Hans',font:"'Microsoft YaHei','PingFang S
 pt:{name:'Português',lang:'pt-BR',font:LET_FONT_LA,df:{a:'Arial',ea:'游ゴシック',cs:'Arial'},head:9,wd:['dom.','seg.','ter.','qua.','qui.','sex.','sáb.'],
  ev:{'三者懇談会':'reunião a três (pais, aluno e escola)','進路懇談会':'reunião sobre o futuro escolar','特別選抜懇談会':'reunião sobre o exame de seleção especial (ingresso no ensino médio)','一般選抜懇談会':'reunião sobre o exame de seleção geral (ingresso no ensino médio)','家庭訪問':'visita domiciliar','教育相談':'consulta educacional','二者懇談':'reunião entre pais e escola'},
  to:'Aos pais e responsáveis do {g}',toAll:'Aos pais e responsáveis',pr:'Diretor(a)',tc:'Professor(a) responsável',title:'Aviso: {ev}',greet:'Agradecemos sempre o apoio à nossa escola.',lead:'A escola fará uma {ev}.',three:'Os pais, o seu filho(a) e a escola vão conversar juntos.',
- pur:{sansha:'Vamos conversar sobre a vida escolar e a vida em casa, e sobre como melhorar o futuro.',shinro:'Vamos conversar sobre em qual escola de ensino médio fazer o exame e sobre o caminho do seu filho(a) depois do ginásio.',visit:'O professor vai visitar a sua casa. Vamos conversar sobre a vida do seu filho(a) em casa e na escola e sobre o caminho até a escola.',other:''},
+ pur:{sansha:'Vamos conversar sobre a vida escolar e a vida em casa, e sobre como melhorar o futuro.',shinro:'Vamos conversar sobre em qual {NEXT} fazer o exame e sobre o caminho do seu filho(a) depois {CUR}.',visit:'O professor vai visitar a sua casa. Vamos conversar sobre a vida do seu filho(a) em casa e na escola e sobre o caminho até a escola.',other:''},
  att:{visit:'Por favor, fique em casa.',other:'Por favor, compareça.'},ask:'Por favor, informe os dias e horários em que não pode.',h:['Data e horário','Local','Como responder','Prazo','Outros'],
  dt:'{d}, das {a} às {b} (aproximadamente)',pl:{class:'Em cada sala de aula',home:'Em cada casa'},how:'Leia o QR code abaixo e escolha os dias e horários em que não pode.',url:'O URL e o QR code podem ser diferentes para cada série.',
  fix:'Se errou ou quer mudar a resposta{until}, responda de novo. Vale a última resposta.',until:' antes do prazo',consult:'Se quiser conversar conosco, entre em contato com o professor responsável.',dl:'Por favor, responda até {t}.',
@@ -3807,7 +3927,7 @@ pt:{name:'Português',lang:'pt-BR',font:LET_FONT_LA,df:{a:'Arial',ea:'游ゴシ�
 fil:{name:'Filipino',lang:'fil',font:LET_FONT_LA,df:{a:'Arial',ea:'游ゴシック',cs:'Arial'},head:9,wd:['Lin','Lun','Mar','Miy','Huw','Biy','Sab'],
  ev:{'三者懇談会':'tatlong-panig na pulong (magulang, estudyante, paaralan)','進路懇談会':'pulong tungkol sa kinabukasan sa pag-aaral','特別選抜懇談会':'pulong para sa special selection exam (high school)','一般選抜懇談会':'pulong para sa general selection exam (high school)','家庭訪問':'pagbisita sa bahay','教育相談':'konsultasyon sa edukasyon','二者懇談':'dalawang-panig na pulong (magulang at paaralan)'},
  to:'Sa mga magulang ng {g}',toAll:'Sa lahat ng magulang',pr:'Punong-guro',tc:'Guro sa klase (homeroom)',title:'Paunawa tungkol sa {ev}',greet:'Salamat po sa patuloy ninyong suporta sa aming paaralan.',lead:'Magkakaroon po ng {ev}.',three:'Mag-uusap ang magulang, ang inyong anak, at ang paaralan.',
- pur:{sansha:'Pag-uusapan natin ang buhay sa paaralan at sa bahay, at kung paano mapapabuti ang hinaharap.',shinro:'Pag-uusapan natin kung aling high school ang kukuha ng exam, at ang landas ng inyong anak pagkatapos ng junior high school.',visit:'Bibisita ang guro sa inyong bahay. Pag-uusapan natin ang buhay ng inyong anak sa bahay at sa paaralan, at ang daan papunta sa paaralan.',other:''},
+ pur:{sansha:'Pag-uusapan natin ang buhay sa paaralan at sa bahay, at kung paano mapapabuti ang hinaharap.',shinro:'Pag-uusapan natin kung aling {NEXT} ang kukuha ng exam, at ang landas ng inyong anak pagkatapos ng {CUR}.',visit:'Bibisita ang guro sa inyong bahay. Pag-uusapan natin ang buhay ng inyong anak sa bahay at sa paaralan, at ang daan papunta sa paaralan.',other:''},
  att:{visit:'Pakiusap po, manatili sa bahay.',other:'Pakiusap po, dumalo kayo.'},ask:'Pakisabi po ang mga petsa at oras na hindi kayo puwede.',h:['Petsa at oras','Lugar','Paano sumagot','Huling araw ng pagsagot','Iba pa'],
  dt:'{d}, mula mga {a} hanggang mga {b}',pl:{class:'Sa bawat silid-aralan',home:'Sa bawat bahay'},how:'Pakibasa ang QR code sa ibaba at piliin ang mga petsa at oras na hindi kayo puwede.',url:'Maaaring magkaiba ang URL at QR code sa bawat baitang.',
  fix:'Kung nagkamali kayo o gusto ninyong baguhin ang sagot{until}, pakisagot muli. Ang pinakabagong sagot ang gagamitin.',until:' bago ang huling araw',consult:'Kung gusto ninyong makipag-usap, pakikontak ang guro sa klase.',dl:'Pakisagot po hanggang {t}.',
@@ -3816,7 +3936,7 @@ fil:{name:'Filipino',lang:'fil',font:LET_FONT_LA,df:{a:'Arial',ea:'游ゴシッ�
 vi:{name:'Tiếng Việt',lang:'vi',font:LET_FONT_LA,df:{a:'Arial',ea:'游ゴシック',cs:'Arial'},head:9,wd:['CN','T2','T3','T4','T5','T6','T7'],
  ev:{'三者懇談会':'buổi họp ba bên (phụ huynh, học sinh, nhà trường)','進路懇談会':'buổi họp về định hướng học tiếp','特別選抜懇談会':'buổi họp về kỳ thi tuyển sinh đặc biệt (vào cấp 3)','一般選抜懇談会':'buổi họp về kỳ thi tuyển sinh thông thường (vào cấp 3)','家庭訪問':'buổi thăm nhà','教育相談':'buổi tư vấn giáo dục','二者懇談':'buổi họp hai bên (phụ huynh và nhà trường)'},
  to:'Kính gửi phụ huynh {g}',toAll:'Kính gửi quý phụ huynh',pr:'Hiệu trưởng',tc:'Giáo viên chủ nhiệm',title:'Thông báo về {ev}',greet:'Cảm ơn quý phụ huynh đã luôn ủng hộ nhà trường.',lead:'Nhà trường sẽ tổ chức {ev}.',three:'Phụ huynh, con em và nhà trường sẽ cùng trao đổi.',
- pur:{sansha:'Chúng ta sẽ trao đổi về cuộc sống ở trường và ở nhà, và về cách làm cho tương lai tốt hơn.',shinro:'Chúng ta sẽ trao đổi về việc thi vào trường cấp 3 nào, và về con đường của con sau khi tốt nghiệp cấp 2.',visit:'Giáo viên sẽ đến thăm nhà. Chúng ta sẽ trao đổi về cuộc sống của con ở nhà và ở trường, và về đường đến trường.',other:''},
+ pur:{sansha:'Chúng ta sẽ trao đổi về cuộc sống ở trường và ở nhà, và về cách làm cho tương lai tốt hơn.',shinro:'Chúng ta sẽ trao đổi về việc thi vào {NEXT} nào, và về con đường của con sau khi tốt nghiệp {CUR}.',visit:'Giáo viên sẽ đến thăm nhà. Chúng ta sẽ trao đổi về cuộc sống của con ở nhà và ở trường, và về đường đến trường.',other:''},
  att:{visit:'Xin vui lòng có mặt ở nhà.',other:'Xin vui lòng tham dự.'},ask:'Xin cho biết những ngày giờ quý phụ huynh không thể.',h:['Ngày giờ','Địa điểm','Cách trả lời','Hạn trả lời','Khác'],
  dt:'{d}, từ khoảng {a} đến khoảng {b}',pl:{class:'Tại từng lớp học',home:'Tại từng gia đình'},how:'Xin quét mã QR bên dưới và chọn những ngày giờ không thể.',url:'URL và mã QR có thể khác nhau tùy theo khối lớp.',
  fix:'Nếu trả lời sai hoặc muốn thay đổi câu trả lời{until}, xin trả lời lại. Câu trả lời mới nhất sẽ được sử dụng.',until:' trước hạn',consult:'Nếu muốn trao đổi thêm, xin liên hệ giáo viên chủ nhiệm.',dl:'Xin trả lời trước {t}.',
@@ -3825,7 +3945,7 @@ vi:{name:'Tiếng Việt',lang:'vi',font:LET_FONT_LA,df:{a:'Arial',ea:'游ゴシ
 es:{name:'Español',lang:'es',font:LET_FONT_LA,df:{a:'Arial',ea:'游ゴシック',cs:'Arial'},head:9,wd:['dom.','lun.','mar.','mié.','jue.','vie.','sáb.'],
  ev:{'三者懇談会':'reunión de tres partes (padres, alumno y escuela)','進路懇談会':'reunión sobre el futuro escolar','特別選抜懇談会':'reunión sobre el examen de selección especial (ingreso a la preparatoria)','一般選抜懇談会':'reunión sobre el examen de selección general (ingreso a la preparatoria)','家庭訪問':'visita a domicilio','教育相談':'consulta educativa','二者懇談':'reunión entre padres y escuela'},
  to:'A los padres de {g}',toAll:'A todos los padres',pr:'Director/a',tc:'Profesor/a tutor/a',title:'Aviso sobre la {ev}',greet:'Gracias por apoyar siempre a nuestra escuela.',lead:'La escuela realizará una {ev}.',three:'Los padres, su hijo/a y la escuela hablarán juntos.',
- pur:{sansha:'Hablaremos de la vida escolar y de la vida en casa, y de cómo mejorar el futuro.',shinro:'Hablaremos de a qué preparatoria presentar el examen y del camino de su hijo/a después de la secundaria.',visit:'El profesor visitará su casa. Hablaremos de la vida de su hijo/a en casa y en la escuela, y del camino a la escuela.',other:''},
+ pur:{sansha:'Hablaremos de la vida escolar y de la vida en casa, y de cómo mejorar el futuro.',shinro:'Hablaremos de a qué {NEXT} presentar el examen y del camino de su hijo/a después de {CUR}.',visit:'El profesor visitará su casa. Hablaremos de la vida de su hijo/a en casa y en la escuela, y del camino a la escuela.',other:''},
  att:{visit:'Por favor, esté en casa.',other:'Por favor, asista.'},ask:'Por favor, indique los días y horas en que no puede.',h:['Fecha y hora','Lugar','Cómo responder','Fecha límite','Otros'],
  dt:'{d}, de {a} a {b} (aproximadamente)',pl:{class:'En cada salón de clase',home:'En cada casa'},how:'Por favor, lea el código QR de abajo y elija los días y horas en que no puede.',url:'La URL y el código QR pueden ser diferentes según el grado.',
  fix:'Si se equivocó o quiere cambiar su respuesta{until}, responda de nuevo. Se usa la última respuesta.',until:' antes de la fecha límite',consult:'Si desea hablar con nosotros, comuníquese con el profesor tutor.',dl:'Por favor, responda hasta {t}.',
@@ -3834,7 +3954,7 @@ es:{name:'Español',lang:'es',font:LET_FONT_LA,df:{a:'Arial',ea:'游ゴシック
 ko:{name:'한국어',lang:'ko',font:"'Malgun Gothic','Apple SD Gothic Neo','Noto Sans KR',sans-serif",df:{a:'Arial',ea:'Malgun Gothic',cs:'Arial'},head:7,wd:['일','월','화','수','목','금','토'],
  ev:{'三者懇談会':'3자 면담(학부모·학생·학교)','進路懇談会':'진로 면담','特別選抜懇談会':'특별전형 면담(고등학교 입시)','一般選抜懇談会':'일반전형 면담(고등학교 입시)','家庭訪問':'가정방문','教育相談':'교육 상담','二者懇談':'2자 면담(학부모·학교)'},
  to:'{g} 학부모님께',toAll:'학부모님께',pr:'교장',tc:'담임교사',title:'{ev} 안내',greet:'항상 학교에 협조해 주셔서 감사합니다.',lead:'“{ev}”을(를) 실시합니다.',three:'학부모님과 자녀, 학교가 함께 이야기합니다.',
- pur:{sansha:'학교생활과 가정생활에 대해 이야기하고, 앞으로를 더 좋게 만드는 방법을 함께 이야기합니다.',shinro:'어느 고등학교에 지원할지, 그리고 중학교 졸업 후의 진로에 대해 이야기합니다.',visit:'선생님이 가정을 방문합니다. 가정과 학교에서의 자녀 모습, 등하굣길에 대해 이야기합니다.',other:''},
+ pur:{sansha:'학교생활과 가정생활에 대해 이야기하고, 앞으로를 더 좋게 만드는 방법을 함께 이야기합니다.',shinro:'어느 {NEXT}에 지원할지, 그리고 {CUR} 졸업 후의 진로에 대해 이야기합니다.',visit:'선생님이 가정을 방문합니다. 가정과 학교에서의 자녀 모습, 등하굣길에 대해 이야기합니다.',other:''},
  att:{visit:'집에 계셔 주세요.',other:'참석해 주세요.'},ask:'참석하실 수 없는 날짜와 시간을 알려 주세요.',h:['일시','장소','답변 방법','마감','기타'],
  dt:'{d}, 약 {a}부터 약 {b}까지',pl:{class:'각 학급 교실',home:'각 가정'},how:'아래 QR코드를 읽고, 참석하실 수 없는 날짜와 시간을 선택해 주세요.',url:'학년에 따라 URL과 QR코드가 다를 수 있습니다.',
  fix:'잘못 답변했거나 답변을 {until}바꾸고 싶을 때는 다시 답변해 주세요. 가장 최근 답변이 적용됩니다.',until:'마감 전에 ',consult:'상담하고 싶은 것이 있으면 담임교사에게 연락해 주세요.',dl:'{t}까지 답변해 주세요.',
@@ -3843,7 +3963,7 @@ ko:{name:'한국어',lang:'ko',font:"'Malgun Gothic','Apple SD Gothic Neo','Noto
 th:{name:'ภาษาไทย',lang:'th',font:"'Leelawadee UI','Noto Sans Thai','Tahoma',sans-serif",df:{a:'Arial',ea:'游ゴシック',cs:'Leelawadee UI'},head:8,wd:['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'],
  ev:{'三者懇談会':'การประชุมสามฝ่าย (ผู้ปกครอง นักเรียน โรงเรียน)','進路懇談会':'การประชุมเรื่องการศึกษาต่อ','特別選抜懇談会':'การประชุมเรื่องการสอบคัดเลือกพิเศษ (เข้ามัธยมปลาย)','一般選抜懇談会':'การประชุมเรื่องการสอบคัดเลือกทั่วไป (เข้ามัธยมปลาย)','家庭訪問':'การเยี่ยมบ้าน','教育相談':'การปรึกษาด้านการศึกษา','二者懇談':'การประชุมสองฝ่าย (ผู้ปกครองและโรงเรียน)'},
  to:'ถึงผู้ปกครองของ{g}',toAll:'ถึงผู้ปกครองทุกท่าน',pr:'ผู้อำนวยการ',tc:'ครูประจำชั้น',title:'ประกาศเรื่อง{ev}',greet:'ขอบคุณที่สนับสนุนโรงเรียนของเราเสมอมา',lead:'โรงเรียนจะจัด{ev}',three:'ผู้ปกครอง บุตรหลาน และโรงเรียนจะพูดคุยกัน',
- pur:{sansha:'เราจะพูดคุยเรื่องชีวิตที่โรงเรียนและที่บ้าน และวิธีทำให้อนาคตดีขึ้น',shinro:'เราจะพูดคุยเรื่องการสอบเข้าโรงเรียนมัธยมปลายที่ไหน และเส้นทางของบุตรหลานหลังจบมัธยมต้น',visit:'ครูจะไปเยี่ยมบ้าน เราจะพูดคุยเรื่องชีวิตของบุตรหลานที่บ้านและที่โรงเรียน และเส้นทางไปโรงเรียน',other:''},
+ pur:{sansha:'เราจะพูดคุยเรื่องชีวิตที่โรงเรียนและที่บ้าน และวิธีทำให้อนาคตดีขึ้น',shinro:'เราจะพูดคุยเรื่องการสอบเข้า{NEXT}ที่ไหน และเส้นทางของบุตรหลานหลังจบ{CUR}',visit:'ครูจะไปเยี่ยมบ้าน เราจะพูดคุยเรื่องชีวิตของบุตรหลานที่บ้านและที่โรงเรียน และเส้นทางไปโรงเรียน',other:''},
  att:{visit:'กรุณาอยู่บ้าน',other:'กรุณาเข้าร่วม'},ask:'กรุณาแจ้งวันและเวลาที่ไม่สะดวก',h:['วันและเวลา','สถานที่','วิธีตอบ','กำหนดตอบ','อื่น ๆ'],
  dt:'{d} ตั้งแต่ประมาณ {a} ถึงประมาณ {b}',pl:{class:'ห้องเรียนแต่ละห้อง',home:'บ้านของแต่ละท่าน'},how:'กรุณาสแกนคิวอาร์โค้ดด้านล่าง แล้วเลือกวันและเวลาที่ไม่สะดวก',url:'URL และคิวอาร์โค้ดอาจแตกต่างกันตามชั้นปี',
  fix:'หากตอบผิดหรืออยากเปลี่ยนคำตอบ{until} กรุณาตอบใหม่ เราจะใช้คำตอบล่าสุด',until:'ก่อนกำหนด',consult:'หากต้องการปรึกษา กรุณาติดต่อครูประจำชั้น',dl:'กรุณาตอบภายใน {t}',
@@ -3863,7 +3983,7 @@ const LET_LANGS=['en','zh','pt','fil','vi','es','ko','th'];
   opt:{btn:'如果这次不想参加，请扫描上面的二维码，选择“今回は希望しません”（这次不参加）。'},foot:'本文由机器/AI翻译。如有不清楚之处，请联系{s}。',sch:'学校'},
  pt:{three:'Os responsáveis, o(a) estudante e a escola vão conversar juntos.',how:'Leia o código bidimensional abaixo (o quadrado preto e branco) e escolha os dias e horários em que não pode.',url:'O URL e o código bidimensional podem ser diferentes para cada série.',
   ev:{'三者懇談会':'reunião a três (responsáveis, estudante e escola)','二者懇談':'reunião entre responsáveis e escola'},
-  pur:{shinro:'Vamos conversar sobre em qual escola de ensino médio fazer o exame e sobre o caminho do(a) estudante depois do ginásio.',visit:'O professor ou a professora vai visitar a sua casa. Vamos conversar sobre a vida do(a) estudante em casa e na escola e sobre o caminho até a escola.'},
+  pur:{shinro:'Vamos conversar sobre em qual {NEXT} fazer o exame e sobre o caminho do(a) estudante depois {CUR}.',visit:'O professor ou a professora vai visitar a sua casa. Vamos conversar sobre a vida do(a) estudante em casa e na escola e sobre o caminho até a escola.'},
   opt:{btn:'Se não quiser participar desta vez, leia o código bidimensional acima e escolha 「今回は希望しません」 (não desejamos participar desta vez).'},foot:'Este texto foi traduzido por máquina/IA. Se algo não estiver claro, entre em contato com {s}.',sch:'a escola'},
  fil:{to:'Sa mga magulang o tagapag-alaga ng {g}',toAll:'Sa lahat ng magulang o tagapag-alaga',three:'Mag-uusap ang pamilya (magulang o tagapag-alaga), ang inyong anak, at ang paaralan.',how:'Pakibasa ang 2D code sa ibaba (ang parisukat na itim at puting pattern) at piliin ang mga petsa at oras na hindi kayo puwede.',url:'Maaaring magkaiba ang URL at 2D code sa bawat baitang.',
   ev:{'三者懇談会':'tatlong-panig na pulong (magulang/tagapag-alaga, estudyante, paaralan)','二者懇談':'dalawang-panig na pulong (magulang/tagapag-alaga at paaralan)'},oth:['Pakiusap po, huwag pumunta sa paaralan sakay ng kotse.','Pakidala po ang panloob na sapatos (uwabaki).','Pakisuot po ang ID ng magulang/tagapag-alaga (hogosha-sho).'],
@@ -3873,7 +3993,7 @@ const LET_LANGS=['en','zh','pt','fil','vi','es','ko','th'];
   opt:{btn:'Nếu lần này không muốn tham dự, xin quét mã hai chiều ở trên và chọn 「今回は希望しません」 (lần này không tham dự).'},foot:'Văn bản này được dịch bằng máy/AI. Nếu có điểm nào chưa rõ, xin liên hệ {s}.',sch:'nhà trường'},
  es:{to:'A las familias y tutores de {g}',toAll:'A todas las familias y tutores',three:'Las familias o tutores, el/la estudiante y la escuela hablarán juntos.',how:'Por favor, lea el código bidimensional de abajo (el cuadrado blanco y negro) y elija los días y horas en que no puede.',url:'La URL y el código bidimensional pueden ser diferentes según el grado.',
   ev:{'三者懇談会':'reunión de tres partes (familia o tutores, estudiante y escuela)','二者懇談':'reunión entre familia o tutores y escuela'},
-  pur:{shinro:'Hablaremos de a qué preparatoria presentar el examen y del camino del/de la estudiante después de la secundaria.',visit:'El profesor o la profesora visitará su casa. Hablaremos de la vida del/de la estudiante en casa y en la escuela, y del camino a la escuela.'},
+  pur:{shinro:'Hablaremos de a qué {NEXT} presentar el examen y del camino del/de la estudiante después de {CUR}.',visit:'El profesor o la profesora visitará su casa. Hablaremos de la vida del/de la estudiante en casa y en la escuela, y del camino a la escuela.'},
   oth:['Por favor, no venga a la escuela en automóvil.','Por favor, traiga zapatillas de interior (uwabaki).','Por favor, use la credencial de familiar o tutor (hogosha-sho).'],
   opt:{btn:'Si no desea participar esta vez, lea el código bidimensional de arriba y elija 「今回は希望しません」 (no deseamos participar esta vez).'},foot:'Este texto fue traducido por máquina/IA. Si algo no está claro, comuníquese con {s}.',sch:'la escuela'},
  ko:{to:'{g} 학부모(보호자)님께',toAll:'학부모(보호자)님께',three:'학부모(보호자)님과 자녀, 학교가 함께 이야기합니다.',how:'아래 2차원 코드(네모난 흑백 무늬)를 읽고, 참석하실 수 없는 날짜와 시간을 선택해 주세요.',url:'학년에 따라 URL과 2차원 코드가 다를 수 있습니다.',
@@ -3888,26 +4008,26 @@ const LET_LANGS=['en','zh','pt','fil','vi','es','ko','th'];
 function fitPv(){   // 印刷のプレビュー：枠の幅いっぱいに、しかも用紙1枚が縦も収まる大きさにする
   const L=document.querySelector('.pvlist');if(!L)return;const bs=L.querySelectorAll('.pvbox');if(!bs.length)return;
   const mm=3.7795,w=+bs[0].dataset.w,h=+bs[0].dataset.h;if(!w||!h)return;
-  const PN=L.closest('.pvpanel'),stk=PN&&getComputedStyle(PN).position==='sticky',top=stk?PN.getBoundingClientRect().top-L.getBoundingClientRect().top*-1+0:Math.max(L.getBoundingClientRect().top,0),cw=L.clientWidth-10,ah=stk?Math.max(260,innerHeight-16-(L.getBoundingClientRect().top-PN.getBoundingClientRect().top)-24):Math.max(260,innerHeight-top-20),sc=Math.max(.2,Math.min(cw/(w*mm),ah/(h*mm)));
+  const cw=L.clientWidth-10,sc=Math.max(.15,cw/(w*mm)*PVZ);   // 枠の横幅いっぱいが基準（高さは気にしない）。拡大縮小ボタンで、倍率を変える
   bs.forEach(b=>{b.style.width=(w*mm*sc)+'px';b.style.height=(h*mm*sc)+'px';const i=b.firstElementChild;if(i)i.style.transform='scale('+sc+')'})}
 window.addEventListener('resize',()=>{try{fitPv()}catch(e){}});
 const LET_JN={ej:'やさしい日本語',en:'英語',zh:'中国語・簡体字',pt:'ポルトガル語',fil:'フィリピノ語',vi:'ベトナム語',es:'スペイン語',ko:'韓国語',th:'タイ語'};
 const letLangName=k=>k==='ej'?'やさしい日本語':`${LET_PACK[k].name}（${LET_JN[k]}）`;
 (function(){const F={   // 「AI（機械翻訳）」の言い方／自動車の来校の例外／やさしい日本語は禁止の言い方を避ける
- ej:{oth:['〔下校|げこう〕する 〔子|こ〕どもの 〔安全|あんぜん〕の ために、くるまで 〔学校|がっこう〕に くる ことは、ふつう おことわり して います。〔特別|とくべつ〕な 〔事情|じじょう〕で くるまが ひつような ときは、〔必|かなら〕ず まえに 〔学校|がっこう〕に 〔相談|そうだん〕して ください。']},
- en:{foot:'This text was translated by AI (machine translation). If anything is unclear, please contact {s}.',oth:['To keep children safe on their way home and during activities, we generally do not allow visits to school by car. If you have a special circumstance and need to come by car, please be sure to consult the school in advance.']},
- zh:{foot:'本文由AI（机器翻译）翻译。如有不清楚之处，请联系{s}。',oth:['为了保障孩子放学途中和活动中的安全，原则上不允许开车来学校。如因特殊情况必须开车，请务必事先与学校商量。']},
- pt:{foot:'Este texto foi traduzido por IA (tradução automática). Se algo não estiver claro, entre em contato com {s}.',oth:['Para garantir a segurança das crianças na saída e durante as atividades, em princípio não permitimos a vinda à escola de carro. Se, por uma situação especial, precisar vir de carro, consulte a escola antes, sem falta.']},
- fil:{foot:'Isinalin ng AI (machine translation) ang tekstong ito. Kung may hindi malinaw, makipag-ugnayan sa {s}.',oth:['Para sa kaligtasan ng mga bata sa pag-uwi at sa mga aktibidad, sa prinsipyo ay hindi po pinapayagan ang pagpunta sa paaralan sakay ng kotse. Kung may espesyal na dahilan at kailangan ang kotse, mangyaring kumonsulta muna sa paaralan.']},
+ ej:{oth:['〔下校|げこう〕する {KID}の 〔安全|あんぜん〕の ために、くるまで 〔学校|がっこう〕に くる ことは、ふつう おことわり して います。〔特別|とくべつ〕な 〔事情|じじょう〕で くるまが ひつような ときは、〔必|かなら〕ず まえに 〔学校|がっこう〕に 〔相談|そうだん〕して ください。']},
+ en:{foot:'This text was translated by AI (machine translation). If anything is unclear, please contact {s}.',oth:['To keep {KID} safe on their way home and during activities, we generally do not allow visits to school by car. If you have a special circumstance and need to come by car, please be sure to consult the school in advance.']},
+ zh:{foot:'本文由AI（机器翻译）翻译。如有不清楚之处，请联系{s}。',oth:['为了保障{KID}放学途中和活动中的安全，原则上不允许开车来学校。如因特殊情况必须开车，请务必事先与学校商量。']},
+ pt:{foot:'Este texto foi traduzido por IA (tradução automática). Se algo não estiver claro, entre em contato com {s}.',oth:['Para garantir a segurança {KID} na saída e durante as atividades, em princípio não permitimos a vinda à escola de carro. Se, por uma situação especial, precisar vir de carro, consulte a escola antes, sem falta.']},
+ fil:{foot:'Isinalin ng AI (machine translation) ang tekstong ito. Kung may hindi malinaw, makipag-ugnayan sa {s}.',oth:['Para sa kaligtasan ng {KID} sa pag-uwi at sa mga aktibidad, sa prinsipyo ay hindi po pinapayagan ang pagpunta sa paaralan sakay ng kotse. Kung may espesyal na dahilan at kailangan ang kotse, mangyaring kumonsulta muna sa paaralan.']},
  vi:{foot:'Văn bản này được dịch bằng AI (dịch máy). Nếu có điểm nào chưa rõ, xin liên hệ {s}.',oth:['Để đảm bảo an toàn cho học sinh khi tan học và trong các hoạt động, về nguyên tắc nhà trường không cho phép đến trường bằng ô tô. Nếu có hoàn cảnh đặc biệt cần đi ô tô, xin nhất định liên hệ với nhà trường trước.']},
- es:{foot:'Este texto fue traducido por IA (traducción automática). Si algo no está claro, comuníquese con {s}.',oth:['Para garantizar la seguridad de los niños a la salida y durante las actividades, en principio no se permite venir a la escuela en automóvil. Si por una circunstancia especial necesita venir en automóvil, consulte antes con la escuela.']},
+ es:{foot:'Este texto fue traducido por IA (traducción automática). Si algo no está claro, comuníquese con {s}.',oth:['Para garantizar la seguridad de {KID} a la salida y durante las actividades, en principio no se permite venir a la escuela en automóvil. Si por una circunstancia especial necesita venir en automóvil, consulte antes con la escuela.']},
  ko:{foot:'이 문서는 AI(기계 번역)로 번역되었습니다. 이해하기 어려운 부분이 있으면 {s}에 문의해 주세요.',oth:['하교 중이거나 활동 중인 학생의 안전을 위해, 원칙적으로 자가용으로 학교에 오시는 것은 허용하지 않습니다. 특별한 사정으로 자가용이 필요한 경우에는 반드시 사전에 학교와 상담해 주세요.']},
  th:{foot:'เอกสารนี้แปลโดย AI (การแปลด้วยเครื่อง) หากมีส่วนที่ไม่เข้าใจ กรุณาติดต่อ {s}',oth:['เพื่อความปลอดภัยของนักเรียนระหว่างเดินทางกลับและระหว่างกิจกรรม โดยหลักการแล้วไม่อนุญาตให้เดินทางมาโรงเรียนด้วยรถยนต์ หากมีเหตุพิเศษที่จำเป็นต้องใช้รถยนต์ กรุณาปรึกษาโรงเรียนล่วงหน้าเสมอ']}};
  for(const id in F){const p=LET_PACK[id];if(F[id].foot)p.foot=F[id].foot;if(F[id].oth)p.oth[0]=F[id].oth[0]}})();
 /* ===== 保護者の画面（Webアプリ）の多言語の文言（やさしい日本語・8言語。既定の文言の翻訳） ===== */
 const FORM_I18N={
-ej:{ui:{info:'〔児童|じどう〕・〔生徒|せいと〕の じょうほう',pick:'えらんで ください',req:'（かならず いれる）',sibN:'きょうだい {n}にんめ',red:'（あかい ところは ×）',cnt:'× を つけた ひと じかん：{n}こ',kanaBad:'ふりがなに かんじが はいって います。ひらがな などで いれて ください。',kanaFix:'ふりがなを ひらがな などで いれて ください（かんじは だめです）。',needMode:'「{a}」か「{b}」を えらんで ください。',needAll:'かならず いれる ところを いれて ください。',kanaChk:'ふりがなを たしかめて ください：',sibKanaChk:'きょうだい {n}にんめの ふりがなを たしかめて ください：',needNg:'× を つける ひと じかんを ひとつ いじょう えらぶか、「{a}」を えらんで ください。',sending:'おくって います…',close:'この ページは とじて だいじょうぶです。',fail:'おくれませんでした：',dl:'📌 しめきり：'},
- tx:{classT:'〔学年|がくねん〕・クラス',numT:'〔出席番号|しゅっせきばんごう〕',nameT:'〔名前|なまえ〕（〔漢字|かんじ〕など）',kanaT:'ふりがな（ひらがな など。〔漢字|かんじ〕は だめです）',kanaNg:'〔漢字|かんじ〕を つかわないで、ひらがな などで いれて ください。',sibHead:'【この 〔学校|がっこう〕に いる きょうだい】',sibHelp:'この 〔学校|がっこう〕に きょうだいが いる ときだけ いれて ください。',sibL:['きょうだい {n}にんめ：〔名前|なまえ〕','きょうだい {n}にんめ：ふりがな','きょうだい {n}にんめ：〔学年|がくねん〕・クラス','きょうだい {n}にんめ：〔出席番号|しゅっせきばんごう〕（わかれば）'],dayHead:'【〔日|ひ〕と 〔時間|じかん〕に ついて】',free:'いつでも だいじょうぶです。こられない 〔日|ひ〕は ありません。',skip:'〔今回|こんかい〕は さんかしません',ng:'こられない 〔日|ひ〕と 〔時間|じかん〕が あります。（えらびます）',ngHelp:'こられない 〔日|ひ〕と 〔時間|じかん〕を えらんで ください。',ngSubmit:'■ さいごに 〔下|した〕の「おくる」ボタンを おして ください。',send:'おくる',secure:'いれた じょうほうは、この {ev}の ため だけに つかいます。〔学校|がっこう〕の 〔先生|せんせい〕が たいせつに あつかいます。',confirm:['こたえて くれて ありがとうございます。','・〔学年|がくねん〕や クラスに よって、〔二次元|にじげん〕コードや URLが ちがう ことが あります。きょうだいが いる ときは、それぞれの 〔二次元|にじげん〕コードや URLで いれて ください。','・おなじ 〔子|こ〕に ついて なんども こたえた ときは、いちばん あたらしい こたえだけを つかいます。','・まちがえた ときは、もういちど こたえて ください。いちばん あたらしい こたえだけを つかいます。','・こたえに ついて、でんわで はなす ことが あります。','・けっかは、あとで れんらく します。'],addrT:'〔住所|じゅうしょ〕',addrHT:'〔家庭訪問|かていほうもん〕の ときに つかいます。〔都道府県|とどうふけん〕から 〔番地|ばんち〕まで いれて ください。',addrHL:'すんで いる ところを えらんで ください。ない ときは「この 〔中|なか〕には ない」を えらんで ください。',addrPh:'れい：〇〇けん〇〇し〇〇ちょう1-2-3'}},
+ej:{ui:{info:'〔児童|じどう〕・〔生徒|せいと〕の じょうほう',pick:'えらんで ください',req:'（かならず いれる）',sibN:'きょうだい {n}め',red:'（あかい ところは ×）',cnt:'× を つけた ひと じかん：{n}こ',kanaBad:'ふりがなに かんじが はいって います。ひらがな などで いれて ください。',kanaFix:'ふりがなを ひらがな などで いれて ください（かんじは だめです）。',needMode:'「{a}」か「{b}」を えらんで ください。',needAll:'かならず いれる ところを いれて ください。',kanaChk:'ふりがなを たしかめて ください：',sibKanaChk:'きょうだい {n}めの ふりがなを たしかめて ください：',needNg:'× を つける ひと じかんを ひとつ いじょう えらぶか、「{a}」を えらんで ください。',sending:'おくって います…',close:'この ページは とじて だいじょうぶです。',fail:'おくれませんでした：',dl:'📌 しめきり：'},
+ tx:{classT:'〔学年|がくねん〕・クラス',numT:'〔出席番号|しゅっせきばんごう〕',nameT:'〔名前|なまえ〕（〔漢字|かんじ〕など）',kanaT:'ふりがな（ひらがな など。〔漢字|かんじ〕は だめです）',kanaNg:'〔漢字|かんじ〕を つかわないで、ひらがな などで いれて ください。',sibHead:'【この 〔学校|がっこう〕に いる きょうだい】',sibHelp:'この 〔学校|がっこう〕に きょうだいが いる ときだけ いれて ください。',sibL:['きょうだい {n}め：〔名前|なまえ〕','きょうだい {n}め：ふりがな','きょうだい {n}め：〔学年|がくねん〕・クラス','きょうだい {n}め：〔出席番号|しゅっせきばんごう〕（わかれば）'],dayHead:'【〔日|ひ〕と 〔時間|じかん〕に ついて】',free:'いつでも だいじょうぶです。こられない 〔日|ひ〕は ありません。',skip:'〔今回|こんかい〕は さんかしません',ng:'こられない 〔日|ひ〕と 〔時間|じかん〕が あります。（えらびます）',ngHelp:'こられない 〔日|ひ〕と 〔時間|じかん〕を えらんで ください。',ngSubmit:'■ さいごに 〔下|した〕の「おくる」ボタンを おして ください。',send:'おくる',secure:'いれた じょうほうは、この {ev}の ため だけに つかいます。〔学校|がっこう〕の 〔先生|せんせい〕が たいせつに あつかいます。',confirm:['こたえて くれて ありがとうございます。','・〔学年|がくねん〕や クラスに よって、〔二次元|にじげん〕コードや URLが ちがう ことが あります。きょうだいが いる ときは、それぞれの 〔二次元|にじげん〕コードや URLで いれて ください。','・おなじ 〔子|こ〕に ついて なんども こたえた ときは、いちばん あたらしい こたえだけを つかいます。','・まちがえた ときは、もういちど こたえて ください。いちばん あたらしい こたえだけを つかいます。','・こたえに ついて、でんわで はなす ことが あります。','・けっかは、あとで れんらく します。'],addrT:'〔住所|じゅうしょ〕',addrHT:'〔家庭訪問|かていほうもん〕の ときに つかいます。〔都道府県|とどうふけん〕から 〔番地|ばんち〕まで いれて ください。',addrHL:'すんで いる ところを えらんで ください。ない ときは「この 〔中|なか〕には ない」を えらんで ください。',addrPh:'れい：〇〇けん〇〇し〇〇ちょう1-2-3'}},
 en:{ui:{info:'Student information',pick:'Please select',req:' (required)',sibN:'Sibling {n}',red:' (red = not available)',cnt:'Dates/times marked ×: {n}',kanaBad:'The reading (furigana) field has characters that are not allowed. Please fix it.',kanaFix:'Please fix the reading (furigana). Kanji cannot be entered.',needMode:'Please choose "{a}" or "{b}".',needAll:'Please fill in all required fields.',kanaChk:'Please check the reading (furigana): ',sibKanaChk:'Please check the reading (furigana) of sibling {n}: ',needNg:'Please mark at least one date/time with ×, or choose "{a}".',sending:'Sending…',close:'You may close this page.',fail:'Could not send: ',dl:'📌 Deadline for answers: '},
  tx:{classT:'Grade and class',numT:'Student number',nameT:'Student name (kanji, etc.)',kanaT:'Reading of the name (hiragana, katakana or letters; no kanji)',kanaNg:'Please enter without kanji (hiragana, katakana or letters).',sibHead:'[Siblings at this school]',sibHelp:'Fill in only if a sibling also attends this school.',sibL:['Sibling {n}: name','Sibling {n}: reading (furigana)','Sibling {n}: grade and class','Sibling {n}: student number (if known)'],dayHead:'[About dates and times]',free:'Any time is fine. There are no dates or times when we cannot come.',skip:'We do not wish to take part this time',ng:'There are dates or times when we cannot come (I will choose them).',ngHelp:'Please choose the dates and times when you cannot come.',ngSubmit:'■ At the end, be sure to press the "Send" button below.',send:'Send',secure:'The information you enter will not be used for any purpose other than this {ev}. The connection is protected by Google encryption (HTTPS). School staff manage the answers appropriately.',confirm:['Thank you for your answer.','・The 2D code and URL may be different for each grade or class. If you have more than one child at this school, please answer with the 2D code or URL that each child brought home.','・If you answer more than once for the same child, only the latest answer is used.','・If you sent wrong information, please answer again. Only the latest answer is used.','・We may call you to talk about your answer.','・We will contact you later with the result of the schedule.'],addrT:'Address',addrHT:'Used when we visit your home. Please enter from the prefecture to the street number. (e.g. ○○ Pref., ○○ City, ○○-cho 1-2-3)',addrHL:'Please choose where you live. If none applies, choose "None of these (この中にはない)".',addrPh:'e.g. ○○ Pref., ○○ City, ○○-cho 1-2-3'}},
 zh:{ui:{info:'学生信息',pick:'请选择',req:'（必填）',sibN:'兄弟姐妹{n}',red:'（红色＝不方便）',cnt:'标记×的日期时间：{n}处',kanaBad:'读音栏有不能使用的字符，请修改。',kanaFix:'请修改读音，不能输入汉字。',needMode:'请选择“{a}”或“{b}”。',needAll:'请填写必填项。',kanaChk:'请确认读音：',sibKanaChk:'请确认兄弟姐妹{n}的读音：',needNg:'请至少选择一个标记×的日期时间，或选择“{a}”。',sending:'发送中…',close:'可以关闭此页面了。',fail:'发送失败：',dl:'📌 回答截止时间：'},
@@ -3971,7 +4091,7 @@ function pkSetPath(o,p,v){const a=p.split('.');let t=o;for(let i=0;i<a.length-1;
 function packGet(pid){const b=JSON.parse(JSON.stringify(LET_PACK[pid])),ov=((P.letter||{}).pk||{})[pid]||{};for(const k in ov)pkSetPath(b,k,ov[k]);return b}
 
 /* ===== ふりがな（kuromoji.js＋IPAdic辞書。辞書は別ファイルを、ユーザーが選んで読み込む） ===== */
-let TK=null,TKP=null;const FURI_DICT_URL='';   // 辞書の配布場所（準備ができたら、ここにURLを入れる）
+let TK=null,TKP=null;const FURI_DICT_URL='https://yft-yft.github.io/schedule/dict.html',FURI_DICT_URL2='https://drive.google.com/drive/folders/1yDOtdwDL1GiiKvH_8t4KrBz_fm2BV8yU?usp=sharing',FURI_LINKS=()=>`<a href="${FURI_DICT_URL}" target="_blank" rel="noopener">GitHub</a>　または　<a href="${FURI_DICT_URL2}" target="_blank" rel="noopener">Googleドライブ</a>`;   // 辞書の配布場所（準備ができたら、ここにURLを入れる）
 const FURI_FILES=['base','cc','check','tid','tid_map','tid_pos','unk','unk_char','unk_compat','unk_invoke','unk_map','unk_pos'].map(n=>n+'.dat.gz');
 const idbOpen=()=>new Promise((res,rej)=>{const r=indexedDB.open('kakopita',1);r.onupgradeneeded=()=>r.result.createObjectStore('dict');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
 const idbGet=async k=>{const db=await idbOpen();return new Promise((res,rej)=>{const q=db.transaction('dict').objectStore('dict').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})};
@@ -3985,12 +4105,21 @@ async function furiBuild(files){   // files: {名前: ArrayBuffer}
 }
 async function furiAutoLoad(){   // 以前に読み込んだ辞書が、このブラウザに残っていれば、自動で使う
   if(TK||TKP)return TKP;
-  TKP=(async()=>{try{const f=await idbGet('files');if(f&&FURI_FILES.every(n=>f[n])){await furiBuild(f);render()}}catch(e){}finally{TKP=null}})();return TKP}
+  TKP=(async()=>{try{const f=await idbGet('files');if(f&&FURI_FILES.every(n=>f[n])){await furiBuild(f);render()}else{FURI_H=await idbGet('dirh')||null;if(FURI_H){if(!(await furiFromHandle(false)))render()}}}catch(e){}finally{TKP=null}})();return TKP}
+let FURI_H=null;
+async function furiFromHandle(interactive){   // 前に選んだ辞書フォルダ（Chrome・Edge）を覚えておき、次回は、そこから読み込む
+  const d=FURI_H;if(!d)return false;
+  try{let p=await d.queryPermission({mode:'read'});if(p!=='granted'&&interactive)p=await d.requestPermission({mode:'read'});if(p!=='granted')return false;
+    const got={},add=async(n,h)=>{if(FURI_FILES.includes(n))got[n]=await(await h.getFile()).arrayBuffer()},scan=async dir=>{for await(const [n,h] of dir.entries())if(h.kind==='file')await add(n,h)};
+    await scan(d);if(Object.keys(got).length<FURI_FILES.length){try{await scan(await d.getDirectoryHandle('dict'))}catch(e){}}
+    if(FURI_FILES.some(n=>!got[n]))return false;
+    await furiBuild(got);try{await idbPut('files',got)}catch(e){}render();return true}catch(e){return false}}
+A['furi-reuse']=async()=>{if(!(await furiFromHandle(true)))toast('前回のフォルダから読み込めませんでした。「ふりがな辞書を読み込む」で、もう一度選んでください',{ms:7000})};
 async function furiPick(){   // フォルダ（またはファイル）を選んで、辞書を読み込む
   if(!(await explainHostPath()))return false;
   const got={};const add=async(n,fh)=>{if(FURI_FILES.includes(n))got[n]=await(await fh.getFile?await fh.getFile():fh).arrayBuffer()};
   try{
-    if(window.showDirectoryPicker){const d=await showDirectoryPicker({mode:'read'});
+    if(window.showDirectoryPicker){const d=await showDirectoryPicker({mode:'read'});try{await idbPut('dirh',d);FURI_H=d}catch(e){}
       const scan=async dir=>{for await(const [n,h] of dir.entries())if(h.kind==='file')await add(n,h)};await scan(d);
       if(Object.keys(got).length<FURI_FILES.length){try{await scan(await d.getDirectoryHandle('dict'))}catch(e){}}}
     else await new Promise(res=>{const i=document.createElement('input');i.type='file';i.multiple=true;i.webkitdirectory=true;i.onchange=async()=>{for(const f of i.files)await add(f.name,f);res()};i.oncancel=res;i.click()});
@@ -4002,7 +4131,7 @@ async function furiPick(){   // フォルダ（またはファイル）を選ん
   try{await idbPut('files',got);toast('辞書を読み込みました。次回からは、自動で使います')}catch(e){toast('辞書は使えます。ただし、このブラウザでは保存できないため、次に開いたときは、もう一度フォルダを選んでください',{ms:9000})}   // 読み込みは成功しているので、保存の失敗は「失敗」と言わない
   render();return true}
 async function furiExplain(){   // ふりがなをオンにするときの案内
-  const r=await ask({title:'ふりがなを使うには、辞書が必要です',body:`<ul style="margin:0 0 0 18px;line-height:1.8"><li><b>やさしい日本語版</b>は、辞書がなくても、ふりがなが付きます。</li><li><b>原文（日本語）</b>に自動でふりがなを付けるには、<b>辞書データ</b>（kuromoji＋IPAdic辞書、約17MB・12ファイル）が必要です。</li><li>入手先：${FURI_DICT_URL?`<a href="${esc(FURI_DICT_URL)}" target="_blank" rel="noopener">${esc(FURI_DICT_URL)}</a>`:'（準備中です。配布場所が決まったら、ここに表示します）'}</li><li>ダウンロードした <b>dict</b> フォルダ（12ファイル）を、<b>このHTMLと同じフォルダ</b>に置き、下のボタンで選んでください。読み込んだ辞書は、このブラウザに保存され、次回から自動で使います。</li><li>辞書のライセンス：kuromoji.js（Apache License 2.0）、IPAdic辞書（奈良先端科学技術大学院大学。再配布可・著作権表示つき）。</li><li>名字・名前の読みは、誤ることがあります。「読み方の修正」で直せます。</li></ul>`,buttons:[{id:0,label:'あとで（原文にはつけない）'},{id:1,label:'辞書を読み込む（フォルダを選ぶ）',kind:'pri'}]});
+  const r=await ask({title:'ふりがなを使うには、辞書が必要です',body:`<ul style="margin:0 0 0 18px;line-height:1.8"><li><b>やさしい日本語版</b>は、辞書がなくても、ふりがなが付きます。</li><li><b>原文（日本語）</b>に自動でふりがなを付けるには、<b>辞書データ</b>（kuromoji＋IPAdic辞書、約17MB・12ファイル）が必要です。</li><li>入手先：${FURI_LINKS()}（職場でGitHubが開けないときは、Googleドライブをお使いください）　…開いたページの案内にしたがって、辞書データをダウンロードしてください。</li><li>ダウンロードした <b>dict</b> フォルダ（12ファイル）を、わかりやすい場所（このHTMLと同じフォルダなど）に置き、下のボタンで選んでください。読み込んだ辞書は、このブラウザに保存され、次回から自動で使います。Chrome・Edge では、選んだフォルダの場所も覚えておき、次に開いたときに、ワンクリックで読み込めます。</li><li>辞書のライセンス：kuromoji.js（Apache License 2.0）、IPAdic辞書（奈良先端科学技術大学院大学。再配布可・著作権表示つき）。</li><li>名字・名前の読みは、誤ることがあります。「読み方の修正」で直せます。</li></ul>`,buttons:[{id:0,label:'あとで（原文にはつけない）'},{id:1,label:'辞書を読み込む（フォルダを選ぶ）',kind:'pri'}]});
   return r===1?furiPick():false}
 const KJ=/[\u4E00-\u9FFF々〆]/,toHira=s=>s.replace(/[\u30A1-\u30F6]/g,c=>String.fromCharCode(c.charCodeAt(0)-0x60));
 function furiTok(t){let out='';for(const tk of TK.tokenize(t)){const sf=tk.surface_form,rd=tk.reading;if(!KJ.test(sf)||!rd||rd==='*'){out+=sf;continue}
@@ -4039,14 +4168,14 @@ function letTransModel(G,pid,rb){
   const d=L.date||todayISO(),p=dp(d),dateLine=ej?`${p.y}〔年|ねん〕${ejMD(p)}`:`${p.y}-${pad(p.m)}-${pad(p.d)}`;
   const cl=P.classes[c0.key]||{},teacher=tg==='class'?(cl.teacher||'').trim():'',school=(P.meta.school||'').trim(),pr=(P.meta.principal||'').trim();
   const sign=[];if(school)sign.push(school);if(pr)sign.push(`${pk.pr}　${pr}`);if(teacher)sign.push(`${ej?`${c0.g}〔年|ねん〕${c0.c}〔組|くみ〕`:`${c0.g}年${c0.c}組`} ${pk.tc}　${teacher}`);
-  const body=[rep(pk.lead,{ev}),letSanshaOn()?pk.three:'',pk.pur[type]||'',type==='visit'?pk.att.visit:pk.att.other,pk.ask].filter(Boolean).join(ej?' ':' ');
+  const body=[rep(pk.lead,{ev}),letSanshaOn()?pk.three:'',stgTx(pk.pur[type],pid),type==='visit'?pk.att.visit:pk.att.other,pk.ask].filter(Boolean).join(ej?' ':' ');
   const hh=pk.h,it=[];let k=0;
   it.push({t:'item',head:`${++k}. ${hh[0]}`,text:rep(pk.dt,{d:dtxt,a:a!=null?fT(a):'',b:a!=null?fT(a+sm*n):''})});
   it.push({t:'item',head:`${++k}. ${hh[1]}`,text:type==='visit'?pk.pl.home:pk.pl.class});
   it.push({t:'item',head:`${++k}. ${hh[2]}`,text:pk.how});it.push({t:'cont',text:`※ ${pk.url}`});it.push({t:'cont',text:`※ ${rep(pk.fix,{until:dlOn?pk.until:''})}`});it.push({t:'qr'});
   if(dlOn)it.push({t:'item',head:`${++k}. ${hh[3]}`,text:`{強調}${rep(pk.dl,{t:dlt})}{/強調}`});
   it.push({t:'cont',text:pk.consult});
-  if(type!=='visit'){it.push({t:'item',head:`${++k}. ${hh[4]}`,text:pk.oth[1]});it.push({t:'cont',text:pk.oth[2]});it.push({t:'cont',text:pk.oth[0]})}
+  if(type!=='visit'){it.push({t:'item',head:`${++k}. ${hh[4]}`,text:pk.oth[1]});it.push({t:'cont',text:pk.oth[2]});it.push({t:'cont',text:stgTx(pk.oth[0],pid)})}
   const url0=(G.grades.size===1?letUrlOf(c0.g):(L.url||'').trim()),url=url0&&/script\.google\.com\/macros\/s\/.+\/exec/.test(url0)&&(P.form||{}).i18n!==false?url0+(url0.includes('?')?'&':'?')+'lang='+pid:url0,qr=url?codeCalc(url):null,og=gl([...G.grades].filter(g=>om.includes(g)));
   const slipTxt=G.slip==='btn'?`${rep(pk.opt.intro,{g:og,ev})} ${pk.opt.btn}`:G.slip==='slip'?`${rep(pk.opt.intro,{g:og,ev})} ${pk.opt.paper}`:'';
   return{date:dateLine,sign,addr,title:rep(pk.title,{ev}),greet:pk.greet,body,close:'',items:it,url,qr:qr&&qr.svg?qr:null,urlLabel:pk.urlLabel,slip:slipTxt,slipBox:G.slip==='slip'?pk.opt.box:'',ruby:ej&&rb,noKi:true,noEnd:true,plain:true,jp:ej,foot:rep(pk.foot||'',{s:(P.meta.tel||'').trim()?`${school||pk.sch||''} (${(P.meta.tel||'').trim()})`:(school||pk.sch||'')})};
@@ -4196,7 +4325,7 @@ function letterPanel(){
    <div class="row"><label class="tog">発行日<input type="date" data-ch="lopt" data-k="date" value="${esc(o('date'))}"></label><span class="tiny muted">空＝今日</span>
     <label class="tog">時候の挨拶<select data-ch="lopt" data-k="season"><option value="">自動（${esc(seasonOf(d))}）</option>${seas.map(x=>`<option ${o('season')===x?'selected':''}>${x}</option>`).join('')}</select></label>
     <label class="tog">呼び方<select data-ch="lopt" data-k="who"><option value="">自動（${esc(letWho())}）</option><option ${o('who')==='児童'?'selected':''}>児童</option><option ${o('who')==='生徒'?'selected':''}>生徒</option></select></label></div>
-   <div class="row"><label class="tog"><input type="checkbox" data-ch="lfuri" ${o('furi')?'checked':''}>漢字にふりがなをつける（原文・やさしい日本語版）</label><span class="tiny muted">${TK?'辞書：読み込み済み':'辞書：未読み込み（やさしい日本語版は辞書なしで付きます。原文には辞書が必要です）'}</span><button class="btn sm" data-act="furi-load">ふりがな辞書を読み込む</button></div>
+   <div class="row"><label class="tog"><input type="checkbox" data-ch="lfuri" ${o('furi')?'checked':''}>漢字にふりがなをつける（原文・やさしい日本語版）</label><span class="tiny muted">${TK?'辞書：読み込み済み':'辞書：未読み込み（やさしい日本語版は辞書なしで付きます。原文には辞書が必要です）'}</span><button class="btn sm" data-act="furi-load">ふりがな辞書を読み込む</button>${!TK&&FURI_H?'<button class="btn sm pri" data-act="furi-reuse">前回の辞書フォルダを使う</button>':''}<span class="tiny">辞書データの入手先：${FURI_LINKS()}</span></div>
    <div class="row"><label class="tog"><input type="checkbox" data-ch="lopt" data-k="sansha" ${letSanshaOn()?'checked':''}>「保護者・${esc(letWho())}・学校の三者で行います」の文を入れる</label><span class="tiny muted">（標準：家庭訪問・教育相談・二者懇談では入れません）</span></div>
    ${optSegHtml()}
    <div class="row"><label class="tog" style="flex:1;min-width:240px">回答用URL<input type="text" data-ch="lurl" value="${esc((P.letter&&P.letter.url)||'')}" placeholder="https://…（2. フォームの欄と共通）" style="flex:1" autocomplete="off" spellcheck="false"></label></div>
@@ -4289,6 +4418,8 @@ function sibLines(st){
   const out=[];for(const b of st.sib||[]){const m=sibFind(b);
     if(m){const pt=placeText(m);out.push(`${clsLabel(m.g,m.c)} ${m.name}${pt?'　'+pt:'　日時未定'}`)}
     else if(b.name||b.g)out.push(`${b.g?b.g+'年'+b.c+'組 ':''}${b.name||''}（名簿になし）`)}
+  const have=new Set((st.sib||[]).map(b=>sibFind(b)).filter(Boolean).map(m=>m.id));
+  for(const r of sibRev(st))if(!have.has(r.id)){const pt=placeText(r);out.push(`${clsLabel(r.g,r.c)} ${r.name}${pt?'　'+pt:'　日時未定'}`)}
   return out;
 }
 function docClassList(){const U=UI.print;if(!U.sel)U.sel=new Set(plist().map(c=>c.key));return plist().filter(c=>U.sel.has(c.key))}
@@ -4336,7 +4467,8 @@ function tableSheet(c,W0=297,H0=210,sub){   // sub：日付の一部だけを表
   const tmLen=Math.max(4,...SL.map(x=>x.label.length));
   const inCell=SM!=='out',outList=SM!=='in';
   const pairs=[],seen=new Set();                                   // きょうだい一覧（表の外）
-  for(const st of mem){for(const b of st.sib||[]){const m=sibFind(b);
+  for(const st of mem){const own=(st.sib||[]).map(b=>({b,m:sibFind(b)})),ids=new Set(own.filter(x=>x.m).map(x=>x.m.id));for(const r of sibRev(st))if(!ids.has(r.id))own.push({b:{},m:r});
+   for(const{b,m}of own){
     if(m&&m.g+'|'+m.c===c.key){const kx=[st.id,m.id].sort().join('~');if(seen.has(kx))continue;seen.add(kx)}
     const lab=m?`${clsLabel(m.g,m.c)} ${m.name}　${placeText(m)||'日時未定'}`:((b.name||b.g)?`${b.g?b.g+'年'+b.c+'組 ':''}${b.name||''}（名簿になし）`:'');
     if(lab)pairs.push(`<b>${esc(st.name)}</b>（${esc(placeText(st)||'日時未定')}）⇄ ${esc(lab)}`)}}
@@ -5066,6 +5198,11 @@ A.about=()=>{
 };
 
 /* ---------- help ---------- */
+/* 使い方の文章を、読みやすい形にする：長い段落は、文ごとの箇条書きに、長い項目は、文ごとの改行にする */
+function structHelp(h){
+  const cut=t=>{const o=[];let d=0,tg='',cur='';for(const ch of t){cur+=ch;if(ch==='<')tg='<';else if(tg){tg+=ch;if(ch==='>'){if(/^<(b|strong|a|span|code)\b/i.test(tg))d++;else if(/^<\/(b|strong|a|span|code)/i.test(tg))d=Math.max(0,d-1);tg=''}}else{if('（(「『'.includes(ch))d++;else if('）)」』'.includes(ch))d=Math.max(0,d-1);else if(ch==='。'&&d===0){o.push(cur);cur=''}}}if(cur.trim())o.push(cur);return o.map(x=>x.replace(/^(\s|<br\s*\/?>)+/,'').trim()).filter(Boolean)};
+  h=h.replace(/<p([^>]*)>([\s\S]*?)<\/p>/g,(m,at,t)=>{const plain=t.replace(/<[^>]+>/g,'');if(plain.length<130)return m;const ps=cut(t);if(ps.length<3)return m;return '<ul class="hl">'+ps.map(x=>'<li>'+x+'</li>').join('')+'</ul>'});
+  return h.replace(/<li>([\s\S]*?)<\/li>/g,(m,t)=>{const plain=t.replace(/<[^>]+>/g,'');if(plain.length<150||t.includes('<ul')||t.includes('<ol'))return m;const ps=cut(t);return ps.length<3?m:'<li>'+ps.join('<br>')+'</li>'})}
 const HELP=[
  ['はじめに',()=>`<h3>最短の流れ（5ステップ）</h3><ol><li><b>1. 準備（名簿・日程）</b>：名簿（学年・組・番号・名前・ふりがな。住所・担任名もいっしょに）を貼り付けるか、ファイルで読み込みます。続けて、実施日と、1日の時間割（開始時刻・1枠の長さ・枠数）を決めます</li><li><b>2. フォーム（任意）</b>：保護者から都合を集めるときだけ使います。WebアプリかGoogleフォームを作るコード（GAS）をコピーして実行。集まった回答ファイルを取り込む（取り込む前に、どの列が何の情報かを確認する画面が出ます）</li><li><b>3. 条件</b>：児童生徒ごとの×（不可）・○（この時間のみ可）を確認・入力する（手入力だけでもOK）</li><li><b>4. かこピタ(配置)</b>：「かこピタ（自動配置）する」を押す。気になるところは、ドラッグで入れ替える</li><li><b>5. 印刷</b>：お知らせ・催促状・学級の一覧表・条件ブロックを印刷する（縦・横を選べます）</li></ol>
   <div class="okbox" style="margin-top:12px"><b>複数人で使うとき（かんたんな流れ）</b>
@@ -5081,7 +5218,7 @@ const HELP=[
   <h3>3. 条件</h3><p>ブラシ（×・○・未・消しゴム）を選んで、ドラッグで囲んだ四角い範囲をまとめて塗ります（指を離したときに反映）。ブラシは、スクロールしても画面の上に固定されます。日付や時刻の見出しをクリックすると、その日・その時刻をまとめて塗れます。枠数（連続枠）は1〜30。きょうだいの学年・組・番号を入れると、名簿と自動で照合します。<b>○がある児童生徒は、○の枠にだけ配置されます。</b></p>
   <h3>4. かこピタ(配置)</h3><p>児童生徒を選ぶと、入れない時間帯が濃い斜線になります（他の児童生徒が入っているマスの上も同様です）。置きたいマスをクリック、またはドラッグ（置いた瞬間に選択は解除されます）。右クリックで外す／休憩（×）（空きマスや休憩のマスは、右ボタンを押したままドラッグして、囲んだ四角い範囲をまとめて×にもできます）。「休憩（×）を置く」に切り替えると、空きマスを囲んでまとめて×にでき、日付をクリックするとその日の空きマスがすべて×になります（もう一度クリックで解除）。休憩モードで置いてある名前をクリックすると、配置モードに戻ります。「全員を外す」で、その学級の配置をまとめて外せます。「書き出し」ボタンでは、この学級の表をExcel（.xlsx）・CSVで保存できるほか、Googleカレンダー用の予定も作れます（くわしくは「書き出し」の項目）。名前の右に出る住所（地区）は、<b>家庭訪問のときだけ最初から表示</b>されます。ほかの行事では最初は非表示で、「住所を表示」にチェックを入れると表示できます。「かこピタ（自動配置）する」とロックのボタンは、画面の右下（スマホでは下）に固定されています。日付・開始時刻・1枠の長さ・最終時刻を変えて、配置が枠の外になったときは、その場で配置を外して、未配置にもどします（「元に戻す」で戻せます）。</p>
   <h3>5. 印刷</h3><p>日程のお知らせ・未回答の催促状・各学級の一覧表・条件ブロックを印刷できます。<b>縦・横を選べます。</b>「保護者への案内文書」は、行事に合わせた文面に、時候の挨拶・回答用URL・二次元コードを自動で入れます（文面は編集できます）。標準は、お知らせと催促状が縦（上下2段。横にすると左右2段）、学級の一覧表が縦（白黒印刷向き。児童生徒名は、空白・「・」を含めて6文字までの名前は、すべて同じ大きさです。7文字以上の名前は、標準の大きさで1行に収まらないときだけ、2行までの折り返し（氏と名の間。区切りがなければ半分）や、その名前だけの文字の縮小で収めます。長い名前がいても、6文字までの名前の大きさは変わりません。きょうだいは赤字と★で強調）です。条件ブロックは文字が小さめなので、A3での印刷をおすすめします。1学級2枚に収まり、文字がいちばん大きくなる向きを自動で選びます。住所の印刷は、学級の一覧表と条件ブロックでは、家庭訪問のときだけ最初からオンです（お知らせと催促状の個票は、家庭に配るので、家庭訪問でも最初はオフです）。文面は「文面を編集する」で書き換えられます（{名前}などの言葉が自動で入れ替わります）。「印刷する」ボタンは画面の左下に浮かんでいて、「印刷前の点検」に確認事項があると、オレンジ（重いときは赤）になり、「確認○件」と出ます。名前に、いまのフォントで表示できない字があるときは、「代わりの字」「ひらがな」「そのまま」から選べます。学級の一覧表では、「書き出し」から、選んだ学級の表をExcel・CSV・カレンダー用の予定にできます。</p>`],
- ['かこピタの設定',()=>`<h3>かこピタ（自動配置）のメニュー</h3><p><b>この設定は学級ごとに保存</b>され、ほかの学級には影響しません。「全学級をかこピタ」「指定した学級をかこピタ」では、それぞれの学級の設定でかこピタします。まとめて設定したいときは、メニュー上部の「対象の学級」で学級を選んでから項目を変えると、<b>変えた項目だけ</b>が選んだ学級に反映されます（何も変えなければ、何も変わりません）。</p><ul><li><b>自動配置の方針</b>：「出席番号順優先」または「シャッフル」。シャッフルは実行のたびに別の案になるので、納得いく案を選べます。</li><li><b>日ごとの人数</b>：「均等にする」で、特定の日だけが過密になるのを防ぎます。</li><li><b>詰める時刻</b>：選んだ時刻に近い枠から使い、まとまった空き時間を作ります。</li><li><b>仕上げの探索</b>：区切りの時刻以降の人数や偏りが減る組み合わせを、指定した秒数まで探します。</li><li><b>いまの配置</b>：「消して組み直す」または「残して、足りない分だけ」。「全学級」「指定した学級」では、配置済みの学級があると、実行前に確認します（「この学級」は、確認なしで実行します。いつでも「元に戻す」で戻せます）。</li><li><b>時刻のルール</b>：「できれば」（まず区切りの時刻までで探し、入らなければ以降も使う）、「厳守」（以降は使わない）、「制限なし」。最初は「できれば17:00まで」です。「厳守」にすると、その学級の画面では区切り以降の枠も隠します。</li></ul><p class="tiny muted">4. かこピタ(配置)で児童生徒を選ぶと、入れない時間帯はいつでも濃い斜線で示されます（手動調整のミス防止）。</p>
+ ['かこピタの設定',()=>`<h3>かこピタ（自動配置）のメニュー</h3><p><b>この設定は学級ごとに保存</b>され、ほかの学級には影響しません。「全学級をかこピタ」「指定した学級をかこピタ」では、それぞれの学級の設定でかこピタします。まとめて設定したいときは、メニュー上部の「対象の学級」で学級を選んでから項目を変えると、<b>変えた項目だけ</b>が選んだ学級に反映されます（何も変えなければ、何も変わりません）。</p><ul><li><b>自動配置の方針</b>：「出席番号順優先」または「シャッフル」。シャッフルは実行のたびに別の案になるので、納得いく案を選べます。</li><li><b>日ごとの人数</b>：「均等にする」で、特定の日だけが過密になるのを防ぎます。</li><li><b>詰める時刻</b>：選んだ時刻に近い枠から使い、まとまった空き時間を作ります。</li><li><b>仕上げ（自動）</b>：全員が入ったあとに、一部の人をはがして探しなおし、きょうだい・住所・偏りの点数が良くなる組み合わせを、数秒だけ探します。設定は要りません。</li><li><b>いまの配置</b>：「消して組み直す」または「残して、足りない分だけ」。「全学級」「指定した学級」では、配置済みの学級があると、実行前に確認します（「この学級」は、確認なしで実行します。いつでも「元に戻す」で戻せます）。</li><li><b>時刻のルール</b>：「できれば」（まず区切りの時刻までで探し、入らなければ以降も使う）、「厳守」（以降は使わない）、「制限なし」。最初は「できれば17:00まで」です。「厳守」にすると、その学級の画面では区切り以降の枠も隠します。</li></ul><p class="tiny muted">4. かこピタ(配置)で児童生徒を選ぶと、入れない時間帯はいつでも濃い斜線で示されます（手動調整のミス防止）。</p>
   <h3>きょうだい・住所への配慮</h3><ul><li><b>きょうだい配慮</b>：きょうだいが別の学級にいても、<b>同じ時刻にならない</b>ようにし、同じ日の近い時刻に寄せます。<b>間隔は「続けて」「1枠あける」「2枠あける」から選べます</b>（既定は1枠あける。あけられないときは続けて）。</li><li><b>住所配慮</b>：同じ地区の児童生徒を、同じ日に続けて配置します。地区の判定は3つから選べます。<b>住所の最初の数字の手前まで</b>（初期設定。「大阪市北区梅田1丁目2-3」→「大阪市北区梅田」）、<b>住所の最初の数字まで</b>（→「大阪市北区梅田1」）、<b>指定した文字数の範囲で</b>（先頭◯文字）。数字のない住所は、先頭◯文字で判定します。余裕があるときは、離れていそうな地区（地区名が違う）どうしが隣り合わないよう、間に1枠あけます。<b>「住所が近い児童生徒を近くに配置する」は、行事が家庭訪問のときだけ最初からオンです</b>（ほかの行事では最初はオフ）。</li></ul>`],
  ['便利な技',()=>`<ul><li><b>Ctrl+Z / Ctrl+Y</b>（Macは⌘）：取り消し／やり直し。Shift+Ctrl+Zでも、やり直せます（配置・条件・名簿の取り込みなど、ほとんどの操作に効きます）</li><li><b>1・2・3・0 キー</b>（3. 条件）：ブラシを ×・○・未・消しゴム に切り替え</li><li><b>↑↓ キー</b>（3. 条件）：前後の児童生徒へ</li><li><b>選んでクリック</b>（4. かこピタ(配置)）：未配置の児童生徒を選び、置きたいマスをクリック。置いてある人を選んで空いているマスをクリックすると、そこへ移ります。別の人の名前をクリックしても、その人を選ぶだけで、配置は変わりません（情報を見たいだけのとき、まちがって動かさないため）。<b>入れ替えは、ドラッグして、相手のマスへ置いたときだけ</b>です</li><li><b>↑↓←→ キー</b>（4. かこピタ(配置)）：選んでいる児童生徒から、となり（上下左右）の児童生徒へ、選択だけを移します（配置は動きません。空欄はとばします）</li><li><b>右クリック</b>（4. かこピタ(配置)）：置いた人を外す／空きマスを休憩（×）に</li><li><b>名前で探す</b>：条件・配置の画面の検索欄で、児童生徒を名前ですばやく探せます</li><li><b>Ctrl+S</b>（Macは⌘+S）：今の状態をファイルに書き出す（バックアップ用）</li><li><b>休憩の予約</b>：「休憩（×）を置く」モードで空きマスをクリック、またはなぞって塗る。日付をクリックするとその日の空きマスがすべて×になります。かこピタはそこを避けます</li><li><b>枠数</b>：特別な支援や相談が必要な児童生徒に、連続した時間を確保できます</li></ul>`],
  ['保存・共有・オフライン',()=>`<h3>保存</h3><p>編集のたびに、自動で保存されます。共有フォルダにつないでいないときはこのブラウザの中、つないでいるときは共有フォルダの中です（切り替えは自動です）。最上部には、最後に保存した時刻が出ます。バックアップとして、「設定」→「保存とバックアップ」から、ファイルへの書き出し・読み込みや、「以前の状態に戻す」（自動バックアップ12件）ができます。</p>
@@ -5149,9 +5286,9 @@ A.help=(el0,e,tab=0)=>{
     return x.replace(VRE,s=>`<a href="#" class="hlink" style="${LS}" data-gov="${VIEWS.find(v=>v[0]===s)[1]}">${s}</a>`).replace(TRE,(s,t)=>`<a href="#" class="hlink" style="${LS}" data-hpl="${HELP.findIndex(h=>h[0]===t)}">${s}</a>`)})};
   const mark=(html,w)=>w?html.replace(/(<[^>]*>)|([^<]+)/g,(m,t,x)=>t?t:x.split(w).join('<mark>'+esc(w)+'</mark>')):html;
   const results=()=>{if(!q)return'';const out=[],ql=q.toLowerCase();HELP.forEach((h,i)=>{const pl=plain[i].toLowerCase();let p=0,n=0;while(n<3){const at=pl.indexOf(ql,p);if(at<0)break;out.push(`<button class="btn sm ghost" style="display:block;text-align:left;white-space:normal;margin:2px 0" data-hp="${i}">${esc(h[0])}：…${esc(plain[i].slice(Math.max(0,at-16),at+q.length+30))}…</button>`);p=at+q.length;n++}});return out.length?out.slice(0,10).join(''):'<span class="muted tiny">見つかりませんでした</span>'};
-  const paint=()=>{box.innerHTML=`<h2>使い方</h2><div class="helpnav">${HELP.map((h,i)=>`<button class="btn sm ${i===cur?'pri':''}" data-hp="${i}">${h[0]}</button>`).join('')}</div><div style="margin:10px 0 4px"><input type="search" id="hpq" placeholder="ことばで探す（例：締め切り）" value="${esc(q)}" style="width:100%;box-sizing:border-box"></div><div id="hpr">${results()}</div><div class="helpbody" style="min-height:300px">${mark(linkify(HELP[cur][1]()),q)}</div><div class="acts"><button class="btn pri" data-close>閉じる</button></div>`};
+  const paint=()=>{box.innerHTML=`<h2>使い方</h2><div class="helpnav">${HELP.map((h,i)=>`<button class="btn sm ${i===cur?'pri':''}" data-hp="${i}">${h[0]}</button>`).join('')}</div><div style="margin:10px 0 4px"><input type="search" id="hpq" placeholder="ことばで探す（例：締め切り）" value="${esc(q)}" style="width:100%;box-sizing:border-box"></div><div id="hpr">${results()}</div><div class="helpbody" style="min-height:300px">${mark(linkify(structHelp(HELP[cur][1]())),q)}</div><div class="acts"><button class="btn pri" data-close>閉じる</button></div>`};
   paint();
-  el.addEventListener('input',ev=>{if(ev.target.id!=='hpq')return;q=ev.target.value.trim();$('#hpr',el).innerHTML=results();const hb=$('.helpbody',el);hb.innerHTML=mark(linkify(HELP[cur][1]()),q)});
+  el.addEventListener('input',ev=>{if(ev.target.id!=='hpq')return;q=ev.target.value.trim();$('#hpr',el).innerHTML=results();const hb=$('.helpbody',el);hb.innerHTML=mark(linkify(structHelp(HELP[cur][1]())),q)});
   el.addEventListener('click',ev=>{if(ev.target.closest('[data-close]')){el._close();return}
     if(ev.target.closest('[data-dl="src"]')){copyAppSource();return}
     const g=ev.target.closest('[data-gov]');if(g){ev.preventDefault();el._close();go(g.dataset.gov);return}
@@ -5214,6 +5351,9 @@ A.newevent=()=>{
     if(a==='go'){
       if(!Object.values(st).some(Boolean)){toast('消す内容を選んでください');return}
       if(!sel.size&&(st.cond||st.sib||st.grid)){toast('対象の学級を選んでください');return}
+      if(st.sched&&(st.cond||st.grid)&&sel.size<cl.length){   // 日程は全学級でなくなるので、選ばなかった学級に前の行事の条件・配置が残ると、新しい行事と混ざる
+        const r=await ask({title:'一部の学級だけが選ばれています',body:`<p>日程・行事名・フォームの設定は、<b>全学級</b>で新しくなります。ところが、条件・配置は、選んだ ${sel.size} 学級（全 ${cl.length} 学級）だけが消えます。</p><p class="ngbox" style="margin-top:8px">選ばなかった学級には、<b>前の行事の条件・配置が残り</b>、新しい行事の日程と混ざるおそれがあります。</p><p class="muted tiny" style="margin-top:8px">行事を切り替えるときは、ふつう、全学級を選びます。</p>`,buttons:[{id:1,label:'全学級を選んで実行',kind:'pri'},{id:2,label:'このまま実行'},{id:0,label:'やめる'}]});
+        if(r===1)cl.forEach(c=>sel.add(c.key));else if(r!==2){paint();return}}
       if(isAll()&&sel.size===cl.length){el._close();await makeBackup('すべて消す前');P=newProject();resetHistory();VER++;UI.cls=null;UI.cond.sid=null;UI.grid.sel=null;UI.snapped=false;go('home');touch();toast('すべて消しました。「以前の状態に戻す」から復元できます',{ms:9000});return}
       el._close();await makeBackup('データを消す前');
       act(()=>{
@@ -5290,7 +5430,7 @@ function vCond(){
 }
 function matrixOne(st){
   if(UI.cond.fine)return matrixFine(st);
-  const dates=P.sched.dates,cg=clsCustom(),sl=visSlots(curCls()),eff=clsAutoC().cutMode==='effort';
+  const dates=P.sched.dates,cg=clsCustom(),sl=gslots(curCls()),eff=clsAutoC().cutMode!=='none';
   let h=`<table class="cm"><thead><tr><th><button class="btn ghost sm" data-act="cm-all" title="全体に塗る">全体</button></th>${dates.map(d=>{const w=dp(d).wd;return `<th class="hb ${w===0||w===6?'we':''}" data-act="cm-day" data-d="${d}">${fmtD(d)}</th>`}).join('')}</tr></thead><tbody>`;
   sl.forEach((x,i)=>{
     const late=isLate(x),first=eff&&late&&(i===0||!isLate(sl[i-1]));
@@ -5313,7 +5453,7 @@ function matrixFine(st){   // 5分ごとの入力
   return h+'</tbody></table>';
 }
 function matrixAll(mem){
-  const dates=P.sched.dates,cg=clsCustom(),k0=curCls(),sl=visSlots(k0),n=mem.length,C=UI.cond;
+  const dates=P.sched.dates,cg=clsCustom(),k0=curCls(),sl=gslots(k0),n=mem.length,C=UI.cond;
   let h=`<table class="am"><thead><tr><th class="sticky"></th>${dates.map(d=>`<th class="dh" colspan="${sl.length}">${fmtD(d)}</th>`).join('')}</tr><tr><th class="sticky"></th>${dates.map(()=>sl.map((x,i)=>`<th class="tk">${x.t%60===0?Math.floor(x.t/60)+'時':''}</th>`).join('')).join('')}</tr>
    <tr class="cnt"><th class="sticky nm" style="cursor:default;color:var(--ink2);font-size:11px">入れる人数</th>${dates.map(d=>sl.map((x,i)=>{
       let c=0;for(const s of mem)if(cg?slotOKg(s,d+'|'+x.key,k0):slotOK(s,d+'|'+x.key))c++;const r=n?c/n:0;const cl=r===0?'cl0':r<.34?'cl1':r<.67?'cl2':r<.9?'cl3':'cl4';
@@ -5334,6 +5474,8 @@ function condSide(st,mem){
    <label class="tog" style="margin-top:10px"><input type="checkbox" data-ch="stok" ${st.ok?'checked':''}>いつでも大丈夫（確認済み）</label></section>
   <section class="panel"><h2>きょうだい<small>配慮に使います</small></h2>${st.sib.length?`<div class="sibhd"><span>名前</span><span>学年</span><span>組</span><span>番</span><span></span></div>`:'<p class="muted tiny" style="margin-bottom:8px">在籍しているきょうだいがいれば追加します。</p>'}`+
    st.sib.map((b,i)=>{const m=(b.name||b.n||b.g||b.c)?sibFind(b):undefined;return `${b.src?`<div class="tiny muted" style="margin:2px 0">${b.src==='r'?'相手の申告から自動で追加':'フォームの回答から'}</div>`:''}<div class="sibrow"><input type="text" data-ch="sib" data-i="${i}" data-f="name" value="${esc(b.name)}" placeholder="名前"><input type="text" data-ch="sib" data-i="${i}" data-f="g" value="${esc(b.g)}"><input type="text" data-ch="sib" data-i="${i}" data-f="c" value="${esc(b.c)}"><input type="text" data-ch="sib" data-i="${i}" data-f="n" value="${esc(b.n)}"><button class="btn ghost sm" data-act="sib-del" data-i="${i}" aria-label="削除" style="padding:3px">${ic('x',14)}</button></div>${m===undefined?'':`<div class="sibnote ${m?'':'muted'}" style="color:${m?'var(--ok)':'var(--warn)'}">${m?`✓ 名簿と一致：${esc(clsLabel(m.g,m.c))} ${m.n}番 ${esc(m.name)}`:'名簿に見つかりません（学年・組・番か名前を確認）'}</div>`}`}).join('')+
+   (()=>{const own=new Set(st.sib.map(b=>sibFind(b)).filter(Boolean).map(m=>m.id)),rv=sibRev(st).filter(r=>!own.has(r.id));   // 相手の側にだけ書いてあるきょうだい（配置では、考慮されます）
+     return rv.length?`<div class="tiny muted" style="margin:10px 0 2px">相手の側の入力から（この人の欄には入っていませんが、配置では考慮されます）</div>`+rv.map(r=>`<div class="sibrow" style="grid-template-columns:1fr auto"><div class="sibnote" style="color:var(--ok);margin:0">✓ ${esc(clsLabel(r.g,r.c))} ${r.n}番 ${esc(r.name)}</div><button class="btn ghost sm" data-act="sib-adopt" data-id="${esc(r.id)}">この人の欄にも追加</button></div>`).join(''):''})()+
    `<button class="btn sm" data-act="sib-add">${ic('plus',15)}きょうだいを追加</button></section>`;
   return h;
 }
@@ -5363,7 +5505,7 @@ function bulkPaint(st,keys){
   const all=keys.every(k=>{const c=st.cond[k];return c&&c.v===b&&!blockV(st,k.split('|')[0],{key:k.split('|')[1],t:parseT(k.split('|')[1])}).part});
   act(()=>{for(const k of keys){if(b==='e'||all){if(st.cond[k])delProp(st.cond,k)}else setProp(st.cond,k,{v:b,s:'m'});clearCfBlock(st,k)}});
 }
-const dayKeys=d=>{if(!UI.cond.fine)return visSlots(curCls()).map(x=>d+'|'+x.key);const o=clsAutoC(),s=P.sched,bm=+s.slotMin||20,b0=parseT(s.start),bs=b0==null?840:b0,end=bs+bm*clamp(+s.slotCount||0,0,300),out=[];for(let m=bs;m<end;m+=CU){if(fineHidden(m,o))continue;out.push(d+'|'+keyT(m))}return out};
+const dayKeys=d=>{if(!UI.cond.fine)return gslots(curCls()).map(x=>d+'|'+x.key);const o=clsAutoC(),s=P.sched,bm=+s.slotMin||20,b0=parseT(s.start),bs=b0==null?840:b0,end=bs+bm*clamp(+s.slotCount||0,0,300),out=[];for(let m=bs;m<end;m+=CU){if(fineHidden(m,o))continue;out.push(d+'|'+keyT(m))}return out};
 const fineHidden=(m,o)=>o.cutMode!=='none'&&m>=cutOf(o.cutTime)&&(o.cutMode==='strict'||(P.opt.hide17&&o.cutMode==='effort'));
 A['cm-day']=el=>bulkPaint(stById(UI.cond.sid),dayKeys(el.dataset.d));
 A['cm-time']=el=>bulkPaint(stById(UI.cond.sid),P.sched.dates.map(d=>d+'|'+el.dataset.t));
@@ -5385,6 +5527,7 @@ CH.stok=el=>act(()=>setProp(stById(UI.cond.sid),'ok',el.checked));
 CH.hide17=el=>act(()=>setProp(P.opt,'hide17',el.checked));
 A.sibadd=null;
 A['sib-add']=()=>{const s=stById(UI.cond.sid);act(()=>setProp(s,'sib',s.sib.concat([{name:'',g:'',c:'',n:'',note:''}])))};
+A['sib-adopt']=el=>{const s=stById(UI.cond.sid),r=stById(el.dataset.id);if(!s||!r)return;act(()=>setProp(s,'sib',s.sib.concat([{name:r.name,kana:r.kana||'',g:String(r.g),c:String(r.c),n:String(r.n),note:'',src:'m'}])))};
 A['sib-del']=el=>{const s=stById(UI.cond.sid);act(()=>setProp(s,'sib',s.sib.filter((_,i)=>i!==+el.dataset.i)))};
 CH.sib=el=>{const s=stById(UI.cond.sid),i=+el.dataset.i;act(()=>{const a=s.sib.map(x=>({...x}));a[i][el.dataset.f]=el.value.trim();delete a[i].src;setProp(s,'sib',a)})};
 A.q=el=>{
